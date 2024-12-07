@@ -108,7 +108,7 @@
         }
 
         .crypto-card:hover::after {
-            content: "Doble click para ver gráfico";
+            content: "Doble clic para ver gráfico";
             position: absolute;
             bottom: 10px;
             left: 50%;
@@ -160,17 +160,19 @@
 
         .mini-chart-container {
             margin-top: 15px;
+            position: relative;
+            height: 80px; /* Define una altura fija para las mini charts */
         }
 
         canvas.mini-chart {
             width: 100% !important;
-            height: 80px !important;
+            height: 100% !important;
         }
 
         .no-chart-text {
-            margin-top:15px;
-            font-size:0.8em;
-            color:#7a8599;
+            margin-top: 15px;
+            font-size: 0.8em;
+            color: #7a8599;
         }
 
         .favorite-icon {
@@ -212,7 +214,7 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 3000; /* Incrementar z-index para estar por encima de favoritesBar */
             padding: 0;
         }
 
@@ -247,10 +249,17 @@
             border-radius: 5px;
         }
 
+        /* Estilos adicionales para el contenedor del gráfico */
         #chartContainer {
             width: 100%;
             height: 70vh; 
             margin-bottom: 20px;
+            position: relative;
+        }
+
+        #cryptoChart {
+            width: 100% !important;
+            height: 100% !important;
         }
 
         .modal-footer {
@@ -364,7 +373,7 @@
             right: 20px;
             display: flex;
             gap: 5px;
-            z-index: 2000;
+            z-index: 1000; /* Reducir z-index para estar debajo del modal */
         }
 
         #btnFavoritos, #btnVerTodos {
@@ -442,6 +451,7 @@
         <button id="btnVerTodos">Ver Todos</button>
     </div>
 
+    <!-- Librería Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         let chartInstance = null;
@@ -503,6 +513,7 @@
         const btnVerTodos = document.getElementById('btnVerTodos');
         const favoritesBar = document.getElementById('favoritesBar');
 
+        // Función para manejar filtros de monedas
         coinFilter.addEventListener('change', () => {
             const filterValue = coinFilter.value;
             filterCoins(filterValue);
@@ -520,14 +531,17 @@
             });
         }
 
+        // Función para obtener recomendaciones aleatorias
         function getRecommendation() {
             return Math.random() > 0.5 ? { flag: 'green-flag', text: 'COMPRAR' } : { flag: 'red-flag', text: 'VENDER' };
         }
 
+        // Función para obtener el intervalo de Binance
         function getBinanceInterval() {
             return '1m';
         }
 
+        // Función para crear tarjetas de criptomonedas
         function createCryptoCard(crypto, index) {
             const recommendation = getRecommendation();
             const card = document.createElement('div');
@@ -559,6 +573,7 @@
             return card;
         }
 
+        // Función para alternar favoritos
         function toggleFavorite(coinId, card) {
             if (favorites.includes(coinId)) {
                 favorites = favorites.filter(f => f !== coinId);
@@ -571,6 +586,7 @@
             reorderCards();
         }
 
+        // Función para cargar mini gráficos
         async function loadMiniChart(binanceSymbol, index) {
             try {
                 const interval = getBinanceInterval();
@@ -621,6 +637,7 @@
             }
         }
 
+        // Función para reordenar tarjetas
         function reorderCards() {
             const cards = Array.from(document.querySelectorAll('.crypto-card'));
             let topCards = [];
@@ -651,6 +668,7 @@
             noChartCards.forEach(c => cryptoGrid.appendChild(c));
         }
 
+        // Función para obtener datos de criptomonedas
         async function fetchCryptoData() {
             try {
                 loadingElement.style.display = 'block';
@@ -704,11 +722,19 @@
                             if (!hasChart) {
                                 card.querySelector('.mini-chart-container').innerHTML = `<p class="no-chart-text">Sin datos de gráfico</p>`;
                             } else {
+                                // Manejo de doble clic y doble toque
+                                let lastTap = 0;
                                 card.addEventListener('dblclick', () => {
-                                    // Ocultamos la barra de favoritos al abrir modal
-                                    favoritesBar.style.display = 'none';
-                                    showModal(coinId, cData.name, cData.current_price, binanceSymbol);
-                                    currentModalCoinId = coinId;
+                                    openModal(coinId, cData.name, cData.current_price, binanceSymbol);
+                                });
+                                card.addEventListener('touchend', (event) => {
+                                    const currentTime = new Date().getTime();
+                                    const tapLength = currentTime - lastTap;
+                                    if (tapLength < 300 && tapLength > 0) {
+                                        openModal(coinId, cData.name, cData.current_price, binanceSymbol);
+                                        event.preventDefault();
+                                    }
+                                    lastTap = currentTime;
                                 });
                             }
                         })
@@ -726,6 +752,7 @@
             }
         }
 
+        // Función para calcular la SMA
         function calculateSMA(data, length) {
             const sma = [];
             for (let i = 0; i < data.length; i++) {
@@ -740,6 +767,7 @@
             return sma;
         }
 
+        // Función para generar predicciones de IA
         function generateAIPrediction(closePrices) {
             const predictions = [];
             const lastPrice = closePrices[closePrices.length - 1];
@@ -750,7 +778,8 @@
             return predictions;
         }
 
-        async function showModal(coinId, coinName, currentPrice, binanceSymbol) {
+        // Función para abrir el modal y mostrar el gráfico
+        async function openModal(coinId, coinName, currentPrice, binanceSymbol) {
             try {
                 const interval = getBinanceInterval();
                 const limit = 100; 
@@ -814,117 +843,124 @@
                 const fullLongSMA = longSMA.concat(Array(aiPredictions.length).fill(null));
                 const aiLine = Array(closePrices.length).fill(null).concat(aiPredictions);
 
-                chartInstance = new Chart(document.getElementById('cryptoChart').getContext('2d'), {
-                    data: {
-                        labels: fullLabels,
-                        datasets: [
-                            {
-                                type: 'line',
-                                label: `${coinName} (USD)`,
-                                data: fullClose,
-                                borderColor: '#00ffcc',
-                                backgroundColor: 'rgba(0,255,204,0.1)',
-                                tension: 0.3,
-                                fill: true,
-                                yAxisID: 'y',
-                            },
-                            {
-                                type: 'line',
-                                label: `Línea de tendencia (${recommendation.text})`,
-                                data: fullTrend,
-                                borderColor: trendColor,
-                                borderDash: [5, 5],
-                                pointRadius: 0,
-                                fill: false,
-                                yAxisID: 'y',
-                            },
-                            {
-                                type: 'line',
-                                label: 'SMA (7)',
-                                data: fullShortSMA,
-                                borderColor: '#FFD700',
-                                fill: false,
-                                pointRadius: 0,
-                                tension: 0.2,
-                                yAxisID: 'y',
-                            },
-                            {
-                                type: 'line',
-                                label: 'SMA (30)',
-                                data: fullLongSMA,
-                                borderColor: '#FF8C00',
-                                fill: false,
-                                pointRadius: 0,
-                                tension: 0.2,
-                                yAxisID: 'y',
-                            },
-                            {
-                                type: 'bar',
-                                label: 'Volumen',
-                                data: volumes.concat(Array(aiPredictions.length).fill(null)),
-                                backgroundColor: 'rgba(0,191,255,0.3)',
-                                borderColor: '#00BFFF',
-                                borderWidth: 1,
-                                yAxisID: 'y1'
-                            },
-                            {
-                                type: 'line',
-                                label: 'Línea IA (Predicción)',
-                                data: aiLine,
-                                borderColor: '#EE82EE',
-                                borderDash: [2, 2],
-                                pointRadius: 0,
-                                fill: false,
-                                tension: 0.2,
-                                yAxisID: 'y',
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false,
+                // Inicializar el gráfico después de que el modal sea visible
+                setTimeout(() => {
+                    chartInstance = new Chart(document.getElementById('cryptoChart').getContext('2d'), {
+                        data: {
+                            labels: fullLabels,
+                            datasets: [
+                                {
+                                    type: 'line',
+                                    label: `${coinName} (USD)`,
+                                    data: fullClose,
+                                    borderColor: '#00ffcc',
+                                    backgroundColor: 'rgba(0,255,204,0.1)',
+                                    tension: 0.3,
+                                    fill: true,
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    type: 'line',
+                                    label: `Línea de tendencia (${recommendation.text})`,
+                                    data: fullTrend,
+                                    borderColor: trendColor,
+                                    borderDash: [5, 5],
+                                    pointRadius: 0,
+                                    fill: false,
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    type: 'line',
+                                    label: 'SMA (7)',
+                                    data: fullShortSMA,
+                                    borderColor: '#FFD700',
+                                    fill: false,
+                                    pointRadius: 0,
+                                    tension: 0.2,
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    type: 'line',
+                                    label: 'SMA (30)',
+                                    data: fullLongSMA,
+                                    borderColor: '#FF8C00',
+                                    fill: false,
+                                    pointRadius: 0,
+                                    tension: 0.2,
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    type: 'bar',
+                                    label: 'Volumen',
+                                    data: volumes.concat(Array(aiPredictions.length).fill(null)),
+                                    backgroundColor: 'rgba(0,191,255,0.3)',
+                                    borderColor: '#00BFFF',
+                                    borderWidth: 1,
+                                    yAxisID: 'y1'
+                                },
+                                {
+                                    type: 'line',
+                                    label: 'Línea IA (Predicción)',
+                                    data: aiLine,
+                                    borderColor: '#EE82EE',
+                                    borderDash: [2, 2],
+                                    pointRadius: 0,
+                                    fill: false,
+                                    tension: 0.2,
+                                    yAxisID: 'y',
+                                }
+                            ]
                         },
-                        scales: {
-                            y: {
-                                type: 'linear',
-                                display: true,
-                                position: 'left',
-                                ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
-                                title: {
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            scales: {
+                                y: {
+                                    type: 'linear',
                                     display: true,
-                                    text: 'Precio (USD)',
-                                    color: body.className === 'dark' ? '#ffffff' : '#000000'
+                                    position: 'left',
+                                    ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
+                                    title: {
+                                        display: true,
+                                        text: 'Precio (USD)',
+                                        color: body.className === 'dark' ? '#ffffff' : '#000000'
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
+                                    title: {
+                                        display: true,
+                                        text: 'Volumen',
+                                        color: body.className === 'dark' ? '#ffffff' : '#000000'
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false,
+                                    },
+                                },
+                                x: {
+                                    ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' }
                                 }
                             },
-                            y1: {
-                                type: 'linear',
-                                display: true,
-                                position: 'right',
-                                ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
-                                title: {
-                                    display: true,
-                                    text: 'Volumen',
-                                    color: body.className === 'dark' ? '#ffffff' : '#000000'
-                                },
-                                grid: {
-                                    drawOnChartArea: false,
-                                },
-                            },
-                            x: {
-                                ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                labels: {
-                                    color: body.className === 'dark' ? '#ffffff' : '#000000'
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: body.className === 'dark' ? '#ffffff' : '#000000'
+                                    }
                                 }
                             }
                         }
-                    }
-                });
+                    });
+
+                    // Forzar el redimensionamiento del gráfico
+                    chartInstance.resize();
+                }, 100); // Retraso de 100ms, ajusta si es necesario
 
                 const aiFinalPrediction = aiPredictions[aiPredictions.length - 1];
                 if (aiFinalPrediction > currentPrice) {
@@ -969,23 +1005,24 @@
             }
         }
 
+        // Función para cerrar el modal
         modalClose.addEventListener('click', () => {
             modalOverlay.style.display = 'none';
-            // Al cerrar el modal, volvemos a mostrar la barra de favoritos
-            favoritesBar.style.display = 'flex';
         });
 
+        // Cerrar el modal al hacer clic fuera del contenido
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) {
                 modalOverlay.style.display = 'none';
-                favoritesBar.style.display = 'flex';
             }
         });
 
+        // Función para desplazarse a los comentarios de análisis
         verAnalisisBtn.addEventListener('click', () => {
             analysisComments.scrollIntoView({ behavior: 'smooth' });
         });
 
+        // Función para establecer alertas de precio
         setAlertBtn.addEventListener('click', () => {
             if (currentModalCoinId && priceAlertInput.value) {
                 const alertPrice = parseFloat(priceAlertInput.value);
@@ -996,6 +1033,7 @@
             }
         });
 
+        // Función para mostrar solo favoritos
         btnFavoritos.addEventListener('click', () => {
             const cards = document.querySelectorAll('.crypto-card');
             cards.forEach(card => {
@@ -1008,13 +1046,16 @@
             });
         });
 
+        // Función para mostrar todas las tarjetas
         btnVerTodos.addEventListener('click', () => {
             const cards = document.querySelectorAll('.crypto-card');
             cards.forEach(card => card.style.display = 'block');
         });
 
+        // Función para obtener datos de criptomonedas al cargar la página
         fetchCryptoData();
 
+        // Actualizar recomendaciones y verificar alertas cada 30 segundos
         setInterval(() => {
             document.querySelectorAll('.crypto-card').forEach((card) => {
                 const flagElement = card.querySelector('.flag');
@@ -1025,6 +1066,7 @@
             checkPriceAlerts();
         }, 30000);
 
+        // Función para verificar alertas de precio
         function checkPriceAlerts() {
             for (let coinId in priceAlerts) {
                 const alertPrice = priceAlerts[coinId];
