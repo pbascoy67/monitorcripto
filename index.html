@@ -1,612 +1,1136 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <base href="/">
     <meta charset="UTF-8">
-    <title>Vacaciones Miami-Orlando 2024</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Criptomonedas</title>
     <style>
-        /* Estilos Generales */
+        body.dark {
+            background-color: #0a0e17;
+            color: #ffffff;
+        }
+
+        body.light {
+            background-color: #f0f0f0;
+            color: #000000;
+        }
+
         body {
-            font-family: 'Roboto', 'Segoe UI', sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #1a237e, #0d47a1);
-            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
         }
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.98);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        /* Encabezados */
+
         h1 {
             text-align: center;
-            color: #1a237e;
-            margin-bottom: 40px;
+            color: #00ffcc;
             font-size: 2.5em;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
         }
-        h2 {
-            color: #1a237e;
-            font-size: 2em;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #1a237e;
-            padding-bottom: 10px;
-        }
+
         h3 {
-            color: #283593;
-            font-size: 1.3em;
-            margin-bottom: 15px;
-        }
-        /* Calendario */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            margin-bottom: 30px;
-            align-items: start;
-        }
-        .calendar-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .weekday {
             text-align: center;
-            font-weight: 600;
-            color: #283593;
-            padding: 8px;
-            background: #e8eaf6;
-            border-radius: 8px;
-            font-size: 1em;
+            color: #7a8599;
+            margin-top: -10px;
+            font-size: 0.9em;
+            font-weight: normal;
         }
-        .day-card {
-            border: none;
-            min-height: 140px;
-            padding: 12px;
-            border-radius: 8px;
-            background: white;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+
+        #lastUpdate {
+            text-align: center;
+            margin-top: 5px;
+            font-style: italic;
+            color: #7a8599;
+            margin-bottom: 20px;
+        }
+
+        #filtersContainer {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-        .day-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-        .date {
-            font-weight: 600;
-            color: #283593;
-            text-align: right;
-            margin-bottom: 8px;
-            font-size: 1.1em;
-        }
-        .activities {
-            flex-grow: 1;
-            overflow-y: auto;
-            margin: 5px 0;
-        }
-        .activity {
-            background: #f5f5f5;
-            padding: 6px;
-            margin: 3px 0;
-            border-radius: 8px;
-            font-size: 0.85em;
-            border-left: 3px solid #1a237e;
-            transition: all 0.2s ease;
+
+        #timeframeSelector,
+        #coinFilterContainer {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .activity:hover {
-            background: #e8eaf6;
-            transform: translateX(3px);
-        }
-        .add-activity {
-            margin-top: auto;
-        }
-        .add-activity input[type="text"] {
-            padding: 6px;
-            font-size: 0.85em;
-            margin-bottom: 4px;
-            width: calc(100% - 12px);
-        }
-        .add-activity button {
-            padding: 4px 8px;
-            font-size: 0.8em;
-            min-width: 60px;
-        }
-        /* Botones y Inputs */
-        input[type="text"], input[type="file"] {
-            padding: 12px;
-            width: calc(100% - 24px);
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 0.95em;
-            margin-bottom: 8px;
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus, input[type="file"]:focus {
-            outline: none;
-            border-color: #1a237e;
-        }
-        button {
-            padding: 10px 15px;
-            background: #1a237e;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95em;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        button:hover {
-            background: #283593;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(26,35,126,0.2);
-        }
-        /* Sección de Documentos Importantes */
-        .files-section {
-            margin-top: 50px;
-            padding: 30px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-        .file-category {
-            margin: 25px 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-        }
-        .file-list {
-            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            background-color: #1a2332;
+            border-radius: 15px;
             padding: 10px;
-            background: white;
-            border-radius: 4px;
         }
-        .file-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            margin: 8px 0;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
-        }
-        .file-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .file-actions button {
-            margin-left: 5px;
-            padding: 4px 8px;
-            font-size: 0.8em;
-            cursor: pointer;
-            background: #1a237e;
-            color: white;
+
+        .timeframe-button {
+            background-color: #00ffcc;
+            color: #0a0e17;
             border: none;
-            border-radius: 4px;
-            transition: background 0.3s ease;
-        }
-        .file-actions button:hover {
-            background: #283593;
-        }
-        .delete-button {
-            background: #e53935;
-        }
-        .delete-button:hover {
-            background: #d32f2f;
-        }
-        /* Notificaciones */
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            background: #283593;
-            color: white;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            font-weight: 500;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            z-index: 1000;
+            font-size: 0.9em;
+            box-shadow: 0 0 15px #00ffcc;
+            flex-grow: 1;
+            text-align: center;
+            min-width: 70px;
         }
-        /* Modal para Visualizar PDFs */
-        .modal {
-            display: none; /* Oculto por defecto */
-            position: fixed; /* Permanecer en la pantalla */
-            z-index: 1001; /* Estar encima de otros elementos */
-            padding-top: 60px; /* Ubicación del contenido */
-            left: 0;
-            top: 0;
-            width: 100%; /* Ancho completo */
-            height: 100%; /* Alto completo */
-            overflow: auto; /* Habilitar scroll si es necesario */
-            background-color: rgba(0,0,0,0.5); /* Fondo negro con opacidad */
+
+        #coinFilter {
+            background-color: #0a0e17;
+            color: #ffffff;
+            border: 1px solid #00ffcc;
+            border-radius: 10px;
+            padding: 10px;
+            min-width: 100px;
         }
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
+
+        #cryptoGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .crypto-card {
+            background-color: #1a2332;
+            border-radius: 15px;
             padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 800px;
-            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
             position: relative;
         }
-        .close-modal {
-            color: #aaa;
+
+        body.light .crypto-card {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .crypto-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .crypto-card:hover::after {
+            content: "Doble clic para ver gráfico";
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #00ffcc;
+            color: #0a0e17;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+
+        .crypto-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+        }
+
+        .crypto-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        .crypto-price {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .flag {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        .green-flag {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .red-flag {
+            background-color: #F44336;
+            color: white;
+        }
+
+        .mini-chart-container {
+            margin-top: 15px;
+            position: relative;
+            height: 80px; 
+        }
+
+        canvas.mini-chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .no-chart-text {
+            margin-top: 15px;
+            font-size: 0.8em;
+            color: #7a8599;
+        }
+
+        .favorite-icon {
             position: absolute;
             top: 10px;
-            right: 25px;
-            font-size: 28px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #ffc107;
+        }
+
+        #loading {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 50px;
+        }
+
+        #error {
+            text-align: center;
+            color: #F44336;
+            font-size: 1.2em;
+            margin-top: 50px;
+            display: none;
+        }
+
+        #modalOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            padding: 0;
+        }
+
+        #modalContent {
+            background: #1a2332;
+            border-radius: 15px;
+            width: 95vw;
+            height: 95vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        body.light #modalContent {
+            background: #f0f0f0;
+            color: #000000;
+        }
+
+        #modalClose {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #00ffcc;
+            color: #0a0e17;
+            border: none;
+            font-size: 1em;
             font-weight: bold;
             cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
         }
-        .close-modal:hover,
-        .close-modal:focus {
-            color: black;
+
+        #chartContainer {
+            width: 100%;
+            min-height: 300px; 
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        #cryptoChart {
+            width: 100%;
+            height: 100%;
+        }
+
+        .modal-footer {
+            font-size: 0.9em;
+            color: #7a8599;
+            text-align: center;
+            word-break: break-all;
+            margin-top: 20px;
+        }
+
+        body.light .modal-footer {
+            color: #333333;
+        }
+
+        .modal-info {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .modal-info p {
+            margin: 5px 0;
+        }
+
+        .modal-explanation {
+            font-size: 0.9em;
+            margin-top: 15px;
+            background-color: #0a0e17;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        body.light .modal-explanation {
+            background-color: #ddd;
+            color: #000;
+        }
+
+        .modal-explanation h4 {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        #analysisComments {
+            margin-top: 20px;
+            background-color: #1a2332;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        body.light #analysisComments {
+            background-color: #eee;
+            color: #000;
+        }
+
+        #analysisComments h4 {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        #analysisComments p {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .related-links a {
+            color: #00ffcc;
             text-decoration: none;
+        }
+
+        .related-links a:hover {
+            text-decoration: underline;
+        }
+
+        #priceAlertContainer {
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        #priceAlertInput {
+            width: 100px;
+            padding: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        #setAlertBtn {
+            padding: 5px 10px;
+            margin-left: 5px;
+            border-radius: 5px;
+            border: none;
+            background: #00ffcc;
+            color: #0a0e17;
             cursor: pointer;
+        }
+
+        #themeToggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #00ffcc;
+            color: #0a0e17;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.8em;
+            z-index: 2000;
+        }
+
+        #favoritesBar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+            z-index: 1000;
+        }
+
+        #btnFavoritos, #btnVerTodos {
+            background-color: #00ffcc;
+            color: #0a0e17;
+            border: none;
+            padding: 5px 8px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.8em;
+        }
+
+        #updateChartBtn {
+            background: #00ffcc;
+            color: #0a0e17;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px auto 5px auto; 
+            display: block;
+            font-size: 0.9em;
+        }
+
+        #lastUpdateModal {
+            text-align: center;
+            font-style: italic;
+            color: #7a8599;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        #verAnalisisBtn {
+            background: #00ffcc;
+            color: #0a0e17;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px auto 0 auto;
+            display: block;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            #modalContent {
+                width: 98vw;
+                height: 98vh;
+            }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>🌴 Vacaciones Miami-Orlando 2024 ✨</h1>
-        <!-- Calendario -->
-        <div class="calendar-header" id="calendar-header"></div>
-        <div class="calendar-grid" id="calendar"></div>
+<body class="dark">
+    <h1>Monitor Criptomonedas</h1>
+    <h3>by Pablo Bascoy</h3>
+    <p id="lastUpdate"></p>
 
-        <!-- Información de IDA -->
-        <div style="margin: 40px 0; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);">
-            <h2 style="margin-top: 0;">✈️ IDA</h2>
-            <p><strong>Lunes, 9 de diciembre</strong></p>
-            <ul style="list-style-type: none; padding: 0;">
-                <li><strong>Vuelo CM168:</strong> 2:31 AM - Buenos Aires (EZE)</li>
-                <li>Duración: 7h 26m</li>
-                <li><strong>Escala:</strong> Panamá (PTY) - 1h 26m</li>
-                <li><strong>Vuelo CM334:</strong> 9:23 AM - Panamá (PTY) a 12:32 PM - Miami (MIA)</li>
-                <li>Duración: 3h 9m</li>
-                <li><strong>Operado por:</strong> Copa Airlines</li>
-            </ul>
+    <div id="filtersContainer">
+        <div id="timeframeSelector">
+            <button class="timeframe-button" data-timeframe="real">Tiempo real</button>
         </div>
-        
-        <!-- Información de VUELTA -->
-        <div style="margin: 40px 0; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);">
-            <h2 style="margin-top: 0;">✈️ VUELTA</h2>
-            <p><strong>Sábado, 21 de diciembre</strong></p>
-            <ul style="list-style-type: none; padding: 0;">
-                <li><strong>Vuelo CM868:</strong> 2:24 PM - Orlando (MCO) a 5:53 PM - Panamá (PTY)</li>
-                <li>Duración: 3h 29m</li>
-                <li><strong>Escala:</strong> Panamá (PTY) - 1h 2m</li>
-                <li><strong>Vuelo CM454:</strong> 6:55 PM - Panamá (PTY) a 4:13 AM - Buenos Aires (EZE)</li>
-                <li>Duración: 7h 18m</li>
-                <li><strong>Operado por:</strong> Copa Airlines</li>
-            </ul>
+        <div id="coinFilterContainer">
+            <select id="coinFilter">
+                <option value="all">Todas</option>
+            </select>
         </div>
+    </div>
 
-        <!-- Documentos Importantes -->
-        <div class="files-section">
-            <h2>📁 Documentos Importantes</h2>
-            <div id="file-categories">
-                <!-- Categoría de Vuelos -->
-                <div class="file-category">
-                    <h3>✈️ Vuelos</h3>
-                    <input type="file" id="vuelos-file" accept=".pdf,.doc,.docx,.jpg,.png">
-                    <button onclick="uploadFile('vuelos')">Subir Archivo</button>
-                    <div class="file-list" id="vuelos-list"></div>
+    <div id="loading">Cargando datos...</div>
+    <div id="error">No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.</div>
+    <div id="cryptoGrid"></div>
+
+    <div id="modalOverlay">
+        <div id="modalContent">
+            <button id="modalClose">Regresar</button>
+            <h2 id="modalTitle"></h2>
+            <button id="updateChartBtn">Actualizar</button>
+            <p id="lastUpdateModal"></p>
+            <div class="modal-info" id="modalInfo"></div>
+            <div id="chartContainer">
+                <canvas id="cryptoChart"></canvas>
+            </div>
+            <button id="verAnalisisBtn">Ver Análisis</button>
+            <div id="priceAlertContainer">
+                <label>Alerta de Precio: $<input type="number" id="priceAlertInput" placeholder="0.00"></label>
+                <button id="setAlertBtn">Set Alert</button>
+            </div>
+            <div class="modal-explanation">
+                <h4>Explicación del gráfico:</h4>
+                <p><span style="color:#00ffcc;font-weight:bold;">Línea principal (cyan):</span> Precio histórico.</p>
+                <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Último precio y recomendación.</p>
+                <p><span style="color:#FFD700;font-weight:bold;">SMA (7) (amarillo):</span> Media móvil corto plazo.</p>
+                <p><span style="color:#FF8C00;font-weight:bold;">SMA (30) (naranja):</span> Media móvil mediano plazo.</p>
+                <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> Actividad de compra/venta.</p>
+                <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> Predicción IA.</p>
+                <h4>Consejo:</h4>
+                <p id="adviceText"></p>
+            </div>
+            <div id="analysisComments">
+                <h4>Comentarios y Análisis Adicionales</h4>
+                <p id="lastTrend"></p>
+                <p id="cryptoComment"></p>
+                <div class="related-links">
+                    <h4>Links relacionados:</h4>
+                    <p id="relatedLinks"></p>
                 </div>
-                <!-- Categoría de Alquiler de Auto -->
-                <div class="file-category">
-                    <h3>🚗 Alquiler de Auto</h3>
-                    <input type="file" id="auto-file" accept=".pdf,.doc,.docx,.jpg,.png">
-                    <button onclick="uploadFile('auto')">Subir Archivo</button>
-                    <div class="file-list" id="auto-list"></div>
-                </div>
-                <!-- Categoría de Hotel en Miami -->
-                <div class="file-category">
-                    <h3>🏨 Hotel en Miami</h3>
-                    <input type="file" id="hotel-file" accept=".pdf,.doc,.docx,.jpg,.png">
-                    <button onclick="uploadFile('hotel')">Subir Archivo</button>
-                    <div class="file-list" id="hotel-list"></div>
-                </div>
-                <!-- Categoría de Casa en Orlando -->
-                <div class="file-category">
-                    <h3>🏠 Casa en Orlando</h3>
-                    <input type="file" id="casa-file" accept=".pdf,.doc,.docx,.jpg,.png">
-                    <button onclick="uploadFile('casa')">Subir Archivo</button>
-                    <div class="file-list" id="casa-list"></div>
-                </div>
-                <!-- Categoría de Ticket Universal -->
-                <div class="file-category">
-                    <h3>🎢 Ticket Universal</h3>
-                    <input type="file" id="universal-file" accept=".pdf,.doc,.docx,.jpg,.png">
-                    <button onclick="uploadFile('universal')">Subir Archivo</button>
-                    <div class="file-list" id="universal-list"></div>
-                </div>
-                <!-- Categoría de Ticket Disney -->
-                <div class="file-category">
-                    <h3>🏰 Ticket Disney</h3>
-                    <input type="file" id="disney-file" accept=".pdf,.doc,.docx,.jpg,.png">
-                    <button onclick="uploadFile('disney')">Subir Archivo</button>
-                    <div class="file-list" id="disney-list"></div>
-                </div>
-                <!-- Nueva Categoría: Cobertura Médica -->
-                <div class="file-category">
-                    <h3>🩺 Cobertura Médica</h3>
-                    <input type="file" id="cobertura-file" accept=".pdf,.doc,.docx,.jpg,.png">
-                    <button onclick="uploadFile('cobertura')">Subir Archivo</button>
-                    <div class="file-list" id="cobertura-list"></div>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="dataSource"></span>
             </div>
         </div>
     </div>
 
-    <!-- Modal para Ver PDF -->
-    <div id="pdf-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <iframe id="pdf-viewer" src="" width="100%" height="600px"></iframe>
-        </div>
+    <audio id="alertSound" src="alerta.mp3" preload="auto"></audio>
+
+    <button id="themeToggle">Tema</button>
+    <div id="favoritesBar">
+        <button id="btnFavoritos">Favoritos</button>
+        <button id="btnVerTodos">Ver Todos</button>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Configuración del Calendario
-        const weekDays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        const startDate = new Date(2024, 11, 8); // Diciembre (11) 8
-        const endDate = new Date(2024, 11, 22); // Diciembre (11) 22
+        let chartInstance = null;
+        let cryptoData = [];
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        let priceAlerts = {};
+        let currentModalCoinId = null;
+        let currentModalCoinName = null;
+        let currentModalPrice = null;
+        let currentModalSymbol = null;
 
-        // Generar Encabezados del Calendario
-        const headerDiv = document.getElementById('calendar-header');
-        weekDays.forEach(day => {
-            const dayHeader = document.createElement('div');
-            dayHeader.className = 'weekday';
-            dayHeader.textContent = day;
-            headerDiv.appendChild(dayHeader);
+        const priorityOrder = ["bitcoin", "ethereum", "dogecoin", "ripple", "solana", "cardano"];
+
+        const sampleComments = [
+            "Esta criptomoneda ha mostrado un impulso interesante.",
+            "Los analistas sugieren precaución por alta volatilidad.",
+            "Activo con fundamentos sólidos y comunidad activa.",
+            "Podría consolidarse antes de un nuevo repunte.",
+            "Ligeros repuntes tras noticias positivas.",
+            "Adopción creciente en varios servicios."
+        ];
+
+        const sampleTrends = [
+            "Última tendencia: Gran interés en redes sociales.",
+            "Última tendencia: Incremento de búsquedas en Google.",
+            "Última tendencia: Partnership con una empresa reconocida.",
+            "Última tendencia: Actualización técnica anunciada.",
+            "Última tendencia: Apetito de inversores institucionales.",
+            "Última tendencia: Rumores de integración con pagos."
+        ];
+
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        body.className = savedTheme;
+
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            body.className = (body.className === 'dark') ? 'light' : 'dark';
+            localStorage.setItem('theme', body.className);
         });
 
-        // Crear el Calendario
-        function createCalendar() {
-            const calendar = document.getElementById('calendar');
-            const firstDay = startDate.getDay();
+        const cryptoGrid = document.getElementById('cryptoGrid');
+        const lastUpdateElement = document.getElementById('lastUpdate');
+        const loadingElement = document.getElementById('loading');
+        const errorElement = document.getElementById('error');
+        const coinFilter = document.getElementById('coinFilter');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalClose = document.getElementById('modalClose');
+        const modalTitle = document.getElementById('modalTitle');
+        const dataSource = document.getElementById('dataSource');
+        const modalInfo = document.getElementById('modalInfo');
+        const adviceText = document.getElementById('adviceText');
+        const verAnalisisBtn = document.getElementById('verAnalisisBtn');
+        const analysisComments = document.getElementById('analysisComments');
+        const cryptoComment = document.getElementById('cryptoComment');
+        const relatedLinks = document.getElementById('relatedLinks');
+        const lastTrend = document.getElementById('lastTrend');
+        const priceAlertInput = document.getElementById('priceAlertInput');
+        const setAlertBtn = document.getElementById('setAlertBtn');
+        const btnFavoritos = document.getElementById('btnFavoritos');
+        const btnVerTodos = document.getElementById('btnVerTodos');
+        const alertSound = document.getElementById('alertSound');
+        const updateChartBtn = document.getElementById('updateChartBtn');
+        const lastUpdateModal = document.getElementById('lastUpdateModal');
 
-            // Añadir días vacíos al inicio
-            for (let i = 0; i < firstDay; i++) {
-                const emptyDay = document.createElement('div');
-                emptyDay.className = 'day-card empty-day';
-                calendar.appendChild(emptyDay);
-            }
+        const timeframeButton = document.querySelector('.timeframe-button[data-timeframe="real"]');
+        timeframeButton.addEventListener('click', () => {
+            fetchCryptoData(true); // true para forzar update inmediato
+        });
 
-            // Añadir días del calendario
-            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                const dayCard = document.createElement('div');
-                dayCard.className = 'day-card';
-                
-                const dateNum = d.getDate();
-                const timestamp = d.getTime();
-                
-                dayCard.innerHTML = `
-                    <div class="date">${dateNum}</div>
-                    <div class="activities" id="activities-${timestamp}">
-                        ${getActivitiesFromStorage(d)}
-                    </div>
-                    <div class="add-activity">
-                        <input type="text" id="input-${timestamp}" placeholder="Agregar actividad...">
-                        <button onclick="addActivity(${timestamp})">Agregar</button>
-                    </div>
-                `;
-                calendar.appendChild(dayCard);
-            }
-        }
-
-        // Obtener Actividades del Almacenamiento Local
-        function getActivitiesFromStorage(date) {
-            const activities = JSON.parse(localStorage.getItem(`activities-${date.getTime()}`) || '[]');
-            return activities.map(activity => `
-                <div class="activity">
-                    <span>${activity}</span>
-                    <button onclick="deleteActivity(${date.getTime()}, '${activity.replace(/'/g, "\\'")}')" style="width: auto; padding: 2px 6px;">🗑️</button>
-                </div>
-            `).join('');
-        }
-
-        // Agregar Actividad
-        function addActivity(timestamp) {
-            const input = document.getElementById(`input-${timestamp}`);
-            const activity = input.value.trim();
-            
-            if (activity) {
-                const activities = JSON.parse(localStorage.getItem(`activities-${timestamp}`) || '[]');
-                activities.push(activity);
-                localStorage.setItem(`activities-${timestamp}`, JSON.stringify(activities));
-                
-                const activitiesDiv = document.getElementById(`activities-${timestamp}`);
-                activitiesDiv.innerHTML = getActivitiesFromStorage(new Date(timestamp));
-                input.value = '';
-
-                showNotification('Actividad agregada');
-            }
-        }
-
-        // Eliminar Actividad
-        function deleteActivity(timestamp, activity) {
-            const activities = JSON.parse(localStorage.getItem(`activities-${timestamp}`) || '[]');
-            const index = activities.indexOf(activity);
-            if (index > -1) {
-                activities.splice(index, 1);
-                localStorage.setItem(`activities-${timestamp}`, JSON.stringify(activities));
-                
-                const activitiesDiv = document.getElementById(`activities-${timestamp}`);
-                activitiesDiv.innerHTML = getActivitiesFromStorage(new Date(timestamp));
-                
-                showNotification('Actividad eliminada');
-            }
-        }
-
-        // Mostrar Notificaciones
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.2em;">✓</span>
-                    <span>${message}</span>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Activar transición
-            setTimeout(() => {
-                notification.style.opacity = '1';
-                notification.style.transform = 'translateY(0)';
-            }, 100);
-            
-            // Ocultar después de 3 segundos
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 3000);
-        }
-
-        // Funciones del Modal para Ver PDFs
-        function openModal(url) {
-            const modal = document.getElementById('pdf-modal');
-            const iframe = document.getElementById('pdf-viewer');
-            iframe.src = url;
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('pdf-modal');
-            const iframe = document.getElementById('pdf-viewer');
-            iframe.src = '';
-            modal.style.display = 'none';
-        }
-
-        // Cerrar el modal al hacer clic fuera del contenido
-        window.onclick = function(event) {
-            const modal = document.getElementById('pdf-modal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-
-        // Subir Archivo
-        function uploadFile(category) {
-            const fileInput = document.getElementById(`${category}-file`);
-            const file = fileInput.files[0];
-            
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const fileData = e.target.result; // Data URL
-                    const files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
-                    files.push({
-                        name: file.name,
-                        date: new Date().toLocaleString(),
-                        data: fileData
-                    });
-                    localStorage.setItem(`files-${category}`, JSON.stringify(files));
-                    updateFileList(category);
-                    fileInput.value = '';
-                    showNotification('Archivo subido exitosamente');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                showNotification('Por favor, selecciona un archivo para subir');
-            }
-        }
-
-        // Eliminar Archivo
-        function deleteFile(category, fileName) {
-            let files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
-            const index = files.findIndex(f => f.name === fileName);
-            if (index > -1) {
-                files.splice(index, 1);
-                localStorage.setItem(`files-${category}`, JSON.stringify(files));
-                updateFileList(category);
-                showNotification('Archivo eliminado exitosamente');
-            }
-        }
-
-        // Actualizar Lista de Archivos
-        function updateFileList(category) {
-            const fileList = document.getElementById(`${category}-list`);
-            const files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
-            
-            fileList.innerHTML = files.length > 0 ? files.map(file => `
-                <div class="file-item">
-                    <span>📄 ${file.name}</span>
-                    <div class="file-actions">
-                        <button onclick="downloadFile('${category}', '${file.name.replace(/'/g, "\\'")}')">Bajar</button>
-                        <button onclick="viewFile('${category}', '${file.name.replace(/'/g, "\\'")}')">Ver</button>
-                        <button class="delete-button" onclick="deleteFile('${category}', '${file.name.replace(/'/g, "\\'")}')">🗑️</button>
-                    </div>
-                </div>
-            `).join('') : '<p>No hay archivos</p>';
-        }
-
-        // Descargar Archivo
-        function downloadFile(category, fileName) {
-            const files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
-            const file = files.find(f => f.name === fileName);
-            if (file) {
-                const link = document.createElement('a');
-                link.href = file.data;
-                link.download = file.name;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showNotification('Descargando archivo...');
-            } else {
-                showNotification('Archivo no encontrado');
-            }
-        }
-
-        // Ver Archivo
-        function viewFile(category, fileName) {
-            const files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
-            const file = files.find(f => f.name === fileName);
-            if (file) {
-                // Verificar si el archivo es PDF
-                if (file.name.toLowerCase().endsWith('.pdf')) {
-                    openModal(file.data);
-                } else {
-                    showNotification('Solo se pueden ver archivos PDF');
+        updateChartBtn.addEventListener('click', async () => {
+            // Primero obtener datos frescos en la principal
+            await fetchCryptoData(true);
+            // Actualizar precio actual de la cripto en el modal
+            if (currentModalCoinId) {
+                const coinData = cryptoData.find(d => d.id === currentModalCoinId);
+                if (coinData) {
+                    currentModalPrice = coinData.current_price;
                 }
-            } else {
-                showNotification('Archivo no encontrado');
+                refreshModalChart();
             }
-        }
+        });
 
-        // Inicializar el Calendario y las Listas de Archivos al Cargar la Página
-        window.onload = function() {
-            createCalendar();
-            ['vuelos', 'auto', 'hotel', 'casa', 'universal', 'disney', 'cobertura'].forEach(category => {
-                updateFileList(category);
+        coinFilter.addEventListener('change', () => {
+            const filterValue = coinFilter.value;
+            filterCoins(filterValue);
+        });
+
+        function filterCoins(filterValue) {
+            const cards = document.querySelectorAll('.crypto-card');
+            cards.forEach(card => {
+                const coinName = card.getAttribute('data-coin-name');
+                card.style.display = (filterValue === 'all' || coinName === filterValue) ? 'block' : 'none';
             });
         }
+
+        function getRecommendation() {
+            return Math.random() > 0.5 ? { flag: 'green-flag', text: 'COMPRAR' } : { flag: 'red-flag', text: 'VENDER' };
+        }
+
+        function getBinanceInterval() {
+            return '1m';
+        }
+
+        function createCryptoCard(crypto, index) {
+            const recommendation = getRecommendation();
+            const card = document.createElement('div');
+            card.className = 'crypto-card';
+            card.setAttribute('data-coin-id', crypto.id);
+            card.setAttribute('data-coin-name', crypto.name);
+            card.setAttribute('data-current-price', crypto.current_price);
+
+            const isFav = favorites.includes(crypto.id);
+            const star = isFav ? '★' : '☆';
+
+            card.innerHTML = `
+                <div class="favorite-icon">${star}</div>
+                <img src="${crypto.image}" alt="${crypto.name} logo" class="crypto-logo">
+                <div class="crypto-name">${crypto.name}</div>
+                <div class="crypto-price">$${crypto.current_price.toFixed(2)}</div>
+                <div class="flag ${recommendation.flag}">${recommendation.text}</div>
+                <div class="mini-chart-container">
+                    <canvas id="miniChart-${index}" class="mini-chart"></canvas>
+                </div>
+            `;
+
+            const favIcon = card.querySelector('.favorite-icon');
+            favIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleFavorite(crypto.id, card);
+            });
+
+            return card;
+        }
+
+        function toggleFavorite(coinId, card) {
+            if (favorites.includes(coinId)) {
+                favorites = favorites.filter(f => f !== coinId);
+                card.querySelector('.favorite-icon').textContent = '☆';
+            } else {
+                favorites.push(coinId);
+                card.querySelector('.favorite-icon').textContent = '★';
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            reorderCards();
+        }
+
+        async function loadMiniChart(binanceSymbol, index) {
+            try {
+                const interval = getBinanceInterval();
+                const limit = 30; 
+                const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=${limit}`;
+                const res = await fetch(endpoint, {cache:'no-store'});
+                if (!res.ok) return false;
+                const klineData = await res.json();
+                if (!Array.isArray(klineData) || klineData.length === 0) return false;
+
+                const closePrices = klineData.map(candle => parseFloat(candle[4]));
+                const labels = klineData.map(candle => {
+                    const date = new Date(candle[0]);
+                    return `${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+                });
+
+                const miniCtx = document.getElementById(`miniChart-${index}`);
+                if (!miniCtx) return false;
+                const miniChartCtx = miniCtx.getContext('2d');
+                new Chart(miniChartCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: closePrices,
+                            borderColor: '#00ffcc',
+                            backgroundColor: 'rgba(0,255,204,0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { display: false },
+                            y: { display: false }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function reorderCards() {
+            const cards = Array.from(document.querySelectorAll('.crypto-card'));
+            let topCards = [];
+            let favCards = [];
+            let haveChartCards = [];
+            let noChartCards = [];
+
+            for (let card of cards) {
+                const coinId = card.getAttribute('data-coin-id');
+                const hasChart = card.querySelector('.mini-chart-container canvas') !== null;
+                const isFav = favorites.includes(coinId);
+
+                if (priorityOrder.includes(coinId)) {
+                    topCards.push(card);
+                } else if (isFav && hasChart) {
+                    favCards.push(card);
+                } else if (hasChart) {
+                    haveChartCards.push(card);
+                } else {
+                    noChartCards.push(card);
+                }
+            }
+
+            cryptoGrid.innerHTML = '';
+            topCards.forEach(c => cryptoGrid.appendChild(c));
+            favCards.forEach(c => cryptoGrid.appendChild(c));
+            haveChartCards.forEach(c => cryptoGrid.appendChild(c));
+            noChartCards.forEach(c => cryptoGrid.appendChild(c));
+        }
+
+        async function fetchCryptoData(forceUpdate = false) {
+            try {
+                loadingElement.style.display = 'block';
+                errorElement.style.display = 'none';
+                cryptoGrid.innerHTML = '';
+                const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false', {cache:'no-store'});
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const data = await response.json();
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error("No se obtuvieron datos de CoinGecko.");
+                }
+
+                cryptoData = data;
+
+                loadingElement.style.display = 'none';
+                cryptoGrid.innerHTML = '';
+                coinFilter.innerHTML = '<option value="all">Todas</option>';
+
+                const topCoins = priorityOrder.map(pid => data.find(d => d.id === pid)).filter(Boolean);
+                const rest = data.filter(d => !priorityOrder.includes(d.id));
+                let index = 0;
+
+                topCoins.forEach(crypto => {
+                    const card = createCryptoCard(crypto, index++);
+                    cryptoGrid.appendChild(card);
+                    const opt = document.createElement('option');
+                    opt.value = crypto.name;
+                    opt.textContent = crypto.name;
+                    coinFilter.appendChild(opt);
+                });
+
+                rest.forEach(crypto => {
+                    const card = createCryptoCard(crypto, index++);
+                    cryptoGrid.appendChild(card);
+                    const opt = document.createElement('option');
+                    opt.value = crypto.name;
+                    opt.textContent = crypto.name;
+                    coinFilter.appendChild(opt);
+                });
+
+                const cards = document.querySelectorAll('.crypto-card');
+                let chartPromises = [];
+
+                for (let i = 0; i < cards.length; i++) {
+                    const card = cards[i];
+                    const coinId = card.getAttribute('data-coin-id');
+                    const cData = data.find(d => d.id === coinId);
+                    const binanceSymbol = (cData.symbol.toUpperCase() + 'USDT');
+                    chartPromises.push(
+                        loadMiniChart(binanceSymbol, i).then(hasChart => {
+                            if (!hasChart) {
+                                card.querySelector('.mini-chart-container').innerHTML = `<p class="no-chart-text">Sin datos de gráfico</p>`;
+                            } else {
+                                let lastTap = 0;
+                                card.addEventListener('dblclick', () => {
+                                    openModal(coinId, cData.name, cData.current_price, binanceSymbol);
+                                });
+                                card.addEventListener('touchend', (event) => {
+                                    const currentTime = new Date().getTime();
+                                    const tapLength = currentTime - lastTap;
+                                    if (tapLength < 300 && tapLength > 0) {
+                                        openModal(coinId, cData.name, cData.current_price, binanceSymbol);
+                                        event.preventDefault();
+                                    }
+                                    lastTap = currentTime;
+                                });
+                            }
+                        })
+                    );
+                }
+
+                await Promise.all(chartPromises);
+                reorderCards();
+                lastUpdateElement.textContent = `Última actualización: ${new Date().toLocaleString()}`;
+            } catch (error) {
+                console.error('Error al obtener datos:', error);
+                loadingElement.style.display = 'none';
+                errorElement.style.display = 'block';
+                errorElement.textContent = 'No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.';
+            }
+        }
+
+        function calculateSMA(data, length) {
+            const sma = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < length - 1) {
+                    sma.push(null);
+                } else {
+                    const slice = data.slice(i - length + 1, i + 1);
+                    const sum = slice.reduce((a, b) => a + b, 0);
+                    sma.push(sum / length);
+                }
+            }
+            return sma;
+        }
+
+        function generateAIPrediction(closePrices) {
+            const predictions = [];
+            const lastPrice = closePrices[closePrices.length - 1];
+            for (let i = 1; i <= 10; i++) {
+                const factor = 1 + (Math.random() - 0.5) * 0.02;
+                predictions.push(lastPrice * factor);
+            }
+            return predictions;
+        }
+
+        async function openModal(coinId, coinName, currentPrice, binanceSymbol) {
+            currentModalCoinId = coinId;
+            currentModalCoinName = coinName;
+            currentModalPrice = currentPrice;
+            currentModalSymbol = binanceSymbol;
+            await loadModalData(coinId, coinName, currentPrice, binanceSymbol);
+        }
+
+        async function loadModalData(coinId, coinName, currentPrice, binanceSymbol) {
+            try {
+                const interval = getBinanceInterval();
+                const limit = 100; 
+                const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=${limit}`;
+                const response = await fetch(endpoint, {cache:'no-store'});
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const klineData = await response.json();
+                if (!Array.isArray(klineData) || klineData.length === 0) {
+                    throw new Error(`Sin datos para ${coinName}.`);
+                }
+
+                const closePrices = klineData.map(c => parseFloat(c[4]));
+                const volumes = klineData.map(c => parseFloat(c[5]));
+                const labels = klineData.map(c => {
+                    const date = new Date(c[0]);
+                    return `${date.getDate()}/${(date.getMonth()+1)} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+                });
+
+                const recommendation = getRecommendation();
+                const isBuy = recommendation.text === 'COMPRAR';
+                const trendColor = isBuy ? '#4CAF50' : '#F44336';
+                const lastPrice = closePrices[closePrices.length - 1];
+                const trendValues = closePrices.map(() => lastPrice);
+
+                const shortSMA = calculateSMA(closePrices, 7);
+                const longSMA = calculateSMA(closePrices, 30);
+
+                const coingeckoDetails = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`, {cache:'no-store'});
+                const detailsData = await coingeckoDetails.json();
+                const marketCap = detailsData.market_data?.market_cap?.usd || 'N/A';
+                const volume24h = detailsData.market_data?.total_volume?.usd || 'N/A';
+
+                const aiPredictions = generateAIPrediction(closePrices);
+                const aiLabels = [];
+                for (let i = 1; i <= aiPredictions.length; i++) {
+                    aiLabels.push(`Futuro+${i}`);
+                }
+
+                modalTitle.textContent = `${coinName} - Tendencia: ${recommendation.text}`;
+                dataSource.textContent = endpoint;
+
+                modalInfo.innerHTML = `
+                    <p>Precio Actual: $${currentPrice.toFixed(2)}</p>
+                    <p>Market Cap: $${marketCap.toLocaleString()}</p>
+                    <p>Volumen 24h: $${volume24h.toLocaleString()}</p>
+                `;
+
+                modalOverlay.style.display = 'flex';
+
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+
+                const fullLabels = labels.concat(aiLabels);
+                const fullClose = closePrices.concat(Array(aiPredictions.length).fill(null));
+                const fullTrend = trendValues.concat(Array(aiPredictions.length).fill(null));
+                const fullShortSMA = shortSMA.concat(Array(aiPredictions.length).fill(null));
+                const fullLongSMA = longSMA.concat(Array(aiPredictions.length).fill(null));
+                const aiLine = Array(closePrices.length).fill(null).concat(aiPredictions);
+
+                setTimeout(() => {
+                    chartInstance = new Chart(document.getElementById('cryptoChart').getContext('2d'), {
+                        data: {
+                            labels: fullLabels,
+                            datasets: [
+                                {
+                                    type: 'line',
+                                    label: `${coinName} (USD)`,
+                                    data: fullClose,
+                                    borderColor: '#00ffcc',
+                                    backgroundColor: 'rgba(0,255,204,0.1)',
+                                    tension: 0.3,
+                                    fill: true,
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    type: 'line',
+                                    label: `Línea de tendencia (${recommendation.text})`,
+                                    data: fullTrend,
+                                    borderColor: trendColor,
+                                    borderDash: [5, 5],
+                                    pointRadius: 0,
+                                    fill: false,
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    type: 'line',
+                                    label: 'SMA (7)',
+                                    data: fullShortSMA,
+                                    borderColor: '#FFD700',
+                                    fill: false,
+                                    pointRadius: 0,
+                                    tension: 0.2,
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    type: 'line',
+                                    label: 'SMA (30)',
+                                    data: fullLongSMA,
+                                    borderColor: '#FF8C00',
+                                    fill: false,
+                                    pointRadius: 0,
+                                    tension: 0.2,
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    type: 'bar',
+                                    label: 'Volumen',
+                                    data: volumes.concat(Array(aiPredictions.length).fill(null)),
+                                    backgroundColor: 'rgba(0,191,255,0.3)',
+                                    borderColor: '#00BFFF',
+                                    borderWidth: 1,
+                                    yAxisID: 'y1'
+                                },
+                                {
+                                    type: 'line',
+                                    label: 'Línea IA (Predicción)',
+                                    data: aiLine,
+                                    borderColor: '#EE82EE',
+                                    borderDash: [2, 2],
+                                    pointRadius: 0,
+                                    fill: false,
+                                    tension: 0.2,
+                                    yAxisID: 'y',
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            scales: {
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
+                                    title: {
+                                        display: true,
+                                        text: 'Precio (USD)',
+                                        color: body.className === 'dark' ? '#ffffff' : '#000000'
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
+                                    title: {
+                                        display: true,
+                                        text: 'Volumen',
+                                        color: body.className === 'dark' ? '#ffffff' : '#000000'
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false,
+                                    },
+                                },
+                                x: {
+                                    ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    labels: {
+                                        color: body.className === 'dark' ? '#ffffff' : '#000000'
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    chartInstance.update();
+                }, 100);
+
+                const aiFinalPrediction = aiPredictions[aiPredictions.length - 1];
+                if (aiFinalPrediction > currentPrice) {
+                    adviceText.textContent = "La IA indica posible alza a corto plazo. Podría ser buen momento para comprar.";
+                } else {
+                    adviceText.textContent = "La IA no muestra aumento claro. Tal vez esperar sea mejor.";
+                }
+
+                const randomComment = sampleComments[Math.floor(Math.random() * sampleComments.length)];
+                cryptoComment.textContent = randomComment;
+
+                const randomTrend = sampleTrends[Math.floor(Math.random() * sampleTrends.length)];
+                lastTrend.textContent = randomTrend;
+
+                const links = detailsData.links;
+                let linksHtml = '';
+                if (links && links.homepage && links.homepage[0]) {
+                    linksHtml += `<p><a href="${links.homepage[0]}" target="_blank">Sitio oficial</a></p>`;
+                }
+                if (links && links.blockchain_site && links.blockchain_site[0]) {
+                    linksHtml += `<p><a href="${links.blockchain_site[0]}" target="_blank">Blockchain Explorer</a></p>`;
+                }
+                if (detailsData.links?.subreddit_url) {
+                    linksHtml += `<p><a href="${detailsData.links.subreddit_url}" target="_blank">Subreddit</a></p>`;
+                }
+                if (detailsData.links?.official_forum_url && detailsData.links.official_forum_url[0]) {
+                    linksHtml += `<p><a href="${detailsData.links.official_forum_url[0]}" target="_blank">Foro Oficial</a></p>`;
+                }
+                if (linksHtml === '') {
+                    linksHtml = `<p>No se encontraron links adicionales.</p>`;
+                }
+                relatedLinks.innerHTML = linksHtml;
+
+                lastUpdateModal.textContent = `Última actualización: ${new Date().toLocaleString()}`;
+            } catch (error) {
+                console.error('Error al mostrar modal con gráfico:', error);
+                modalTitle.textContent = `${coinName} - Sin datos de gráfico`;
+                modalInfo.innerHTML = `<p>No se pudieron obtener datos del gráfico. Intente más tarde.</p>`;
+                adviceText.textContent = "No hay suficientes datos para dar un consejo.";
+                dataSource.textContent = "";
+                modalOverlay.style.display = 'flex';
+                lastUpdateModal.textContent = "";
+            }
+        }
+
+        modalClose.addEventListener('click', () => {
+            modalOverlay.style.display = 'none';
+        });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.style.display = 'none';
+            }
+        });
+
+        verAnalisisBtn.addEventListener('click', () => {
+            analysisComments.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        setAlertBtn.addEventListener('click', () => {
+            if (currentModalCoinId && priceAlertInput.value) {
+                const alertPrice = parseFloat(priceAlertInput.value);
+                if (!isNaN(alertPrice) && alertPrice > 0) {
+                    priceAlerts[currentModalCoinId] = alertPrice;
+                    alert(`Alerta establecida para ${currentModalCoinId} en $${alertPrice}.`);
+                }
+            }
+        });
+
+        btnFavoritos.addEventListener('click', () => {
+            const cards = document.querySelectorAll('.crypto-card');
+            cards.forEach(card => {
+                const coinId = card.getAttribute('data-coin-id');
+                card.style.display = favorites.includes(coinId) ? 'block' : 'none';
+            });
+        });
+
+        btnVerTodos.addEventListener('click', () => {
+            const cards = document.querySelectorAll('.crypto-card');
+            cards.forEach(card => card.style.display = 'block');
+        });
+
+        function checkPriceAlerts() {
+            for (let coinId in priceAlerts) {
+                const alertPrice = priceAlerts[coinId];
+                const card = document.querySelector(`.crypto-card[data-coin-id="${coinId}"]`);
+                if (card) {
+                    const currentPrice = parseFloat(card.getAttribute('data-current-price'));
+                    if (currentPrice >= alertPrice) {
+                        alertSound.play();
+                        delete priceAlerts[coinId];
+                    }
+                }
+            }
+        }
+
+        function refreshModalChart() {
+            if (currentModalCoinId && currentModalCoinName && currentModalPrice && currentModalSymbol) {
+                loadModalData(currentModalCoinId, currentModalCoinName, currentModalPrice, currentModalSymbol);
+            }
+        }
+
+        // Primera carga
+        fetchCryptoData();
+
+        // Actualizar datos, banderas y alertas cada 30 segundos
+        setInterval(async () => {
+            await fetchCryptoData(true);
+            document.querySelectorAll('.crypto-card').forEach((card) => {
+                const flagElement = card.querySelector('.flag');
+                const recommendation = getRecommendation();
+                flagElement.className = `flag ${recommendation.flag}`;
+                flagElement.textContent = recommendation.text;
+            });
+            checkPriceAlerts();
+        }, 30000);
     </script>
 </body>
 </html>
