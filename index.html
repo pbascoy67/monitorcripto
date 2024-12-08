@@ -462,13 +462,13 @@
                 <button id="setAlertBtn">Set Alert</button>
             </div>
             <div class="modal-explanation">
-                <h4>Explicación del gráfico:</h4>
-                <p><span style="color:#00ffcc;font-weight:bold;">Línea principal (cyan):</span> Precio histórico.</p>
-                <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Último precio y recomendación.</p>
-                <p><span style="color:#FFD700;font-weight:bold;">SMA (7) (amarillo):</span> Media móvil corto plazo.</p>
-                <p><span style="color:#FF8C00;font-weight:bold;">SMA (30) (naranja):</span> Media móvil mediano plazo.</p>
-                <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> Actividad de compra/venta.</p>
-                <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> Predicción IA.</p>
+                <h4>Explicación de los Indicadores:</h4>
+                <p><span style="color:#00ffcc;font-weight:bold;">Línea principal (cyan):</span> Representa el <strong>precio histórico</strong> de la criptomoneda. Muestra cómo ha evolucionado el precio a lo largo del tiempo, permitiendo identificar tendencias generales.</p>
+                <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Indica el <strong>último precio</strong> y la <strong>recomendación</strong> (comprar/vender) basada en el análisis actual. Ayuda a tomar decisiones informadas sobre posibles movimientos en el mercado.</p>
+                <p><span style="color:#FFD700;font-weight:bold;">SMA (7) (amarillo):</span> Es una <strong>media móvil de corto plazo</strong> que suaviza las fluctuaciones diarias del precio. Ayuda a identificar tendencias recientes y posibles puntos de entrada o salida.</p>
+                <p><span style="color:#FF8C00;font-weight:bold;">SMA (30) (naranja):</span> Representa una <strong>media móvil de mediano plazo</strong>, proporcionando una visión más estable de la tendencia general del mercado. Facilita la identificación de cambios en la dirección del precio.</p>
+                <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> Muestra la <strong>actividad de compra/venta</strong> de la criptomoneda. Un alto volumen puede indicar un fuerte interés del mercado, mientras que un bajo volumen puede sugerir falta de movimiento.</p>
+                <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> Es la <strong>predicción generada por inteligencia artificial</strong> para futuros movimientos de precios. Ayuda a anticipar posibles tendencias basadas en análisis avanzados.</p>
                 <h4>Consejo:</h4>
                 <p id="adviceText"></p>
             </div>
@@ -495,7 +495,9 @@
         <button id="btnVerTodos">Ver Todos</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Actualización a la última versión de Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
     <script>
         let chartInstance = null;
         let cryptoData = [];
@@ -892,22 +894,17 @@
                     chartInstance.destroy();
                 }
 
-                const fullLabels = labels.concat(aiLabels);
-                const fullClose = closePrices.concat(Array(aiPredictions.length).fill(null));
-                const fullTrend = trendValues.concat(Array(aiPredictions.length).fill(null));
-                const fullShortSMA = shortSMA.concat(Array(aiPredictions.length).fill(null));
-                const fullLongSMA = longSMA.concat(Array(aiPredictions.length).fill(null));
                 const aiLine = Array(closePrices.length).fill(null).concat(aiPredictions);
 
                 setTimeout(() => {
                     chartInstance = new Chart(document.getElementById('cryptoChart').getContext('2d'), {
                         data: {
-                            labels: fullLabels,
+                            labels: labels.concat(aiLabels),
                             datasets: [
                                 {
                                     type: 'line',
                                     label: `${coinName} (USD)`,
-                                    data: fullClose,
+                                    data: closePrices.concat(Array(aiPredictions.length).fill(null)),
                                     borderColor: '#00ffcc',
                                     backgroundColor: 'rgba(0,255,204,0.1)',
                                     tension: 0.3,
@@ -917,7 +914,7 @@
                                 {
                                     type: 'line',
                                     label: `Línea de tendencia (${recommendation.text})`,
-                                    data: fullTrend,
+                                    data: trendValues.concat(Array(aiPredictions.length).fill(null)),
                                     borderColor: trendColor,
                                     borderDash: [5, 5],
                                     pointRadius: 0,
@@ -927,7 +924,7 @@
                                 {
                                     type: 'line',
                                     label: 'SMA (7)',
-                                    data: fullShortSMA,
+                                    data: shortSMA.concat(Array(aiPredictions.length).fill(null)),
                                     borderColor: '#FFD700',
                                     fill: false,
                                     pointRadius: 0,
@@ -937,7 +934,7 @@
                                 {
                                     type: 'line',
                                     label: 'SMA (30)',
-                                    data: fullLongSMA,
+                                    data: longSMA.concat(Array(aiPredictions.length).fill(null)),
                                     borderColor: '#FF8C00',
                                     fill: false,
                                     pointRadius: 0,
@@ -1008,6 +1005,10 @@
                                     labels: {
                                         color: body.className === 'dark' ? '#ffffff' : '#000000'
                                     }
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
                                 }
                             }
                         }
@@ -1106,6 +1107,7 @@
                     if (currentPrice >= alertPrice) {
                         alertSound.play();
                         delete priceAlerts[coinId];
+                        alert(`¡Alerta! ${coinId} ha alcanzado el precio de $${alertPrice}.`);
                     }
                 }
             }
