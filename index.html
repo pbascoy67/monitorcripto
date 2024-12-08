@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <base href="/">
     <meta charset="UTF-8">
     <title>Vacaciones Miami-Orlando 2024</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Estilos Generales */
         body {
             font-family: 'Roboto', 'Segoe UI', sans-serif;
             margin: 0;
@@ -21,6 +22,7 @@
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
+        /* Encabezados */
         h1 {
             text-align: center;
             color: #1a237e;
@@ -41,6 +43,7 @@
             font-size: 1.3em;
             margin-bottom: 15px;
         }
+        /* Calendario */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -98,6 +101,9 @@
             font-size: 0.85em;
             border-left: 3px solid #1a237e;
             transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .activity:hover {
             background: #e8eaf6;
@@ -117,6 +123,7 @@
             font-size: 0.8em;
             min-width: 60px;
         }
+        /* Botones y Inputs */
         input[type="text"], input[type="file"] {
             padding: 12px;
             width: calc(100% - 24px);
@@ -148,6 +155,7 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(26,35,126,0.2);
         }
+        /* Sección de Documentos Importantes */
         .files-section {
             margin-top: 50px;
             padding: 30px;
@@ -183,6 +191,27 @@
             transform: translateX(5px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
+        .file-actions button {
+            margin-left: 5px;
+            padding: 4px 8px;
+            font-size: 0.8em;
+            cursor: pointer;
+            background: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+        .file-actions button:hover {
+            background: #283593;
+        }
+        .delete-button {
+            background: #e53935;
+        }
+        .delete-button:hover {
+            background: #d32f2f;
+        }
+        /* Notificaciones */
         .notification {
             position: fixed;
             bottom: 20px;
@@ -193,27 +222,391 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             font-weight: 500;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        /* Modal para Visualizar PDFs */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed; /* Permanecer en la pantalla */
+            z-index: 1001; /* Estar encima de otros elementos */
+            padding-top: 60px; /* Ubicación del contenido */
+            left: 0;
+            top: 0;
+            width: 100%; /* Ancho completo */
+            height: 100%; /* Alto completo */
+            overflow: auto; /* Habilitar scroll si es necesario */
+            background-color: rgba(0,0,0,0.5); /* Fondo negro con opacidad */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .close-modal {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal:hover,
+        .close-modal:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🌴 Vacaciones Miami-Orlando 2024 ✨</h1>
+        <!-- Calendario -->
         <div class="calendar-header" id="calendar-header"></div>
         <div class="calendar-grid" id="calendar"></div>
 
-        <div style="margin: 40px 0; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
+        <!-- Información de IDA -->
+        <div style="margin: 40px 0; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);">
             <h2 style="margin-top: 0;">✈️ IDA</h2>
-            <img src="ida1.jpg" alt="Itinerario de vuelo" style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <p><strong>Lunes, 9 de diciembre</strong></p>
+            <ul style="list-style-type: none; padding: 0;">
+                <li><strong>Vuelo CM168:</strong> 2:31 AM - Buenos Aires (EZE)</li>
+                <li>Duración: 7h 26m</li>
+                <li><strong>Escala:</strong> Panamá (PTY) - 1h 26m</li>
+                <li><strong>Vuelo CM334:</strong> 9:23 AM - Panamá (PTY) a 12:32 PM - Miami (MIA)</li>
+                <li>Duración: 3h 9m</li>
+                <li><strong>Operado por:</strong> Copa Airlines</li>
+            </ul>
+        </div>
+        
+        <!-- Información de VUELTA -->
+        <div style="margin: 40px 0; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);">
+            <h2 style="margin-top: 0;">✈️ VUELTA</h2>
+            <p><strong>Sábado, 21 de diciembre</strong></p>
+            <ul style="list-style-type: none; padding: 0;">
+                <li><strong>Vuelo CM868:</strong> 2:24 PM - Orlando (MCO) a 5:53 PM - Panamá (PTY)</li>
+                <li>Duración: 3h 29m</li>
+                <li><strong>Escala:</strong> Panamá (PTY) - 1h 2m</li>
+                <li><strong>Vuelo CM454:</strong> 6:55 PM - Panamá (PTY) a 4:13 AM - Buenos Aires (EZE)</li>
+                <li>Duración: 7h 18m</li>
+                <li><strong>Operado por:</strong> Copa Airlines</li>
+            </ul>
         </div>
 
-        <div style="margin: 40px 0; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
-            <h2 style="margin-top: 0;">✈️ VUELTA</h2>
-            <img src="vuelta1.png" alt="Itinerario de vuelo vuelta" style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <!-- Documentos Importantes -->
+        <div class="files-section">
+            <h2>📁 Documentos Importantes</h2>
+            <div id="file-categories">
+                <!-- Categoría de Vuelos -->
+                <div class="file-category">
+                    <h3>✈️ Vuelos</h3>
+                    <input type="file" id="vuelos-file" accept=".pdf,.doc,.docx,.jpg,.png">
+                    <button onclick="uploadFile('vuelos')">Subir Archivo</button>
+                    <div class="file-list" id="vuelos-list"></div>
+                </div>
+                <!-- Categoría de Alquiler de Auto -->
+                <div class="file-category">
+                    <h3>🚗 Alquiler de Auto</h3>
+                    <input type="file" id="auto-file" accept=".pdf,.doc,.docx,.jpg,.png">
+                    <button onclick="uploadFile('auto')">Subir Archivo</button>
+                    <div class="file-list" id="auto-list"></div>
+                </div>
+                <!-- Categoría de Hotel en Miami -->
+                <div class="file-category">
+                    <h3>🏨 Hotel en Miami</h3>
+                    <input type="file" id="hotel-file" accept=".pdf,.doc,.docx,.jpg,.png">
+                    <button onclick="uploadFile('hotel')">Subir Archivo</button>
+                    <div class="file-list" id="hotel-list"></div>
+                </div>
+                <!-- Categoría de Casa en Orlando -->
+                <div class="file-category">
+                    <h3>🏠 Casa en Orlando</h3>
+                    <input type="file" id="casa-file" accept=".pdf,.doc,.docx,.jpg,.png">
+                    <button onclick="uploadFile('casa')">Subir Archivo</button>
+                    <div class="file-list" id="casa-list"></div>
+                </div>
+                <!-- Categoría de Ticket Universal -->
+                <div class="file-category">
+                    <h3>🎢 Ticket Universal</h3>
+                    <input type="file" id="universal-file" accept=".pdf,.doc,.docx,.jpg,.png">
+                    <button onclick="uploadFile('universal')">Subir Archivo</button>
+                    <div class="file-list" id="universal-list"></div>
+                </div>
+                <!-- Categoría de Ticket Disney -->
+                <div class="file-category">
+                    <h3>🏰 Ticket Disney</h3>
+                    <input type="file" id="disney-file" accept=".pdf,.doc,.docx,.jpg,.png">
+                    <button onclick="uploadFile('disney')">Subir Archivo</button>
+                    <div class="file-list" id="disney-list"></div>
+                </div>
+                <!-- Nueva Categoría: Cobertura Médica -->
+                <div class="file-category">
+                    <h3>🩺 Cobertura Médica</h3>
+                    <input type="file" id="cobertura-file" accept=".pdf,.doc,.docx,.jpg,.png">
+                    <button onclick="uploadFile('cobertura')">Subir Archivo</button>
+                    <div class="file-list" id="cobertura-list"></div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Modal para Ver PDF -->
+    <div id="pdf-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <iframe id="pdf-viewer" src="" width="100%" height="600px"></iframe>
+        </div>
+    </div>
+
     <script>
-        // Tu JavaScript sigue igual
+        // Configuración del Calendario
+        const weekDays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const startDate = new Date(2024, 11, 8); // Diciembre (11) 8
+        const endDate = new Date(2024, 11, 22); // Diciembre (11) 22
+
+        // Generar Encabezados del Calendario
+        const headerDiv = document.getElementById('calendar-header');
+        weekDays.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'weekday';
+            dayHeader.textContent = day;
+            headerDiv.appendChild(dayHeader);
+        });
+
+        // Crear el Calendario
+        function createCalendar() {
+            const calendar = document.getElementById('calendar');
+            const firstDay = startDate.getDay();
+
+            // Añadir días vacíos al inicio
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'day-card empty-day';
+                calendar.appendChild(emptyDay);
+            }
+
+            // Añadir días del calendario
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'day-card';
+                
+                const dateNum = d.getDate();
+                const timestamp = d.getTime();
+                
+                dayCard.innerHTML = `
+                    <div class="date">${dateNum}</div>
+                    <div class="activities" id="activities-${timestamp}">
+                        ${getActivitiesFromStorage(d)}
+                    </div>
+                    <div class="add-activity">
+                        <input type="text" id="input-${timestamp}" placeholder="Agregar actividad...">
+                        <button onclick="addActivity(${timestamp})">Agregar</button>
+                    </div>
+                `;
+                calendar.appendChild(dayCard);
+            }
+        }
+
+        // Obtener Actividades del Almacenamiento Local
+        function getActivitiesFromStorage(date) {
+            const activities = JSON.parse(localStorage.getItem(`activities-${date.getTime()}`) || '[]');
+            return activities.map(activity => `
+                <div class="activity">
+                    <span>${activity}</span>
+                    <button onclick="deleteActivity(${date.getTime()}, '${activity.replace(/'/g, "\\'")}')" style="width: auto; padding: 2px 6px;">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        // Agregar Actividad
+        function addActivity(timestamp) {
+            const input = document.getElementById(`input-${timestamp}`);
+            const activity = input.value.trim();
+            
+            if (activity) {
+                const activities = JSON.parse(localStorage.getItem(`activities-${timestamp}`) || '[]');
+                activities.push(activity);
+                localStorage.setItem(`activities-${timestamp}`, JSON.stringify(activities));
+                
+                const activitiesDiv = document.getElementById(`activities-${timestamp}`);
+                activitiesDiv.innerHTML = getActivitiesFromStorage(new Date(timestamp));
+                input.value = '';
+
+                showNotification('Actividad agregada');
+            }
+        }
+
+        // Eliminar Actividad
+        function deleteActivity(timestamp, activity) {
+            const activities = JSON.parse(localStorage.getItem(`activities-${timestamp}`) || '[]');
+            const index = activities.indexOf(activity);
+            if (index > -1) {
+                activities.splice(index, 1);
+                localStorage.setItem(`activities-${timestamp}`, JSON.stringify(activities));
+                
+                const activitiesDiv = document.getElementById(`activities-${timestamp}`);
+                activitiesDiv.innerHTML = getActivitiesFromStorage(new Date(timestamp));
+                
+                showNotification('Actividad eliminada');
+            }
+        }
+
+        // Mostrar Notificaciones
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.2em;">✓</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Activar transición
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateY(0)';
+            }, 100);
+            
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Funciones del Modal para Ver PDFs
+        function openModal(url) {
+            const modal = document.getElementById('pdf-modal');
+            const iframe = document.getElementById('pdf-viewer');
+            iframe.src = url;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('pdf-modal');
+            const iframe = document.getElementById('pdf-viewer');
+            iframe.src = '';
+            modal.style.display = 'none';
+        }
+
+        // Cerrar el modal al hacer clic fuera del contenido
+        window.onclick = function(event) {
+            const modal = document.getElementById('pdf-modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Subir Archivo
+        function uploadFile(category) {
+            const fileInput = document.getElementById(`${category}-file`);
+            const file = fileInput.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fileData = e.target.result; // Data URL
+                    const files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
+                    files.push({
+                        name: file.name,
+                        date: new Date().toLocaleString(),
+                        data: fileData
+                    });
+                    localStorage.setItem(`files-${category}`, JSON.stringify(files));
+                    updateFileList(category);
+                    fileInput.value = '';
+                    showNotification('Archivo subido exitosamente');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                showNotification('Por favor, selecciona un archivo para subir');
+            }
+        }
+
+        // Eliminar Archivo
+        function deleteFile(category, fileName) {
+            let files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
+            const index = files.findIndex(f => f.name === fileName);
+            if (index > -1) {
+                files.splice(index, 1);
+                localStorage.setItem(`files-${category}`, JSON.stringify(files));
+                updateFileList(category);
+                showNotification('Archivo eliminado exitosamente');
+            }
+        }
+
+        // Actualizar Lista de Archivos
+        function updateFileList(category) {
+            const fileList = document.getElementById(`${category}-list`);
+            const files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
+            
+            fileList.innerHTML = files.length > 0 ? files.map(file => `
+                <div class="file-item">
+                    <span>📄 ${file.name}</span>
+                    <div class="file-actions">
+                        <button onclick="downloadFile('${category}', '${file.name.replace(/'/g, "\\'")}')">Bajar</button>
+                        <button onclick="viewFile('${category}', '${file.name.replace(/'/g, "\\'")}')">Ver</button>
+                        <button class="delete-button" onclick="deleteFile('${category}', '${file.name.replace(/'/g, "\\'")}')">🗑️</button>
+                    </div>
+                </div>
+            `).join('') : '<p>No hay archivos</p>';
+        }
+
+        // Descargar Archivo
+        function downloadFile(category, fileName) {
+            const files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
+            const file = files.find(f => f.name === fileName);
+            if (file) {
+                const link = document.createElement('a');
+                link.href = file.data;
+                link.download = file.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showNotification('Descargando archivo...');
+            } else {
+                showNotification('Archivo no encontrado');
+            }
+        }
+
+        // Ver Archivo
+        function viewFile(category, fileName) {
+            const files = JSON.parse(localStorage.getItem(`files-${category}`) || '[]');
+            const file = files.find(f => f.name === fileName);
+            if (file) {
+                // Verificar si el archivo es PDF
+                if (file.name.toLowerCase().endsWith('.pdf')) {
+                    openModal(file.data);
+                } else {
+                    showNotification('Solo se pueden ver archivos PDF');
+                }
+            } else {
+                showNotification('Archivo no encontrado');
+            }
+        }
+
+        // Inicializar el Calendario y las Listas de Archivos al Cargar la Página
+        window.onload = function() {
+            createCalendar();
+            ['vuelos', 'auto', 'hotel', 'casa', 'universal', 'disney', 'cobertura'].forEach(category => {
+                updateFileList(category);
+            });
+        }
     </script>
 </body>
 </html>
