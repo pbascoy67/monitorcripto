@@ -1,1171 +1,1371 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor Criptomonedas - RSI Edition</title>
-    <style>
-        body.dark {
-            background-color: #0a0e17;
-            color: #ffffff;
-        }
-        body.light {
-            background-color: #f0f0f0;
-            color: #000000;
-        }
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        h1 {
-            text-align: center;
-            color: #00ffcc;
-            font-size: 2.5em;
-            margin-bottom: 5px;
-        }
-        h3 {
-            text-align: center;
-            color: #7a8599;
-            margin-top: -10px;
-            font-size: 0.9em;
-            font-weight: normal;
-        }
-        #indicatorExplanation {
-            max-width: 800px;
-            margin: 10px auto 20px auto;
-            background-color: #1a2332;
-            border-radius: 10px;
-            padding: 15px;
-            color: #ccc;
-            font-size: 0.9em;
-        }
-        body.light #indicatorExplanation {
-            background-color: #eaeaea;
-            color: #333;
-        }
-        #indicatorExplanation p {
-            margin: 5px 0;
-            line-height: 1.3em;
-        }
-        #lastUpdate {
-            text-align: center;
-            margin-top: 5px;
-            font-style: italic;
-            color: #7a8599;
-            margin-bottom: 20px;
-        }
-        #filtersContainer {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        #timeframeSelector,
-        #coinFilterContainer {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            background-color: #1a2332;
-            border-radius: 15px;
-            padding: 10px;
-        }
-        .timeframe-button {
-            background-color: #00ffcc;
-            color: #0a0e17;
-            border: none;
-            padding: 10px 15px;
-            margin: 5px;
-            cursor: pointer;
-            border-radius: 10px;
-            font-size: 0.9em;
-            box-shadow: 0 0 15px #00ffcc;
-            flex-grow: 1;
-            text-align: center;
-            min-width: 70px;
-        }
-        #coinFilter {
-            background-color: #0a0e17;
-            color: #ffffff;
-            border: 1px solid #00ffcc;
-            border-radius: 10px;
-            padding: 10px;
-            min-width: 100px;
-        }
-        #cryptoGrid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .crypto-card {
-            background-color: #1a2332;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-        body.light .crypto-card {
-            background-color: #ffffff;
-            color: #000000;
-        }
-        .crypto-card:hover {
-            transform: translateY(-5px);
-        }
-        .crypto-card:hover::after {
-            content: "Doble clic para ver gráfico";
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #00ffcc;
-            color: #0a0e17;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            white-space: nowrap;
-        }
-        .crypto-logo {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 15px;
-        }
-        .crypto-name {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            word-break: break-word;
-        }
-        .crypto-price {
-            font-size: 1.1em;
-            margin-bottom: 15px;
-        }
-        .flag {
-            display: inline-block;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.9em;
-            /* Evita que el texto se corte en la tarjeta */
-            white-space: nowrap;
-        }
-        .green-flag {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .red-flag {
-            background-color: #F44336;
-            color: white;
-        }
-        .neutral-flag {
-            background-color: #FF9800;
-            color: white;
-        }
-        .mini-chart-container {
-            margin-top: 15px;
-            position: relative;
-            height: 80px;
-        }
-        canvas.mini-chart {
-            width: 100%;
-            height: 100%;
-        }
-        .no-chart-text {
-            margin-top: 15px;
-            font-size: 0.8em;
-            color: #7a8599;
-        }
-        .favorite-icon {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 1.2em;
-            color: #ffc107;
-        }
-        #loading {
-            text-align: center;
-            font-size: 1.5em;
-            margin-top: 50px;
-        }
-        #error {
-            text-align: center;
-            color: #F44336;
-            font-size: 1.2em;
-            margin-top: 50px;
-            display: none;
-        }
-        #modalOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
-            padding: 0;
-        }
-        #modalContent {
-            background: #1a2332;
-            border-radius: 15px;
-            width: 95vw;
-            height: 95vh;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        body.light #modalContent {
-            background: #f0f0f0;
-            color: #000000;
-        }
-        #modalClose {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #00ffcc;
-            color: #0a0e17;
-            border: none;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        #chartContainer {
-            width: 100%;
-            min-height: 300px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        #cryptoChart {
-            width: 100%;
-            height: 100%;
-        }
-        .modal-footer {
-            font-size: 0.9em;
-            color: #7a8599;
-            text-align: center;
-            word-break: break-all;
-            margin-top: 20px;
-        }
-        body.light .modal-footer {
-            color: #333333;
-        }
-        .modal-info {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .modal-info p {
-            margin: 5px 0;
-        }
-        .modal-explanation {
-            font-size: 0.9em;
-            margin-top: 15px;
-            background-color: #0a0e17;
-            padding: 10px;
-            border-radius: 10px;
-        }
-        body.light .modal-explanation {
-            background-color: #ddd;
-            color: #000;
-        }
-        .modal-explanation h4 {
-            margin-top: 10px;
-            margin-bottom: 5px;
-        }
-        #analysisComments {
-            margin-top: 20px;
-            background-color: #1a2332;
-            border-radius: 10px;
-            padding: 10px;
-        }
-        body.light #analysisComments {
-            background-color: #eee;
-            color: #000;
-        }
-        #analysisComments h4 {
-            margin-top: 5px;
-            margin-bottom: 10px;
-        }
-        #analysisComments p {
-            font-size: 0.9em;
-            margin-bottom: 10px;
-        }
-        .related-links a {
-            color: #00ffcc;
-            text-decoration: none;
-        }
-        .related-links a:hover {
-            text-decoration: underline;
-        }
-        #priceAlertContainer {
-            margin: 10px 0;
-            text-align: center;
-        }
-        #priceAlertInput {
-            width: 100px;
-            padding: 5px;
-            border-radius: 5px;
-            border: none;
-        }
-        #setAlertBtn {
-            padding: 5px 10px;
-            margin-left: 5px;
-            border-radius: 5px;
-            border: none;
-            background: #00ffcc;
-            color: #0a0e17;
-            cursor: pointer;
-        }
-        #themeToggle {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background-color: #00ffcc;
-            color: #0a0e17;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 0.8em;
-            z-index: 2000;
-        }
-        #favoritesBar {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 5px;
-            z-index: 1000;
-        }
-        #btnFavoritos, #btnVerTodos {
-            background-color: #00ffcc;
-            color: #0a0e17;
-            border: none;
-            padding: 5px 8px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 0.8em;
-        }
-        #updateChartBtn {
-            background: #00ffcc;
-            color: #0a0e17;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px auto 5px auto;
-            display: block;
-            font-size: 0.9em;
-        }
-        #lastUpdateModal {
-            text-align: center;
-            font-style: italic;
-            color: #7a8599;
-            margin-top: 5px;
-            margin-bottom: 10px;
-        }
-        #verAnalisisBtn {
-            background: #00ffcc;
-            color: #0a0e17;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px auto 0 auto;
-            display: block;
-            font-size: 0.9em;
-        }
-        @media (max-width: 768px) {
-            #modalContent {
-                width: 98vw;
-                height: 98vh;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Monitor Criptomonedas - RSI + PnL + Voz + Intervalo FIX</title>
+  <style>
+    body.dark {
+      background-color: #0a0e17;
+      color: #ffffff;
+    }
+    body.light {
+      background-color: #f0f0f0;
+      color: #000000;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    h1 {
+      text-align: center;
+      color: #00ffcc;
+      font-size: 2.5em;
+      margin-bottom: 5px;
+    }
+    h3 {
+      text-align: center;
+      color: #7a8599;
+      margin-top: -10px;
+      font-size: 0.9em;
+      font-weight: normal;
+    }
+    #indicatorExplanation {
+      max-width: 800px;
+      margin: 10px auto 20px auto;
+      background-color: #1a2332;
+      border-radius: 10px;
+      padding: 15px;
+      color: #ccc;
+      font-size: 0.9em;
+    }
+    body.light #indicatorExplanation {
+      background-color: #eaeaea;
+      color: #333;
+    }
+    #indicatorExplanation p {
+      margin: 5px 0;
+      line-height: 1.3em;
+    }
+    #lastUpdate {
+      text-align: center;
+      margin-top: 5px;
+      font-style: italic;
+      color: #7a8599;
+      margin-bottom: 20px;
+    }
+    #filtersContainer {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #timeframeSelector,
+    #coinFilterContainer {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      background-color: #1a2332;
+      border-radius: 15px;
+      padding: 10px;
+    }
+    .timeframe-button {
+      background-color: #00ffcc;
+      color: #0a0e17;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      cursor: pointer;
+      border-radius: 10px;
+      font-size: 0.9em;
+      box-shadow: 0 0 15px #00ffcc;
+      flex-grow: 1;
+      text-align: center;
+      min-width: 70px;
+    }
+    #coinFilter {
+      background-color: #0a0e17;
+      color: #ffffff;
+      border: 1px solid #00ffcc;
+      border-radius: 10px;
+      padding: 10px;
+      min-width: 100px;
+    }
+
+    #intervalContainer {
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    #intervalContainer label {
+      margin-right: 5px;
+    }
+    #updateIntervalInput {
+      width: 60px;
+      padding: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    #setIntervalBtn {
+      padding: 5px 10px;
+      margin-left: 5px;
+      border-radius: 5px;
+      border: none;
+      background: #00ffcc;
+      color: #0a0e17;
+      cursor: pointer;
+    }
+
+    #cryptoGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .crypto-card {
+      background-color: #1a2332;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    body.light .crypto-card {
+      background-color: #ffffff;
+      color: #000000;
+    }
+    .crypto-card:hover {
+      transform: translateY(-5px);
+    }
+    .crypto-card:hover::after {
+      content: "Doble clic para ver gráfico";
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #00ffcc;
+      color: #0a0e17;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.8em;
+      white-space: nowrap;
+    }
+    .crypto-logo {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 15px;
+    }
+    .crypto-name {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      word-break: break-word;
+    }
+    .crypto-price {
+      font-size: 1.1em;
+      margin-bottom: 15px;
+    }
+    .flag {
+      display: inline-block;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      white-space: nowrap;
+    }
+    .green-flag {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .red-flag {
+      background-color: #F44336;
+      color: white;
+    }
+    .neutral-flag {
+      background-color: #FF9800;
+      color: white;
+    }
+    .mini-chart-container {
+      margin-top: 15px;
+      position: relative;
+      height: 80px;
+    }
+    canvas.mini-chart {
+      width: 100%;
+      height: 100%;
+    }
+    .no-chart-text {
+      margin-top: 15px;
+      font-size: 0.8em;
+      color: #7a8599;
+    }
+    .favorite-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 1.2em;
+      color: #ffc107;
+    }
+    #loading {
+      text-align: center;
+      font-size: 1.5em;
+      margin-top: 50px;
+    }
+    #error {
+      text-align: center;
+      color: #F44336;
+      font-size: 1.2em;
+      margin-top: 50px;
+      display: none;
+    }
+    #modalOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+      padding: 0;
+    }
+    #modalContent {
+      background: #1a2332;
+      border-radius: 15px;
+      width: 95vw;
+      height: 95vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    body.light #modalContent {
+      background: #f0f0f0;
+      color: #000000;
+    }
+    #modalClose {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #00ffcc;
+      color: #0a0e17;
+      border: none;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    #chartContainer {
+      width: 100%;
+      min-height: 300px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    #cryptoChart {
+      width: 100%;
+      height: 100%;
+    }
+    .modal-footer {
+      font-size: 0.9em;
+      color: #7a8599;
+      text-align: center;
+      word-break: break-all;
+      margin-top: 20px;
+    }
+    body.light .modal-footer {
+      color: #333333;
+    }
+    .modal-info {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .modal-info p {
+      margin: 5px 0;
+    }
+    .modal-explanation {
+      font-size: 0.9em;
+      margin-top: 15px;
+      background-color: #0a0e17;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    body.light .modal-explanation {
+      background-color: #ddd;
+      color: #000;
+    }
+    .modal-explanation h4 {
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+    #analysisComments {
+      margin-top: 20px;
+      background-color: #1a2332;
+      border-radius: 10px;
+      padding: 10px;
+    }
+    body.light #analysisComments {
+      background-color: #eee;
+      color: #000;
+    }
+    #analysisComments h4 {
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    #analysisComments p {
+      font-size: 0.9em;
+      margin-bottom: 10px;
+    }
+    .related-links a {
+      color: #00ffcc;
+      text-decoration: none;
+    }
+    .related-links a:hover {
+      text-decoration: underline;
+    }
+    #priceAlertContainer {
+      margin: 10px 0;
+      text-align: center;
+    }
+    #percentAlertLabel {
+      display: inline-block;
+      margin-right: 5px;
+    }
+    #priceAlertInput {
+      width: 60px;
+      padding: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    #setAlertBtn {
+      padding: 5px 10px;
+      margin-left: 5px;
+      border-radius: 5px;
+      border: none;
+      background: #00ffcc;
+      color: #0a0e17;
+      cursor: pointer;
+    }
+    #buyPriceContainer {
+      margin: 10px 0;
+      text-align: center;
+    }
+    #buyPriceInput {
+      width: 100px;
+      padding: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    #setBuyPriceBtn {
+      padding: 5px 10px;
+      margin-left: 5px;
+      border-radius: 5px;
+      border: none;
+      background: #00ffcc;
+      color: #0a0e17;
+      cursor: pointer;
+    }
+    #clearBuyPriceBtn {
+      padding: 5px 10px;
+      margin-left: 5px;
+      border-radius: 5px;
+      border: none;
+      background: #F44336;
+      color: white;
+      cursor: pointer;
+    }
+    #profitLossContainer {
+      margin: 10px 0;
+      text-align: center;
+    }
+    #profitLossText {
+      margin: 5px;
+      font-weight: bold;
+    }
+    .green-arrow {
+      color: #00ff00;
+      font-weight: bold;
+    }
+    .red-arrow {
+      color: #ff4444;
+      font-weight: bold;
+    }
+    #themeToggle {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: #00ffcc;
+      color: #0a0e17;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 0.8em;
+      z-index: 2000;
+    }
+    #favoritesBar {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 5px;
+      z-index: 1000;
+    }
+    #btnFavoritos, #btnVerTodos {
+      background-color: #00ffcc;
+      color: #0a0e17;
+      border: none;
+      padding: 5px 8px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 0.8em;
+    }
+    #updateChartBtn {
+      background: #00ffcc;
+      color: #0a0e17;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px auto 5px auto;
+      display: block;
+      font-size: 0.9em;
+    }
+    #lastUpdateModal {
+      text-align: center;
+      font-style: italic;
+      color: #7a8599;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    #verAnalisisBtn {
+      background: #00ffcc;
+      color: #0a0e17;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px auto 0 auto;
+      display: block;
+      font-size: 0.9em;
+    }
+    #silenciarAlertasBtn {
+      background: #FF9800;
+      color: #0a0e17;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.8em;
+      cursor: pointer;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 2100;
+    }
+    @media (max-width: 768px) {
+      #modalContent {
+        width: 98vw;
+        height: 98vh;
+      }
+    }
+  </style>
 </head>
 <body class="dark">
-    <h1>Monitor Criptomonedas</h1>
-    <h3>by Pablo Bascoy</h3>
+  <h1>Monitor Criptomonedas</h1>
+  <h3>by Pablo Bascoy</h3>
 
-    <!-- Nueva explicación de RSI -->
-    <div id="indicatorExplanation">
-        <p><strong>¿Qué es el RSI (Relative Strength Index)?</strong></p>
-        <p>El RSI es un indicador técnico que mide la fortaleza o debilidad de un activo según sus movimientos recientes de precio. Se mueve entre 0 y 100, y típicamente:</p>
-        <ul>
-            <li>RSI > 70: indica posible sobrecompra (señal de venta).</li>
-            <li>RSI < 30: indica posible sobreventa (señal de compra).</li>
-            <li>RSI entre 30 y 70: zona “neutral” (podría subir o bajar).</li>
-        </ul>
-        <p>Con esto, tendrás una visión rápida sobre si podrías comprar, vender o simplemente esperar.</p>
+  <div id="indicatorExplanation">
+    <p><strong>¿Qué es el RSI (Relative Strength Index)?</strong></p>
+    <p>El RSI mide la fortaleza o debilidad de un activo según sus últimos movimientos de precio, entre 0 y 100.</p>
+    <ul>
+      <li>RSI &gt; 70: Señal de venta.</li>
+      <li>RSI &lt; 30: Señal de compra.</li>
+      <li>RSI 30-70: Fase neutra.</li>
+    </ul>
+    <p>Puedes actualizar manualmente o cada cierto número de segundos configurables. El % de ganancia/pérdida se recalcula según tu precio de compra.  
+    La alerta de venta se dispara si RSI indica vender y la ganancia alcanza o supera el % configurado. La alerta de compra se dispara si RSI indica comprar y no tienes precio de compra.</p>
+  </div>
+
+  <p id="lastUpdate">Última actualización: (sin datos)</p>
+
+  <div id="intervalContainer">
+    <label>Actualización (segundos): 
+      <input type="number" id="updateIntervalInput" placeholder="30">
+    </label>
+    <button id="setIntervalBtn">Set Interval</button>
+  </div>
+
+  <div id="filtersContainer">
+    <div id="timeframeSelector">
+      <button class="timeframe-button" data-timeframe="real">Tiempo real</button>
     </div>
+    <div id="coinFilterContainer">
+      <select id="coinFilter">
+          <option value="all">Todas</option>
+      </select>
+    </div>
+  </div>
 
-    <p id="lastUpdate"></p>
+  <div id="loading">Cargando datos...</div>
+  <div id="error">No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.</div>
+  <div id="cryptoGrid"></div>
 
-    <div id="filtersContainer">
-        <div id="timeframeSelector">
-            <button class="timeframe-button" data-timeframe="real">Tiempo real</button>
+  <div id="modalOverlay">
+    <div id="modalContent">
+      <button id="modalClose">Regresar</button>
+      <h2 id="modalTitle"></h2>
+      <button id="updateChartBtn">Actualizar</button>
+      <p id="lastUpdateModal"></p>
+      <div class="modal-info" id="modalInfo"></div>
+      <div id="chartContainer">
+        <canvas id="cryptoChart"></canvas>
+      </div>
+      <button id="verAnalisisBtn">Ver Análisis</button>
+
+      <div id="priceAlertContainer">
+        <label id="percentAlertLabel">% de ganancia para alerta:
+          <input type="number" id="priceAlertInput" placeholder="5">
+        </label>
+        <button id="setAlertBtn">Set Alert</button>
+      </div>
+
+      <div id="buyPriceContainer">
+        <label>Precio de Compra: $<input type="number" id="buyPriceInput" placeholder="0.00"></label>
+        <button id="setBuyPriceBtn">Coloque precio de compra</button>
+        <button id="clearBuyPriceBtn">Borrar precio de compra</button>
+      </div>
+      <div id="profitLossContainer">
+        <p id="profitLossText">Ganancia/Perdida: 0%</p>
+      </div>
+
+      <div class="modal-explanation">
+        <h4>Explicación de los Indicadores:</h4>
+        <p><span style="color:#00ffcc;font-weight:bold;">Línea principal (cyan):</span> Muestra el <strong>precio histórico</strong>.</p>
+        <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Marca el <strong>último precio</strong> y la recomendación (comprar/vender).</p>
+        <p><span style="color:#FFD700;font-weight:bold;">SMA (7) (amarillo):</span> <strong>Media móvil de corto plazo</strong>.</p>
+        <p><span style="color:#FF8C00;font-weight:bold;">SMA (30) (naranja):</span> <strong>Media móvil de mediano plazo</strong>.</p>
+        <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> Muestra el interés (operaciones).</p>
+        <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> Predicción de <strong>inteligencia artificial</strong>.</p>
+        <h4>Consejo:</h4>
+        <p id="adviceText">(Se llenará con consejos aleatorios)</p>
+      </div>
+
+      <div id="analysisComments">
+        <h4>Comentarios y Análisis Adicionales</h4>
+        <p id="lastTrend"></p>
+        <p id="cryptoComment"></p>
+        <div class="related-links">
+          <h4>Links relacionados:</h4>
+          <p id="relatedLinks"></p>
         </div>
-        <div id="coinFilterContainer">
-            <select id="coinFilter">
-                <option value="all">Todas</option>
-            </select>
+      </div>
+      <div class="modal-footer">
+        <span id="dataSource"></span>
+      </div>
+    </div>
+  </div>
+
+  <button id="themeToggle">Tema</button>
+  <div id="favoritesBar">
+    <button id="btnFavoritos">Favoritos</button>
+    <button id="btnVerTodos">Ver Todos</button>
+  </div>
+
+  <button id="silenciarAlertasBtn">Silenciar Alertas</button>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    /********************************************************
+    *   Variables globales y configuraciones
+    ********************************************************/
+    let chartInstance = null;
+    let cryptoData = [];
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    let priceAlerts = {};
+    let buyPrices = JSON.parse(localStorage.getItem('buyPrices')) || {};
+    let currentModalCoinId = null;
+    let currentModalCoinName = null;
+    let currentModalPrice = null;
+    let currentModalSymbol = null;
+    let silenciarAlertas = false;
+    let updateTimer = null;
+
+    // Intervalo de actualización por defecto 30 seg
+    let updateInterval = parseInt(localStorage.getItem('updateInterval')) || 30;
+    const priorityOrder = ["bitcoin", "ethereum", "dogecoin", "ripple", "solana", "cardano"];
+
+    /********************************************************
+    *   Elementos del DOM
+    ********************************************************/
+    const body = document.body;
+    const themeToggle = document.getElementById('themeToggle');
+    const silenciarAlertasBtn = document.getElementById('silenciarAlertasBtn');
+    const lastUpdateElement = document.getElementById('lastUpdate');
+    const loadingElement = document.getElementById('loading');
+    const errorElement = document.getElementById('error');
+    const cryptoGrid = document.getElementById('cryptoGrid');
+    const coinFilter = document.getElementById('coinFilter');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalClose = document.getElementById('modalClose');
+    const modalTitle = document.getElementById('modalTitle');
+    const dataSource = document.getElementById('dataSource');
+    const modalInfo = document.getElementById('modalInfo');
+    const adviceText = document.getElementById('adviceText');
+    const verAnalisisBtn = document.getElementById('verAnalisisBtn');
+    const analysisComments = document.getElementById('analysisComments');
+    const cryptoComment = document.getElementById('cryptoComment');
+    const relatedLinks = document.getElementById('relatedLinks');
+    const lastTrend = document.getElementById('lastTrend');
+    const lastUpdateModal = document.getElementById('lastUpdateModal');
+    const priceAlertInput = document.getElementById('priceAlertInput');
+    const setAlertBtn = document.getElementById('setAlertBtn');
+    const buyPriceInput = document.getElementById('buyPriceInput');
+    const setBuyPriceBtn = document.getElementById('setBuyPriceBtn');
+    const clearBuyPriceBtn = document.getElementById('clearBuyPriceBtn');
+    const profitLossText = document.getElementById('profitLossText');
+    const btnFavoritos = document.getElementById('btnFavoritos');
+    const btnVerTodos = document.getElementById('btnVerTodos');
+    const updateChartBtn = document.getElementById('updateChartBtn');
+
+    const updateIntervalInput = document.getElementById('updateIntervalInput');
+    const setIntervalBtn = document.getElementById('setIntervalBtn');
+
+    /********************************************************
+    *   Manejo de tema
+    ********************************************************/
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    body.className = savedTheme;
+
+    themeToggle.addEventListener('click', () => {
+      body.className = (body.className === 'dark') ? 'light' : 'dark';
+      localStorage.setItem('theme', body.className);
+    });
+
+    /********************************************************
+    *   Botón silenciar alertas
+    ********************************************************/
+    silenciarAlertasBtn.addEventListener('click', () => {
+      silenciarAlertas = !silenciarAlertas;
+      silenciarAlertasBtn.textContent = silenciarAlertas ? "Activar Alertas" : "Silenciar Alertas";
+    });
+
+    /********************************************************
+    *   Intervalo configurable
+    ********************************************************/
+    updateIntervalInput.value = updateInterval;
+    setIntervalBtn.addEventListener('click', () => {
+      const newVal = parseInt(updateIntervalInput.value);
+      if (!isNaN(newVal) && newVal > 0) {
+        updateInterval = newVal;
+        localStorage.setItem('updateInterval', updateInterval);
+        speakMessage(`Intervalo de actualización configurado a ${updateInterval} segundos.`);
+
+        if (updateTimer) {
+          clearInterval(updateTimer);
+        }
+        startUpdateTimer(); // Reiniciamos con el nuevo valor
+      }
+    });
+
+    /********************************************************
+    *   RSI y funciones de recomendación
+    ********************************************************/
+    function calculateRSI(closePrices, period = 14) {
+      if (closePrices.length < period) return null;
+      let gains = 0;
+      let losses = 0;
+      for (let i = 1; i < period; i++) {
+        const diff = closePrices[i] - closePrices[i - 1];
+        if (diff > 0) gains += diff;
+        else losses -= diff;
+      }
+      let avgGain = gains / (period - 1);
+      let avgLoss = losses / (period - 1);
+
+      let rsiArray = [null];
+      for (let i = period; i < closePrices.length; i++) {
+        const diff = closePrices[i] - closePrices[i - 1];
+        const gain = diff > 0 ? diff : 0;
+        const loss = diff < 0 ? -diff : 0;
+        avgGain = (avgGain * (period - 1) + gain) / period;
+        avgLoss = (avgLoss * (period - 1) + loss) / period;
+
+        if (avgLoss === 0) {
+          rsiArray.push(100);
+        } else {
+          const rs = avgGain / avgLoss;
+          rsiArray.push(100 - (100 / (1 + rs)));
+        }
+      }
+      return rsiArray[rsiArray.length - 1];
+    }
+
+    function getRecommendationFromRSI(rsiValue) {
+      if (rsiValue === null) {
+        return { flag: 'neutral-flag', text: 'NEUTRAL (Sin RSI)' };
+      }
+      if (rsiValue > 70) {
+        return { flag: 'red-flag', text: 'VENDER (RSI>70)' };
+      } else if (rsiValue < 30) {
+        return { flag: 'green-flag', text: 'COMPRAR (RSI<30)' };
+      } else {
+        return { flag: 'neutral-flag', text: 'ESPERAR (RSI 30-70)' };
+      }
+    }
+
+    /********************************************************
+    *   Voz
+    ********************************************************/
+    function speakMessage(text) {
+      if (silenciarAlertas) return;
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-ES';
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        speechSynthesis.speak(utterance);
+      }
+    }
+
+    /********************************************************
+    *   Creación y actualización de cards
+    ********************************************************/
+    function createCryptoCard(crypto, index, rsiRecommendation) {
+      const card = document.createElement('div');
+      card.className = 'crypto-card';
+      card.setAttribute('data-coin-id', crypto.id);
+      card.setAttribute('data-coin-name', crypto.name);
+      card.setAttribute('data-current-price', crypto.current_price);
+
+      const isFav = favorites.includes(crypto.id);
+      const star = isFav ? '★' : '☆';
+
+      card.innerHTML = `
+        <div class="favorite-icon">${star}</div>
+        <img src="${crypto.image}" alt="${crypto.name} logo" class="crypto-logo">
+        <div class="crypto-name">${crypto.name}</div>
+        <div class="crypto-price">$${crypto.current_price.toFixed(2)}</div>
+        <div class="flag ${rsiRecommendation.flag}">${rsiRecommendation.text}</div>
+        <div class="mini-chart-container">
+          <canvas id="miniChart-${index}" class="mini-chart"></canvas>
         </div>
-    </div>
+      `;
 
-    <div id="loading">Cargando datos...</div>
-    <div id="error">No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.</div>
-    <div id="cryptoGrid"></div>
+      // Favorito
+      const favIcon = card.querySelector('.favorite-icon');
+      favIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFavorite(crypto.id, card);
+      });
 
-    <div id="modalOverlay">
-        <div id="modalContent">
-            <button id="modalClose">Regresar</button>
-            <h2 id="modalTitle"></h2>
-            <button id="updateChartBtn">Actualizar</button>
-            <p id="lastUpdateModal"></p>
-            <div class="modal-info" id="modalInfo"></div>
-            <div id="chartContainer">
-                <canvas id="cryptoChart"></canvas>
-            </div>
-            <button id="verAnalisisBtn">Ver Análisis</button>
-            <div id="priceAlertContainer">
-                <label>Alerta de Precio: $<input type="number" id="priceAlertInput" placeholder="0.00"></label>
-                <button id="setAlertBtn">Set Alert</button>
-            </div>
-            <div class="modal-explanation">
-                <h4>Explicación de los Indicadores:</h4>
-                <p><span style="color:#00ffcc;font-weight:bold;">Línea principal (cyan):</span> Representa el <strong>precio histórico</strong> de la criptomoneda.</p>
-                <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Indica el <strong>último precio</strong> y la <strong>recomendación</strong> (comprar/vender) basada en el análisis actual.</p>
-                <p><span style="color:#FFD700;font-weight:bold;">SMA (7) (amarillo):</span> Es una <strong>media móvil de corto plazo</strong>.</p>
-                <p><span style="color:#FF8C00;font-weight:bold;">SMA (30) (naranja):</span> Representa una <strong>media móvil de mediano plazo</strong>.</p>
-                <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> Muestra la <strong>actividad de compra/venta</strong>.</p>
-                <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> Es la <strong>predicción generada por inteligencia artificial</strong>.</p>
-                <h4>Consejo:</h4>
-                <p id="adviceText"></p>
-            </div>
-            <div id="analysisComments">
-                <h4>Comentarios y Análisis Adicionales</h4>
-                <p id="lastTrend"></p>
-                <p id="cryptoComment"></p>
-                <div class="related-links">
-                    <h4>Links relacionados:</h4>
-                    <p id="relatedLinks"></p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <span id="dataSource"></span>
-            </div>
-        </div>
-    </div>
+      // Doble click / double tap
+      let lastTap = 0;
+      card.addEventListener('dblclick', () => {
+        openModal(crypto.id, crypto.name, crypto.current_price, crypto.symbol.toUpperCase() + 'USDT');
+      });
+      card.addEventListener('touchend', (event) => {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 300 && tapLength > 0) {
+          openModal(crypto.id, crypto.name, crypto.current_price, crypto.symbol.toUpperCase() + 'USDT');
+          event.preventDefault();
+        }
+        lastTap = currentTime;
+      });
 
-    <audio id="alertSound" src="alerta.mp3" preload="auto"></audio>
+      return card;
+    }
 
-    <button id="themeToggle">Tema</button>
-    <div id="favoritesBar">
-        <button id="btnFavoritos">Favoritos</button>
-        <button id="btnVerTodos">Ver Todos</button>
-    </div>
+    function toggleFavorite(coinId, card) {
+      if (favorites.includes(coinId)) {
+        favorites = favorites.filter(f => f !== coinId);
+        card.querySelector('.favorite-icon').textContent = '☆';
+      } else {
+        favorites.push(coinId);
+        card.querySelector('.favorite-icon').textContent = '★';
+      }
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      reorderCards();
+    }
 
-    <!-- Última versión de Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    function reorderCards() {
+      const cards = Array.from(document.querySelectorAll('.crypto-card'));
+      let topCards = [];
+      let favCards = [];
+      let haveChartCards = [];
+      let noChartCards = [];
 
-    <script>
-        let chartInstance = null;
-        let cryptoData = [];
-        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-        let priceAlerts = {};
-        let currentModalCoinId = null;
-        let currentModalCoinName = null;
-        let currentModalPrice = null;
-        let currentModalSymbol = null;
+      for (let card of cards) {
+        const coinId = card.getAttribute('data-coin-id');
+        const hasChart = card.querySelector('.mini-chart-container canvas') !== null;
+        const isFav = favorites.includes(coinId);
 
-        const priorityOrder = ["bitcoin", "ethereum", "dogecoin", "ripple", "solana", "cardano"];
+        if (priorityOrder.includes(coinId)) {
+          topCards.push(card);
+        } else if (isFav && hasChart) {
+          favCards.push(card);
+        } else if (hasChart) {
+          haveChartCards.push(card);
+        } else {
+          noChartCards.push(card);
+        }
+      }
 
-        const sampleComments = [
-            "Esta criptomoneda ha mostrado un impulso interesante.",
-            "Los analistas sugieren precaución por alta volatilidad.",
-            "Activo con fundamentos sólidos y comunidad activa.",
-            "Podría consolidarse antes de un nuevo repunte.",
-            "Ligeros repuntes tras noticias positivas.",
-            "Adopción creciente en varios servicios."
-        ];
+      cryptoGrid.innerHTML = '';
+      topCards.forEach(c => cryptoGrid.appendChild(c));
+      favCards.forEach(c => cryptoGrid.appendChild(c));
+      haveChartCards.forEach(c => cryptoGrid.appendChild(c));
+      noChartCards.forEach(c => cryptoGrid.appendChild(c));
+    }
 
-        const sampleTrends = [
-            "Última tendencia: Gran interés en redes sociales.",
-            "Última tendencia: Incremento de búsquedas en Google.",
-            "Última tendencia: Partnership con una empresa reconocida.",
-            "Última tendencia: Actualización técnica anunciada.",
-            "Última tendencia: Apetito de inversores institucionales.",
-            "Última tendencia: Rumores de integración con pagos."
-        ];
+    async function loadMiniChart(binanceSymbol, index) {
+      try {
+        const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1m&limit=30`;
+        const res = await fetch(endpoint, {cache:'no-store'});
+        if (!res.ok) return false;
+        const klineData = await res.json();
+        if (!Array.isArray(klineData) || klineData.length === 0) return false;
 
-        const body = document.body;
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        body.className = savedTheme;
-
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('click', () => {
-            body.className = (body.className === 'dark') ? 'light' : 'dark';
-            localStorage.setItem('theme', body.className);
+        const closePrices = klineData.map(c => parseFloat(c[4]));
+        const labels = klineData.map(c => {
+          const date = new Date(c[0]);
+          return `${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
         });
 
-        const cryptoGrid = document.getElementById('cryptoGrid');
-        const lastUpdateElement = document.getElementById('lastUpdate');
-        const loadingElement = document.getElementById('loading');
-        const errorElement = document.getElementById('error');
-        const coinFilter = document.getElementById('coinFilter');
-        const modalOverlay = document.getElementById('modalOverlay');
-        const modalClose = document.getElementById('modalClose');
-        const modalTitle = document.getElementById('modalTitle');
-        const dataSource = document.getElementById('dataSource');
-        const modalInfo = document.getElementById('modalInfo');
-        const adviceText = document.getElementById('adviceText');
-        const verAnalisisBtn = document.getElementById('verAnalisisBtn');
-        const analysisComments = document.getElementById('analysisComments');
-        const cryptoComment = document.getElementById('cryptoComment');
-        const relatedLinks = document.getElementById('relatedLinks');
-        const lastTrend = document.getElementById('lastTrend');
-        const priceAlertInput = document.getElementById('priceAlertInput');
-        const setAlertBtn = document.getElementById('setAlertBtn');
-        const btnFavoritos = document.getElementById('btnFavoritos');
-        const btnVerTodos = document.getElementById('btnVerTodos');
-        const alertSound = document.getElementById('alertSound');
-        const updateChartBtn = document.getElementById('updateChartBtn');
-        const lastUpdateModal = document.getElementById('lastUpdateModal');
+        const miniCtx = document.getElementById(`miniChart-${index}`);
+        if (!miniCtx) return false;
+        const miniChartCtx = miniCtx.getContext('2d');
+        new Chart(miniChartCtx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: closePrices,
+              borderColor: '#00ffcc',
+              backgroundColor: 'rgba(0,255,204,0.1)',
+              tension: 0.3,
+              fill: true,
+              pointRadius: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { display: false },
+              y: { display: false }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
 
-        // Botón de timeframe
-        const timeframeButton = document.querySelector('.timeframe-button[data-timeframe="real"]');
-        timeframeButton.addEventListener('click', () => {
-            fetchCryptoData(true);
+    /********************************************************
+    *   PnL
+    ********************************************************/
+    function updateProfitLoss(coinId, currentPrice) {
+      const buy = parseFloat(buyPrices[coinId] || 0);
+      if (!isNaN(buy) && buy > 0) {
+        const pnl = ((currentPrice - buy) / buy) * 100;
+        let arrow = '';
+        if (pnl > 0) {
+          arrow = '<span class="green-arrow">▲</span>';
+        } else if (pnl < 0) {
+          arrow = '<span class="red-arrow">▼</span>';
+        }
+        profitLossText.innerHTML = `Ganancia/Perdida: ${pnl.toFixed(2)}% ${arrow}`;
+      } else {
+        profitLossText.textContent = `Ganancia/Perdida: 0%`;
+      }
+    }
+
+    /********************************************************
+    *   fetchCryptoData
+    ********************************************************/
+    async function fetchCryptoData(forceUpdate = false) {
+      try {
+        loadingElement.style.display = 'block';
+        errorElement.style.display = 'none';
+        cryptoGrid.innerHTML = '';
+
+        const response = await fetch(
+          'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false',
+          { cache: 'no-store' }
+        );
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error("No se obtuvieron datos de CoinGecko.");
+        }
+        cryptoData = data;
+
+        loadingElement.style.display = 'none';
+        cryptoGrid.innerHTML = '';
+        coinFilter.innerHTML = '<option value="all">Todas</option>';
+
+        let index = 0;
+        const topCoins = priorityOrder.map(pid => data.find(d => d.id === pid)).filter(Boolean);
+        const rest = data.filter(d => !priorityOrder.includes(d.id));
+
+        // Crea cards + RSI + alertas
+        async function createCardWithRSI(crypto) {
+          const binanceSymbol = (crypto.symbol.toUpperCase() + 'USDT');
+          let rsiValue = null;
+          try {
+            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1m&limit=30`, { cache: 'no-store' });
+            if (res.ok) {
+              const klineData = await res.json();
+              const closePrices = klineData.map(c => parseFloat(c[4]));
+              if (closePrices.length > 0) {
+                rsiValue = calculateRSI(closePrices, 14);
+              }
+            }
+          } catch (err) {
+            //
+          }
+          const rsiRec = getRecommendationFromRSI(rsiValue);
+
+          // Lógica de alertas
+          if (!silenciarAlertas && favorites.includes(crypto.id) && rsiValue !== null) {
+            const percentAlert = parseFloat(priceAlerts['globalPercentAlert'] || 5);
+
+            // RSI vender
+            if (rsiValue >= 70) {
+              const buyVal = parseFloat(buyPrices[crypto.id] || 0);
+              if (buyVal > 0) {
+                const pnl = ((crypto.current_price - buyVal) / buyVal) * 100;
+                // Se dispara si >= al % configurado
+                if (pnl >= percentAlert) {
+                  speakMessage(`Se sugiere vender ${crypto.name}. Ganancia de ${pnl.toFixed(2)} porciento, RSI: ${rsiValue.toFixed(2)}`);
+                }
+              }
+            }
+            // RSI comprar
+            else if (rsiValue < 30) {
+              const buyVal = parseFloat(buyPrices[crypto.id] || 0);
+              if (buyVal === 0) {
+                speakMessage(`Se sugiere comprar ${crypto.name}. RSI: ${rsiValue.toFixed(2)}. Sin precio de compra configurado.`);
+              }
+            }
+          }
+
+          // Crear card
+          const card = createCryptoCard(crypto, index++, rsiRec);
+          cryptoGrid.appendChild(card);
+
+          // Añadir option al select
+          const opt = document.createElement('option');
+          opt.value = crypto.name;
+          opt.textContent = crypto.name;
+          coinFilter.appendChild(opt);
+
+          // Mini chart
+          const loaded = await loadMiniChart(binanceSymbol, index - 1);
+          if (!loaded) {
+            card.querySelector('.mini-chart-container').innerHTML = `<p class="no-chart-text">Sin datos de gráfico</p>`;
+          }
+        }
+
+        // Top coins
+        for (let c of topCoins) {
+          await createCardWithRSI(c);
+        }
+        // Resto
+        for (let c of rest) {
+          await createCardWithRSI(c);
+        }
+
+        reorderCards();
+
+        // Hora de actualización
+        lastUpdateElement.textContent = `Última actualización: ${new Date().toLocaleString()}`;
+
+        // Recalcular PnL
+        for (const coin of data) {
+          if (buyPrices[coin.id]) {
+            const card = document.querySelector(`.crypto-card[data-coin-id="${coin.id}"]`);
+            if (card) {
+              card.setAttribute('data-current-price', coin.current_price);
+              if (coin.id === currentModalCoinId) {
+                updateProfitLoss(coin.id, coin.current_price);
+              }
+            }
+          }
+        }
+
+      } catch (error) {
+        console.error('Error al obtener datos:', error);
+        loadingElement.style.display = 'none';
+        errorElement.style.display = 'block';
+        errorElement.textContent = 'No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.';
+      }
+    }
+
+    /********************************************************
+    *   Modal
+    ********************************************************/
+    async function openModal(coinId, coinName, currentPrice, binanceSymbol) {
+      currentModalCoinId = coinId;
+      currentModalCoinName = coinName;
+      currentModalPrice = currentPrice;
+      currentModalSymbol = binanceSymbol;
+      await loadModalData(coinId, coinName, currentPrice, binanceSymbol);
+    }
+
+    async function loadModalData(coinId, coinName, currentPrice, binanceSymbol) {
+      try {
+        const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1m&limit=100`;
+        const response = await fetch(endpoint, {cache:'no-store'});
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const klineData = await response.json();
+        if (!Array.isArray(klineData) || klineData.length === 0) {
+          throw new Error(`Sin datos para ${coinName}.`);
+        }
+
+        const closePrices = klineData.map(c => parseFloat(c[4]));
+        const volumes = klineData.map(c => parseFloat(c[5]));
+        const labels = klineData.map(c => {
+          const date = new Date(c[0]);
+          return `${date.getDate()}/${(date.getMonth()+1)} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
         });
 
-        updateChartBtn.addEventListener('click', async () => {
-            await fetchCryptoData(true);
-            if (currentModalCoinId) {
-                const coinData = cryptoData.find(d => d.id === currentModalCoinId);
-                if (coinData) {
-                    currentModalPrice = coinData.current_price;
-                }
-                refreshModalChart();
-            }
-        });
+        const lastPrice = closePrices[closePrices.length - 1];
+        const trendValues = closePrices.map(() => lastPrice);
 
-        coinFilter.addEventListener('change', () => {
-            const filterValue = coinFilter.value;
-            filterCoins(filterValue);
-        });
+        const shortSMA = calculateSMA(closePrices, 7);
+        const longSMA = calculateSMA(closePrices, 30);
 
-        function filterCoins(filterValue) {
-            const cards = document.querySelectorAll('.crypto-card');
-            cards.forEach(card => {
-                const coinName = card.getAttribute('data-coin-name');
-                card.style.display = (filterValue === 'all' || coinName === filterValue) ? 'block' : 'none';
-            });
+        // Llamada a CoinGecko para más detalles
+        const coingeckoDetails = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`, {cache:'no-store'});
+        const detailsData = await coingeckoDetails.json();
+        const marketCap = detailsData.market_data?.market_cap?.usd || 'N/A';
+        const volume24h = detailsData.market_data?.total_volume?.usd || 'N/A';
+
+        const aiPredictions = generateAIPrediction(closePrices);
+        const aiLabels = [];
+        for (let i = 1; i <= aiPredictions.length; i++) {
+          aiLabels.push(`Futuro+${i}`);
         }
 
-        // --------------------------------------------------------------------
-        // FUNCIONES RSI
-        // --------------------------------------------------------------------
-        function calculateRSI(closePrices, period = 14) {
-            if (closePrices.length < period) return null;
+        const rsiValue = calculateRSI(closePrices, 14);
+        const rsiRec = getRecommendationFromRSI(rsiValue);
+        const modalRecColor = (rsiRec.flag === 'green-flag') ? '#4CAF50'
+                                : (rsiRec.flag === 'red-flag') ? '#F44336'
+                                : '#FF9800';
 
-            let gains = 0;
-            let losses = 0;
-            // Sumar primeros 'period - 1' cambios
-            for (let i = 1; i < period; i++) {
-                const diff = closePrices[i] - closePrices[i - 1];
-                if (diff > 0) gains += diff;
-                else losses -= diff;
-            }
-            let avgGain = gains / (period - 1);
-            let avgLoss = losses / (period - 1);
+        modalTitle.textContent = `${coinName} - Tendencia: ${rsiRec.text}`;
+        dataSource.textContent = endpoint;
 
-            let rsiArray = [null]; 
-            for (let i = period; i < closePrices.length; i++) {
-                const diff = closePrices[i] - closePrices[i - 1];
-                const gain = diff > 0 ? diff : 0;
-                const loss = diff < 0 ? -diff : 0;
-                avgGain = (avgGain * (period - 1) + gain) / period;
-                avgLoss = (avgLoss * (period - 1) + loss) / period;
+        modalInfo.innerHTML = `
+          <p>Precio Actual: $${currentPrice.toFixed(2)}</p>
+          <p>Market Cap: $${parseFloat(marketCap).toLocaleString()}</p>
+          <p>Volumen 24h: $${parseFloat(volume24h).toLocaleString()}</p>
+          <p>RSI (14): ${rsiValue ? rsiValue.toFixed(2) : 'N/A'}</p>
+        `;
 
-                if (avgLoss === 0) {
-                    rsiArray.push(100);
-                } else {
-                    const rs = avgGain / avgLoss;
-                    rsiArray.push(100 - (100 / (1 + rs)));
-                }
-            }
-            return rsiArray[rsiArray.length - 1];
+        modalOverlay.style.display = 'flex';
+
+        if (chartInstance) {
+          chartInstance.destroy();
         }
 
-        function getRecommendationFromRSI(rsiValue) {
-            if (rsiValue === null) {
-                // No se pudo calcular RSI
-                return { flag: 'neutral-flag', text: 'NEUTRAL (Sin RSI)' };
+        // IA line
+        const aiLine = Array(closePrices.length).fill(null).concat(aiPredictions);
+
+        setTimeout(() => {
+          chartInstance = new Chart(document.getElementById('cryptoChart').getContext('2d'), {
+            data: {
+              labels: labels.concat(aiLabels),
+              datasets: [
+                {
+                  type: 'line',
+                  label: `${coinName} (USD)`,
+                  data: closePrices.concat(Array(aiPredictions.length).fill(null)),
+                  borderColor: '#00ffcc',
+                  backgroundColor: 'rgba(0,255,204,0.1)',
+                  tension: 0.3,
+                  fill: true,
+                  yAxisID: 'y',
+                },
+                {
+                  type: 'line',
+                  label: `Línea de tendencia (${rsiRec.text})`,
+                  data: trendValues.concat(Array(aiPredictions.length).fill(null)),
+                  borderColor: modalRecColor,
+                  borderDash: [5, 5],
+                  pointRadius: 0,
+                  fill: false,
+                  yAxisID: 'y',
+                },
+                {
+                  type: 'line',
+                  label: 'SMA (7)',
+                  data: shortSMA.concat(Array(aiPredictions.length).fill(null)),
+                  borderColor: '#FFD700',
+                  fill: false,
+                  pointRadius: 0,
+                  tension: 0.2,
+                  yAxisID: 'y',
+                },
+                {
+                  type: 'line',
+                  label: 'SMA (30)',
+                  data: longSMA.concat(Array(aiPredictions.length).fill(null)),
+                  borderColor: '#FF8C00',
+                  fill: false,
+                  pointRadius: 0,
+                  tension: 0.2,
+                  yAxisID: 'y',
+                },
+                {
+                  type: 'bar',
+                  label: 'Volumen',
+                  data: volumes.concat(Array(aiPredictions.length).fill(null)),
+                  backgroundColor: 'rgba(0,191,255,0.3)',
+                  borderColor: '#00BFFF',
+                  borderWidth: 1,
+                  yAxisID: 'y1'
+                },
+                {
+                  type: 'line',
+                  label: 'Línea IA (Predicción)',
+                  data: aiLine,
+                  borderColor: '#EE82EE',
+                  borderDash: [2, 2],
+                  pointRadius: 0,
+                  fill: false,
+                  tension: 0.2,
+                  yAxisID: 'y',
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: {
+                mode: 'index',
+                intersect: false,
+              },
+              scales: {
+                y: {
+                  type: 'linear',
+                  display: true,
+                  position: 'left',
+                  ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
+                  title: {
+                    display: true,
+                    text: 'Precio (USD)',
+                    color: body.className === 'dark' ? '#ffffff' : '#000000'
+                  }
+                },
+                y1: {
+                  type: 'linear',
+                  display: true,
+                  position: 'right',
+                  ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
+                  title: {
+                    display: true,
+                    text: 'Volumen',
+                    color: body.className === 'dark' ? '#ffffff' : '#000000'
+                  },
+                  grid: {
+                    drawOnChartArea: false,
+                  },
+                },
+                x: {
+                  ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' }
+                }
+              },
+              plugins: {
+                legend: {
+                  labels: {
+                    color: body.className === 'dark' ? '#ffffff' : '#000000'
+                  }
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                }
+              }
             }
-            if (rsiValue > 70) {
-                return { flag: 'red-flag', text: 'VENDER (RSI>70)' };
-            } else if (rsiValue < 30) {
-                return { flag: 'green-flag', text: 'COMPRAR (RSI<30)' };
-            } else {
-                // Formato más corto para evitar recorte
-                return { flag: 'neutral-flag', text: 'ESPERAR (RSI 30-70)' };
-            }
+          });
+          chartInstance.update();
+        }, 100);
+
+        fillAdviceAndComments(detailsData);
+
+        lastUpdateModal.textContent = `Última actualización: ${new Date().toLocaleString()}`;
+
+        if (buyPrices[coinId]) {
+          buyPriceInput.value = buyPrices[coinId];
+        } else {
+          buyPriceInput.value = "";
         }
-        // --------------------------------------------------------------------
+        updateProfitLoss(coinId, currentPrice);
 
-        function getBinanceInterval() {
-            return '1m';
+      } catch (error) {
+        console.error('Error al mostrar modal con gráfico:', error);
+        modalTitle.textContent = `${coinName} - Sin datos de gráfico`;
+        modalInfo.innerHTML = `<p>No se pudieron obtener datos del gráfico. Intente más tarde.</p>`;
+        adviceText.textContent = "No hay suficientes datos para dar un consejo.";
+        dataSource.textContent = "";
+        modalOverlay.style.display = 'flex';
+        lastUpdateModal.textContent = "";
+      }
+    }
+
+    function fillAdviceAndComments(detailsData) {
+      const randomAdvice = [
+        "Considera también el volumen para mayor precisión.",
+        "Observa la tendencia global del mercado antes de invertir.",
+        "Consulta noticias recientes que puedan afectar al activo.",
+        "Evaluar riesgos antes de tomar decisiones de compra o venta.",
+        "Puedes combinar RSI con otras medias móviles."
+      ];
+      adviceText.textContent = randomAdvice[Math.floor(Math.random() * randomAdvice.length)];
+
+      const randomComments = [
+        "Últimas noticias impulsaron el interés en este proyecto.",
+        "La comunidad se ha mostrado optimista.",
+        "Podría haber una corrección tras la fuerte subida.",
+        "Análisis técnicos sugieren posible retroceso.",
+        "La adopción institucional sigue en aumento."
+      ];
+      cryptoComment.textContent = randomComments[Math.floor(Math.random() * randomComments.length)];
+
+      const randomTrends = [
+        "Tendencia: alto interés en redes sociales esta semana.",
+        "Tendencia: grandes inversores consideran la cripto.",
+        "Tendencia: nueva alianza comercial anunciada.",
+        "Tendencia: fuerte volatilidad en las últimas horas.",
+        "Tendencia: rumor sobre integración con e-commerce."
+      ];
+      lastTrend.textContent = randomTrends[Math.floor(Math.random() * randomTrends.length)];
+
+      if (!detailsData.links?.homepage?.[0]) {
+        relatedLinks.innerHTML = "<p>No se encontraron links adicionales.</p>";
+      }
+    }
+
+    modalClose.addEventListener('click', () => {
+      modalOverlay.style.display = 'none';
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        modalOverlay.style.display = 'none';
+      }
+    });
+
+    verAnalisisBtn.addEventListener('click', () => {
+      analysisComments.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    setAlertBtn.addEventListener('click', () => {
+      const percentVal = parseFloat(priceAlertInput.value);
+      if (!isNaN(percentVal) && percentVal > 0) {
+        priceAlerts['globalPercentAlert'] = percentVal;
+        speakMessage(`Has establecido la alerta de ganancia en ${percentVal} porciento.`);
+      }
+    });
+
+    setBuyPriceBtn.addEventListener('click', () => {
+      if (currentModalCoinId && buyPriceInput.value) {
+        const buyPrice = parseFloat(buyPriceInput.value);
+        if (!isNaN(buyPrice) && buyPrice > 0) {
+          buyPrices[currentModalCoinId] = buyPrice;
+          localStorage.setItem('buyPrices', JSON.stringify(buyPrices));
+          updateProfitLoss(currentModalCoinId, currentModalPrice);
+          speakMessage(`Precio de compra establecido para ${currentModalCoinId} en ${buyPrice} dólares.`);
         }
+      }
+    });
 
-        // Crear la card principal
-        function createCryptoCard(crypto, index, rsiRecommendation) {
-            const card = document.createElement('div');
-            card.className = 'crypto-card';
-            card.setAttribute('data-coin-id', crypto.id);
-            card.setAttribute('data-coin-name', crypto.name);
-            card.setAttribute('data-current-price', crypto.current_price);
+    clearBuyPriceBtn.addEventListener('click', () => {
+      if (currentModalCoinId) {
+        delete buyPrices[currentModalCoinId];
+        localStorage.setItem('buyPrices', JSON.stringify(buyPrices));
+        buyPriceInput.value = "";
+        profitLossText.textContent = "Ganancia/Perdida: 0%";
+      }
+    });
 
-            const isFav = favorites.includes(crypto.id);
-            const star = isFav ? '★' : '☆';
+    btnFavoritos.addEventListener('click', () => {
+      const cards = document.querySelectorAll('.crypto-card');
+      cards.forEach(card => {
+        const coinId = card.getAttribute('data-coin-id');
+        card.style.display = favorites.includes(coinId) ? 'block' : 'none';
+      });
+    });
 
-            card.innerHTML = `
-                <div class="favorite-icon">${star}</div>
-                <img src="${crypto.image}" alt="${crypto.name} logo" class="crypto-logo">
-                <div class="crypto-name">${crypto.name}</div>
-                <div class="crypto-price">$${crypto.current_price.toFixed(2)}</div>
-                <div class="flag ${rsiRecommendation.flag}">${rsiRecommendation.text}</div>
-                <div class="mini-chart-container">
-                    <canvas id="miniChart-${index}" class="mini-chart"></canvas>
-                </div>
-            `;
+    btnVerTodos.addEventListener('click', () => {
+      const cards = document.querySelectorAll('.crypto-card');
+      cards.forEach(card => card.style.display = 'block');
+    });
 
-            const favIcon = card.querySelector('.favorite-icon');
-            favIcon.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleFavorite(crypto.id, card);
-            });
+    updateChartBtn.addEventListener('click', async () => {
+      await fetchCryptoData(true);
+      if (currentModalCoinId && currentModalCoinName && currentModalPrice && currentModalSymbol) {
+        await loadModalData(currentModalCoinId, currentModalCoinName, currentModalPrice, currentModalSymbol);
+      }
+    });
 
-            return card;
+    // Iniciar el primer fetch
+    fetchCryptoData(false);
+
+    // Función para arrancar timer
+    function startUpdateTimer() {
+      if (updateTimer) {
+        clearInterval(updateTimer);
+      }
+      updateTimer = setInterval(async () => {
+        await fetchCryptoData(true);
+      }, updateInterval * 1000);
+    }
+    startUpdateTimer();
+
+    // Funciones extra
+    function calculateSMA(data, length) {
+      const sma = [];
+      for (let i = 0; i < data.length; i++) {
+        if (i < length - 1) {
+          sma.push(null);
+        } else {
+          const slice = data.slice(i - length + 1, i + 1);
+          const sum = slice.reduce((a, b) => a + b, 0);
+          sma.push(sum / length);
         }
+      }
+      return sma;
+    }
 
-        function toggleFavorite(coinId, card) {
-            if (favorites.includes(coinId)) {
-                favorites = favorites.filter(f => f !== coinId);
-                card.querySelector('.favorite-icon').textContent = '☆';
-            } else {
-                favorites.push(coinId);
-                card.querySelector('.favorite-icon').textContent = '★';
-            }
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-            reorderCards();
-        }
-
-        async function loadMiniChart(binanceSymbol, index) {
-            try {
-                const interval = getBinanceInterval();
-                const limit = 30;
-                const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=${limit}`;
-                const res = await fetch(endpoint, {cache:'no-store'});
-                if (!res.ok) return false;
-                const klineData = await res.json();
-                if (!Array.isArray(klineData) || klineData.length === 0) return false;
-
-                const closePrices = klineData.map(candle => parseFloat(candle[4]));
-                const labels = klineData.map(candle => {
-                    const date = new Date(candle[0]);
-                    return `${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
-                });
-
-                const miniCtx = document.getElementById(`miniChart-${index}`);
-                if (!miniCtx) return false;
-                const miniChartCtx = miniCtx.getContext('2d');
-                new Chart(miniChartCtx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: closePrices,
-                            borderColor: '#00ffcc',
-                            backgroundColor: 'rgba(0,255,204,0.1)',
-                            tension: 0.3,
-                            fill: true,
-                            pointRadius: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: { display: false },
-                            y: { display: false }
-                        },
-                        plugins: {
-                            legend: { display: false }
-                        }
-                    }
-                });
-                return true;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        function reorderCards() {
-            const cards = Array.from(document.querySelectorAll('.crypto-card'));
-            let topCards = [];
-            let favCards = [];
-            let haveChartCards = [];
-            let noChartCards = [];
-
-            for (let card of cards) {
-                const coinId = card.getAttribute('data-coin-id');
-                const hasChart = card.querySelector('.mini-chart-container canvas') !== null;
-                const isFav = favorites.includes(coinId);
-
-                if (priorityOrder.includes(coinId)) {
-                    topCards.push(card);
-                } else if (isFav && hasChart) {
-                    favCards.push(card);
-                } else if (hasChart) {
-                    haveChartCards.push(card);
-                } else {
-                    noChartCards.push(card);
-                }
-            }
-
-            cryptoGrid.innerHTML = '';
-            topCards.forEach(c => cryptoGrid.appendChild(c));
-            favCards.forEach(c => cryptoGrid.appendChild(c));
-            haveChartCards.forEach(c => cryptoGrid.appendChild(c));
-            noChartCards.forEach(c => cryptoGrid.appendChild(c));
-        }
-
-        async function fetchCryptoData(forceUpdate = false) {
-            try {
-                loadingElement.style.display = 'block';
-                errorElement.style.display = 'none';
-                cryptoGrid.innerHTML = '';
-                const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false', {cache:'no-store'});
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-                const data = await response.json();
-                if (!Array.isArray(data) || data.length === 0) {
-                    throw new Error("No se obtuvieron datos de CoinGecko.");
-                }
-                cryptoData = data;
-
-                loadingElement.style.display = 'none';
-                cryptoGrid.innerHTML = '';
-                coinFilter.innerHTML = '<option value="all">Todas</option>';
-
-                // Orden prioritario
-                const topCoins = priorityOrder.map(pid => data.find(d => d.id === pid)).filter(Boolean);
-                const rest = data.filter(d => !priorityOrder.includes(d.id));
-                let index = 0;
-
-                async function createCardWithRSI(crypto) {
-                    const binanceSymbol = (crypto.symbol.toUpperCase() + 'USDT');
-                    const interval = getBinanceInterval();
-                    const limit = 30;
-                    const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=${limit}`;
-                    let rsiValue = null;
-                    try {
-                        const res = await fetch(endpoint, {cache:'no-store'});
-                        if (res.ok) {
-                            const klineData = await res.json();
-                            const closePrices = klineData.map(candle => parseFloat(candle[4]));
-                            if (closePrices.length > 0) {
-                                rsiValue = calculateRSI(closePrices, 14);
-                            }
-                        }
-                    } catch (err) {
-                        // Error al obtener RSI
-                    }
-                    const rsiRecommendation = getRecommendationFromRSI(rsiValue);
-                    const card = createCryptoCard(crypto, index++, rsiRecommendation);
-                    cryptoGrid.appendChild(card);
-
-                    const opt = document.createElement('option');
-                    opt.value = crypto.name;
-                    opt.textContent = crypto.name;
-                    coinFilter.appendChild(opt);
-
-                    // Mini chart
-                    const loaded = await loadMiniChart(binanceSymbol, index - 1);
-                    if (!loaded) {
-                        card.querySelector('.mini-chart-container').innerHTML = `<p class="no-chart-text">Sin datos de gráfico</p>`;
-                    } else {
-                        let lastTap = 0;
-                        card.addEventListener('dblclick', () => {
-                            openModal(crypto.id, crypto.name, crypto.current_price, binanceSymbol);
-                        });
-                        card.addEventListener('touchend', (event) => {
-                            const currentTime = new Date().getTime();
-                            const tapLength = currentTime - lastTap;
-                            if (tapLength < 300 && tapLength > 0) {
-                                openModal(crypto.id, crypto.name, crypto.current_price, binanceSymbol);
-                                event.preventDefault();
-                            }
-                            lastTap = currentTime;
-                        });
-                    }
-                }
-
-                // Cards prioritarias
-                for (let crypto of topCoins) {
-                    await createCardWithRSI(crypto);
-                }
-                // Otras
-                for (let crypto of rest) {
-                    await createCardWithRSI(crypto);
-                }
-
-                reorderCards();
-                lastUpdateElement.textContent = `Última actualización: ${new Date().toLocaleString()}`;
-            } catch (error) {
-                console.error('Error al obtener datos:', error);
-                loadingElement.style.display = 'none';
-                errorElement.style.display = 'block';
-                errorElement.textContent = 'No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.';
-            }
-        }
-
-        function calculateSMA(data, length) {
-            const sma = [];
-            for (let i = 0; i < data.length; i++) {
-                if (i < length - 1) {
-                    sma.push(null);
-                } else {
-                    const slice = data.slice(i - length + 1, i + 1);
-                    const sum = slice.reduce((a, b) => a + b, 0);
-                    sma.push(sum / length);
-                }
-            }
-            return sma;
-        }
-
-        function generateAIPrediction(closePrices) {
-            const predictions = [];
-            const lastPrice = closePrices[closePrices.length - 1];
-            for (let i = 1; i <= 10; i++) {
-                const factor = 1 + (Math.random() - 0.5) * 0.02;
-                predictions.push(lastPrice * factor);
-            }
-            return predictions;
-        }
-
-        async function openModal(coinId, coinName, currentPrice, binanceSymbol) {
-            currentModalCoinId = coinId;
-            currentModalCoinName = coinName;
-            currentModalPrice = currentPrice;
-            currentModalSymbol = binanceSymbol;
-            await loadModalData(coinId, coinName, currentPrice, binanceSymbol);
-        }
-
-        async function loadModalData(coinId, coinName, currentPrice, binanceSymbol) {
-            try {
-                const interval = getBinanceInterval();
-                const limit = 100;
-                const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=${limit}`;
-                const response = await fetch(endpoint, {cache:'no-store'});
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-                const klineData = await response.json();
-                if (!Array.isArray(klineData) || klineData.length === 0) {
-                    throw new Error(`Sin datos para ${coinName}.`);
-                }
-
-                const closePrices = klineData.map(c => parseFloat(c[4]));
-                const volumes = klineData.map(c => parseFloat(c[5]));
-                const labels = klineData.map(c => {
-                    const date = new Date(c[0]);
-                    return `${date.getDate()}/${(date.getMonth()+1)} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
-                });
-
-                const lastPrice = closePrices[closePrices.length - 1];
-                const trendValues = closePrices.map(() => lastPrice);
-
-                const shortSMA = calculateSMA(closePrices, 7);
-                const longSMA = calculateSMA(closePrices, 30);
-
-                const coingeckoDetails = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`, {cache:'no-store'});
-                const detailsData = await coingeckoDetails.json();
-                const marketCap = detailsData.market_data?.market_cap?.usd || 'N/A';
-                const volume24h = detailsData.market_data?.total_volume?.usd || 'N/A';
-
-                const aiPredictions = generateAIPrediction(closePrices);
-                const aiLabels = [];
-                for (let i = 1; i <= aiPredictions.length; i++) {
-                    aiLabels.push(`Futuro+${i}`);
-                }
-
-                // Calcular RSI para mostrarlo en el modal
-                const rsiValue = calculateRSI(closePrices, 14);
-                const rsiRec = getRecommendationFromRSI(rsiValue);
-                const modalRecColor = (rsiRec.flag === 'green-flag') ? '#4CAF50'
-                                    : (rsiRec.flag === 'red-flag') ? '#F44336'
-                                    : '#FF9800';
-
-                modalTitle.textContent = `${coinName} - Tendencia: ${rsiRec.text}`;
-                dataSource.textContent = endpoint;
-
-                modalInfo.innerHTML = `
-                    <p>Precio Actual: $${currentPrice.toFixed(2)}</p>
-                    <p>Market Cap: $${parseFloat(marketCap).toLocaleString()}</p>
-                    <p>Volumen 24h: $${parseFloat(volume24h).toLocaleString()}</p>
-                    <p>RSI (14): ${rsiValue ? rsiValue.toFixed(2) : 'N/A'}</p>
-                `;
-
-                modalOverlay.style.display = 'flex';
-
-                if (chartInstance) {
-                    chartInstance.destroy();
-                }
-
-                // Datos IA
-                const aiLine = Array(closePrices.length).fill(null).concat(aiPredictions);
-
-                setTimeout(() => {
-                    chartInstance = new Chart(document.getElementById('cryptoChart').getContext('2d'), {
-                        data: {
-                            labels: labels.concat(aiLabels),
-                            datasets: [
-                                {
-                                    type: 'line',
-                                    label: `${coinName} (USD)`,
-                                    data: closePrices.concat(Array(aiPredictions.length).fill(null)),
-                                    borderColor: '#00ffcc',
-                                    backgroundColor: 'rgba(0,255,204,0.1)',
-                                    tension: 0.3,
-                                    fill: true,
-                                    yAxisID: 'y',
-                                },
-                                {
-                                    type: 'line',
-                                    label: `Línea de tendencia (${rsiRec.text})`,
-                                    data: trendValues.concat(Array(aiPredictions.length).fill(null)),
-                                    borderColor: modalRecColor,
-                                    borderDash: [5, 5],
-                                    pointRadius: 0,
-                                    fill: false,
-                                    yAxisID: 'y',
-                                },
-                                {
-                                    type: 'line',
-                                    label: 'SMA (7)',
-                                    data: shortSMA.concat(Array(aiPredictions.length).fill(null)),
-                                    borderColor: '#FFD700',
-                                    fill: false,
-                                    pointRadius: 0,
-                                    tension: 0.2,
-                                    yAxisID: 'y',
-                                },
-                                {
-                                    type: 'line',
-                                    label: 'SMA (30)',
-                                    data: longSMA.concat(Array(aiPredictions.length).fill(null)),
-                                    borderColor: '#FF8C00',
-                                    fill: false,
-                                    pointRadius: 0,
-                                    tension: 0.2,
-                                    yAxisID: 'y',
-                                },
-                                {
-                                    type: 'bar',
-                                    label: 'Volumen',
-                                    data: volumes.concat(Array(aiPredictions.length).fill(null)),
-                                    backgroundColor: 'rgba(0,191,255,0.3)',
-                                    borderColor: '#00BFFF',
-                                    borderWidth: 1,
-                                    yAxisID: 'y1'
-                                },
-                                {
-                                    type: 'line',
-                                    label: 'Línea IA (Predicción)',
-                                    data: aiLine,
-                                    borderColor: '#EE82EE',
-                                    borderDash: [2, 2],
-                                    pointRadius: 0,
-                                    fill: false,
-                                    tension: 0.2,
-                                    yAxisID: 'y',
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            interaction: {
-                                mode: 'index',
-                                intersect: false,
-                            },
-                            scales: {
-                                y: {
-                                    type: 'linear',
-                                    display: true,
-                                    position: 'left',
-                                    ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
-                                    title: {
-                                        display: true,
-                                        text: 'Precio (USD)',
-                                        color: body.className === 'dark' ? '#ffffff' : '#000000'
-                                    }
-                                },
-                                y1: {
-                                    type: 'linear',
-                                    display: true,
-                                    position: 'right',
-                                    ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
-                                    title: {
-                                        display: true,
-                                        text: 'Volumen',
-                                        color: body.className === 'dark' ? '#ffffff' : '#000000'
-                                    },
-                                    grid: {
-                                        drawOnChartArea: false,
-                                    },
-                                },
-                                x: {
-                                    ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' }
-                                }
-                            },
-                            plugins: {
-                                legend: {
-                                    labels: {
-                                        color: body.className === 'dark' ? '#ffffff' : '#000000'
-                                    }
-                                },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false,
-                                }
-                            }
-                        }
-                    });
-                    chartInstance.update();
-                }, 100);
-
-                const aiFinalPrediction = aiPredictions[aiPredictions.length - 1];
-                if (aiFinalPrediction > currentPrice) {
-                    adviceText.textContent = "La IA indica posible alza a corto plazo. Podría ser buen momento para comprar.";
-                } else {
-                    adviceText.textContent = "La IA no muestra aumento claro. Tal vez esperar sea mejor.";
-                }
-
-                const randomComment = sampleComments[Math.floor(Math.random() * sampleComments.length)];
-                cryptoComment.textContent = randomComment;
-
-                const randomTrend = sampleTrends[Math.floor(Math.random() * sampleTrends.length)];
-                lastTrend.textContent = randomTrend;
-
-                const links = detailsData.links;
-                let linksHtml = '';
-                if (links && links.homepage && links.homepage[0]) {
-                    linksHtml += `<p><a href="${links.homepage[0]}" target="_blank">Sitio oficial</a></p>`;
-                }
-                if (links && links.blockchain_site && links.blockchain_site[0]) {
-                    linksHtml += `<p><a href="${links.blockchain_site[0]}" target="_blank">Blockchain Explorer</a></p>`;
-                }
-                if (detailsData.links?.subreddit_url) {
-                    linksHtml += `<p><a href="${detailsData.links.subreddit_url}" target="_blank">Subreddit</a></p>`;
-                }
-                if (detailsData.links?.official_forum_url && detailsData.links.official_forum_url[0]) {
-                    linksHtml += `<p><a href="${detailsData.links.official_forum_url[0]}" target="_blank">Foro Oficial</a></p>`;
-                }
-                if (linksHtml === '') {
-                    linksHtml = `<p>No se encontraron links adicionales.</p>`;
-                }
-                relatedLinks.innerHTML = linksHtml;
-
-                lastUpdateModal.textContent = `Última actualización: ${new Date().toLocaleString()}`;
-            } catch (error) {
-                console.error('Error al mostrar modal con gráfico:', error);
-                modalTitle.textContent = `${coinName} - Sin datos de gráfico`;
-                modalInfo.innerHTML = `<p>No se pudieron obtener datos del gráfico. Intente más tarde.</p>`;
-                adviceText.textContent = "No hay suficientes datos para dar un consejo.";
-                dataSource.textContent = "";
-                modalOverlay.style.display = 'flex';
-                lastUpdateModal.textContent = "";
-            }
-        }
-
-        modalClose.addEventListener('click', () => {
-            modalOverlay.style.display = 'none';
-        });
-
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                modalOverlay.style.display = 'none';
-            }
-        });
-
-        verAnalisisBtn.addEventListener('click', () => {
-            analysisComments.scrollIntoView({ behavior: 'smooth' });
-        });
-
-        setAlertBtn.addEventListener('click', () => {
-            if (currentModalCoinId && priceAlertInput.value) {
-                const alertPrice = parseFloat(priceAlertInput.value);
-                if (!isNaN(alertPrice) && alertPrice > 0) {
-                    priceAlerts[currentModalCoinId] = alertPrice;
-                    alert(`Alerta establecida para ${currentModalCoinId} en $${alertPrice}.`);
-                }
-            }
-        });
-
-        btnFavoritos.addEventListener('click', () => {
-            const cards = document.querySelectorAll('.crypto-card');
-            cards.forEach(card => {
-                const coinId = card.getAttribute('data-coin-id');
-                card.style.display = favorites.includes(coinId) ? 'block' : 'none';
-            });
-        });
-
-        btnVerTodos.addEventListener('click', () => {
-            const cards = document.querySelectorAll('.crypto-card');
-            cards.forEach(card => card.style.display = 'block');
-        });
-
-        function checkPriceAlerts() {
-            for (let coinId in priceAlerts) {
-                const alertPrice = priceAlerts[coinId];
-                const card = document.querySelector(`.crypto-card[data-coin-id="${coinId}"]`);
-                if (card) {
-                    const currentPrice = parseFloat(card.getAttribute('data-current-price'));
-                    if (currentPrice >= alertPrice) {
-                        alertSound.play();
-                        delete priceAlerts[coinId];
-                        alert(`¡Alerta! ${coinId} ha alcanzado el precio de $${alertPrice}.`);
-                    }
-                }
-            }
-        }
-
-        function refreshModalChart() {
-            if (currentModalCoinId && currentModalCoinName && currentModalPrice && currentModalSymbol) {
-                loadModalData(currentModalCoinId, currentModalCoinName, currentModalPrice, currentModalSymbol);
-            }
-        }
-
-        // Primera carga
-        fetchCryptoData();
-
-        // Actualización periódica
-        setInterval(async () => {
-            await fetchCryptoData(true);
-            checkPriceAlerts();
-        }, 30000);
-    </script>
+    function generateAIPrediction(closePrices) {
+      const predictions = [];
+      const lastPrice = closePrices[closePrices.length - 1];
+      for (let i = 1; i <= 10; i++) {
+        const factor = 1 + (Math.random() - 0.5) * 0.02;
+        predictions.push(lastPrice * factor);
+      }
+      return predictions;
+    }
+  </script>
 </body>
 </html>
