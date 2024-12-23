@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Monitor Criptomonedas - RSI + PnL + Voz + Intervalo FIX</title>
+  <title>Monitor Criptomonedas - RSI + PnL + Voz + Favoritas Primero</title>
   <style>
     body.dark {
       background-color: #0a0e17;
@@ -325,13 +325,6 @@
       font-size: 0.9em;
       margin-bottom: 10px;
     }
-    .related-links a {
-      color: #00ffcc;
-      text-decoration: none;
-    }
-    .related-links a:hover {
-      text-decoration: underline;
-    }
     #priceAlertContainer {
       margin: 10px 0;
       text-align: center;
@@ -483,6 +476,7 @@
   <h1>Monitor Criptomonedas</h1>
   <h3>by Pablo Bascoy</h3>
 
+  <!-- Explicación de RSI -->
   <div id="indicatorExplanation">
     <p><strong>¿Qué es el RSI (Relative Strength Index)?</strong></p>
     <p>El RSI mide la fortaleza o debilidad de un activo según sus últimos movimientos de precio, entre 0 y 100.</p>
@@ -491,14 +485,14 @@
       <li>RSI &lt; 30: Señal de compra.</li>
       <li>RSI 30-70: Fase neutra.</li>
     </ul>
-    <p>Puedes actualizar manualmente o cada cierto número de segundos configurables. El % de ganancia/pérdida se recalcula según tu precio de compra.  
-    La alerta de venta se dispara si RSI indica vender y la ganancia alcanza o supera el % configurado. La alerta de compra se dispara si RSI indica comprar y no tienes precio de compra.</p>
+    <p>Las criptomonedas marcadas como favoritas aparecerán primero cada vez que se actualice (automático o manual).  
+    Puedes actualizar manualmente o cada cierto número de segundos. El % de ganancia/pérdida se recalcula según tu precio de compra.</p>
   </div>
 
   <p id="lastUpdate">Última actualización: (sin datos)</p>
 
   <div id="intervalContainer">
-    <label>Actualización (segundos): 
+    <label>Actualización (segundos):
       <input type="number" id="updateIntervalInput" placeholder="30">
     </label>
     <button id="setIntervalBtn">Set Interval</button>
@@ -550,10 +544,10 @@
       <div class="modal-explanation">
         <h4>Explicación de los Indicadores:</h4>
         <p><span style="color:#00ffcc;font-weight:bold;">Línea principal (cyan):</span> Muestra el <strong>precio histórico</strong>.</p>
-        <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Marca el <strong>último precio</strong> y la recomendación (comprar/vender).</p>
+        <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Marca el <strong>último precio</strong> y la recomendación.</p>
         <p><span style="color:#FFD700;font-weight:bold;">SMA (7) (amarillo):</span> <strong>Media móvil de corto plazo</strong>.</p>
         <p><span style="color:#FF8C00;font-weight:bold;">SMA (30) (naranja):</span> <strong>Media móvil de mediano plazo</strong>.</p>
-        <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> Muestra el interés (operaciones).</p>
+        <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> Mide la cantidad de operaciones.</p>
         <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> Predicción de <strong>inteligencia artificial</strong>.</p>
         <h4>Consejo:</h4>
         <p id="adviceText">(Se llenará con consejos aleatorios)</p>
@@ -563,10 +557,6 @@
         <h4>Comentarios y Análisis Adicionales</h4>
         <p id="lastTrend"></p>
         <p id="cryptoComment"></p>
-        <div class="related-links">
-          <h4>Links relacionados:</h4>
-          <p id="relatedLinks"></p>
-        </div>
       </div>
       <div class="modal-footer">
         <span id="dataSource"></span>
@@ -584,10 +574,8 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
   <script>
-    /********************************************************
-    *   Variables globales y configuraciones
-    ********************************************************/
     let chartInstance = null;
     let cryptoData = [];
     let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
@@ -600,13 +588,9 @@
     let silenciarAlertas = false;
     let updateTimer = null;
 
-    // Intervalo de actualización por defecto 30 seg
+    // Intervalo por defecto 30 seg
     let updateInterval = parseInt(localStorage.getItem('updateInterval')) || 30;
-    const priorityOrder = ["bitcoin", "ethereum", "dogecoin", "ripple", "solana", "cardano"];
 
-    /********************************************************
-    *   Elementos del DOM
-    ********************************************************/
     const body = document.body;
     const themeToggle = document.getElementById('themeToggle');
     const silenciarAlertasBtn = document.getElementById('silenciarAlertasBtn');
@@ -624,7 +608,6 @@
     const verAnalisisBtn = document.getElementById('verAnalisisBtn');
     const analysisComments = document.getElementById('analysisComments');
     const cryptoComment = document.getElementById('cryptoComment');
-    const relatedLinks = document.getElementById('relatedLinks');
     const lastTrend = document.getElementById('lastTrend');
     const lastUpdateModal = document.getElementById('lastUpdateModal');
     const priceAlertInput = document.getElementById('priceAlertInput');
@@ -636,13 +619,10 @@
     const btnFavoritos = document.getElementById('btnFavoritos');
     const btnVerTodos = document.getElementById('btnVerTodos');
     const updateChartBtn = document.getElementById('updateChartBtn');
-
     const updateIntervalInput = document.getElementById('updateIntervalInput');
     const setIntervalBtn = document.getElementById('setIntervalBtn');
 
-    /********************************************************
-    *   Manejo de tema
-    ********************************************************/
+    // Tema
     const savedTheme = localStorage.getItem('theme') || 'dark';
     body.className = savedTheme;
 
@@ -651,17 +631,13 @@
       localStorage.setItem('theme', body.className);
     });
 
-    /********************************************************
-    *   Botón silenciar alertas
-    ********************************************************/
+    // Botón silenciar
     silenciarAlertasBtn.addEventListener('click', () => {
       silenciarAlertas = !silenciarAlertas;
       silenciarAlertasBtn.textContent = silenciarAlertas ? "Activar Alertas" : "Silenciar Alertas";
     });
 
-    /********************************************************
-    *   Intervalo configurable
-    ********************************************************/
+    // Intervalo configurable
     updateIntervalInput.value = updateInterval;
     setIntervalBtn.addEventListener('click', () => {
       const newVal = parseInt(updateIntervalInput.value);
@@ -669,17 +645,12 @@
         updateInterval = newVal;
         localStorage.setItem('updateInterval', updateInterval);
         speakMessage(`Intervalo de actualización configurado a ${updateInterval} segundos.`);
-
-        if (updateTimer) {
-          clearInterval(updateTimer);
-        }
-        startUpdateTimer(); // Reiniciamos con el nuevo valor
+        if (updateTimer) clearInterval(updateTimer);
+        startUpdateTimer();
       }
     });
 
-    /********************************************************
-    *   RSI y funciones de recomendación
-    ********************************************************/
+    // RSI
     function calculateRSI(closePrices, period = 14) {
       if (closePrices.length < period) return null;
       let gains = 0;
@@ -723,9 +694,7 @@
       }
     }
 
-    /********************************************************
-    *   Voz
-    ********************************************************/
+    // Voz
     function speakMessage(text) {
       if (silenciarAlertas) return;
       if ('speechSynthesis' in window) {
@@ -737,9 +706,7 @@
       }
     }
 
-    /********************************************************
-    *   Creación y actualización de cards
-    ********************************************************/
+    // Creación y actualización de cards
     function createCryptoCard(crypto, index, rsiRecommendation) {
       const card = document.createElement('div');
       card.className = 'crypto-card';
@@ -798,34 +765,28 @@
       reorderCards();
     }
 
+    /**
+     * Reordena para que las favoritas vayan siempre primero.
+     */
     function reorderCards() {
       const cards = Array.from(document.querySelectorAll('.crypto-card'));
-      let topCards = [];
-      let favCards = [];
-      let haveChartCards = [];
-      let noChartCards = [];
+      const favCards = [];
+      const otherCards = [];
 
-      for (let card of cards) {
+      cards.forEach(card => {
         const coinId = card.getAttribute('data-coin-id');
-        const hasChart = card.querySelector('.mini-chart-container canvas') !== null;
-        const isFav = favorites.includes(coinId);
-
-        if (priorityOrder.includes(coinId)) {
-          topCards.push(card);
-        } else if (isFav && hasChart) {
+        if (favorites.includes(coinId)) {
           favCards.push(card);
-        } else if (hasChart) {
-          haveChartCards.push(card);
         } else {
-          noChartCards.push(card);
+          otherCards.push(card);
         }
-      }
+      });
 
       cryptoGrid.innerHTML = '';
-      topCards.forEach(c => cryptoGrid.appendChild(c));
+      // Primero favoritas
       favCards.forEach(c => cryptoGrid.appendChild(c));
-      haveChartCards.forEach(c => cryptoGrid.appendChild(c));
-      noChartCards.forEach(c => cryptoGrid.appendChild(c));
+      // Luego las demás
+      otherCards.forEach(c => cryptoGrid.appendChild(c));
     }
 
     async function loadMiniChart(binanceSymbol, index) {
@@ -876,9 +837,7 @@
       }
     }
 
-    /********************************************************
-    *   PnL
-    ********************************************************/
+    // PnL
     function updateProfitLoss(coinId, currentPrice) {
       const buy = parseFloat(buyPrices[coinId] || 0);
       if (!isNaN(buy) && buy > 0) {
@@ -895,9 +854,6 @@
       }
     }
 
-    /********************************************************
-    *   fetchCryptoData
-    ********************************************************/
     async function fetchCryptoData(forceUpdate = false) {
       try {
         loadingElement.style.display = 'block';
@@ -921,10 +877,7 @@
         coinFilter.innerHTML = '<option value="all">Todas</option>';
 
         let index = 0;
-        const topCoins = priorityOrder.map(pid => data.find(d => d.id === pid)).filter(Boolean);
-        const rest = data.filter(d => !priorityOrder.includes(d.id));
 
-        // Crea cards + RSI + alertas
         async function createCardWithRSI(crypto) {
           const binanceSymbol = (crypto.symbol.toUpperCase() + 'USDT');
           let rsiValue = null;
@@ -942,7 +895,7 @@
           }
           const rsiRec = getRecommendationFromRSI(rsiValue);
 
-          // Lógica de alertas
+          // Alertas de voz
           if (!silenciarAlertas && favorites.includes(crypto.id) && rsiValue !== null) {
             const percentAlert = parseFloat(priceAlerts['globalPercentAlert'] || 5);
 
@@ -951,7 +904,6 @@
               const buyVal = parseFloat(buyPrices[crypto.id] || 0);
               if (buyVal > 0) {
                 const pnl = ((crypto.current_price - buyVal) / buyVal) * 100;
-                // Se dispara si >= al % configurado
                 if (pnl >= percentAlert) {
                   speakMessage(`Se sugiere vender ${crypto.name}. Ganancia de ${pnl.toFixed(2)} porciento, RSI: ${rsiValue.toFixed(2)}`);
                 }
@@ -976,25 +928,20 @@
           opt.textContent = crypto.name;
           coinFilter.appendChild(opt);
 
-          // Mini chart
           const loaded = await loadMiniChart(binanceSymbol, index - 1);
           if (!loaded) {
             card.querySelector('.mini-chart-container').innerHTML = `<p class="no-chart-text">Sin datos de gráfico</p>`;
           }
         }
 
-        // Top coins
-        for (let c of topCoins) {
-          await createCardWithRSI(c);
-        }
-        // Resto
-        for (let c of rest) {
-          await createCardWithRSI(c);
+        // Creamos las cards para todas las cripto
+        for (let coin of data) {
+          await createCardWithRSI(coin);
         }
 
+        // Reordenamos (favoritas primero)
         reorderCards();
 
-        // Hora de actualización
         lastUpdateElement.textContent = `Última actualización: ${new Date().toLocaleString()}`;
 
         // Recalcular PnL
@@ -1018,9 +965,6 @@
       }
     }
 
-    /********************************************************
-    *   Modal
-    ********************************************************/
     async function openModal(coinId, coinName, currentPrice, binanceSymbol) {
       currentModalCoinId = coinId;
       currentModalCoinName = coinName;
@@ -1053,7 +997,7 @@
         const shortSMA = calculateSMA(closePrices, 7);
         const longSMA = calculateSMA(closePrices, 30);
 
-        // Llamada a CoinGecko para más detalles
+        // CoinGecko
         const coingeckoDetails = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`, {cache:'no-store'});
         const detailsData = await coingeckoDetails.json();
         const marketCap = detailsData.market_data?.market_cap?.usd || 'N/A';
@@ -1211,7 +1155,6 @@
         }, 100);
 
         fillAdviceAndComments(detailsData);
-
         lastUpdateModal.textContent = `Última actualización: ${new Date().toLocaleString()}`;
 
         if (buyPrices[coinId]) {
@@ -1234,35 +1177,31 @@
 
     function fillAdviceAndComments(detailsData) {
       const randomAdvice = [
-        "Considera también el volumen para mayor precisión.",
-        "Observa la tendencia global del mercado antes de invertir.",
-        "Consulta noticias recientes que puedan afectar al activo.",
-        "Evaluar riesgos antes de tomar decisiones de compra o venta.",
-        "Puedes combinar RSI con otras medias móviles."
+        "Observa también el volumen para mayor precisión.",
+        "Ten en cuenta la tendencia global del mercado.",
+        "Considera noticias recientes que puedan afectar al activo.",
+        "Combina RSI con otras medias móviles para más eficacia.",
+        "Analiza la volatilidad antes de comprar o vender."
       ];
       adviceText.textContent = randomAdvice[Math.floor(Math.random() * randomAdvice.length)];
 
       const randomComments = [
         "Últimas noticias impulsaron el interés en este proyecto.",
         "La comunidad se ha mostrado optimista.",
-        "Podría haber una corrección tras la fuerte subida.",
-        "Análisis técnicos sugieren posible retroceso.",
-        "La adopción institucional sigue en aumento."
+        "Posible corrección tras la última subida.",
+        "Técnicamente, podría retroceder a corto plazo.",
+        "La adopción a nivel institucional sigue en aumento."
       ];
       cryptoComment.textContent = randomComments[Math.floor(Math.random() * randomComments.length)];
 
       const randomTrends = [
         "Tendencia: alto interés en redes sociales esta semana.",
-        "Tendencia: grandes inversores consideran la cripto.",
+        "Tendencia: grandes inversores evalúan la cripto.",
         "Tendencia: nueva alianza comercial anunciada.",
-        "Tendencia: fuerte volatilidad en las últimas horas.",
+        "Tendencia: fuerte volatilidad últimamente.",
         "Tendencia: rumor sobre integración con e-commerce."
       ];
       lastTrend.textContent = randomTrends[Math.floor(Math.random() * randomTrends.length)];
-
-      if (!detailsData.links?.homepage?.[0]) {
-        relatedLinks.innerHTML = "<p>No se encontraron links adicionales.</p>";
-      }
     }
 
     modalClose.addEventListener('click', () => {
@@ -1328,10 +1267,10 @@
       }
     });
 
-    // Iniciar el primer fetch
+    // Primer fetch
     fetchCryptoData(false);
 
-    // Función para arrancar timer
+    // Timer
     function startUpdateTimer() {
       if (updateTimer) {
         clearInterval(updateTimer);
