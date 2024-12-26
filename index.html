@@ -289,6 +289,7 @@
     }
     #modalOverlay.expanded-view #chartContainer {
       height: 80vh;
+      flex-grow: 1;
     }
     #cryptoChart {
       width: 100%;
@@ -517,7 +518,7 @@
       }
       #chartContainer.expanded-chart {
         width: 100%;
-        height: 500px;
+        height: 80vh; /* Aumentar la altura para mayor visibilidad */
       }
     }
 
@@ -1349,18 +1350,14 @@
       modalOverlay.classList.remove('expanded-view'); // Remover clase de vista expandida si existe
       modalOverlay.style.display = 'none';
       // Reiniciar el modal al estado inicial
-      volverBtn.style.display = 'none';
-      verAnalisisBtn.style.display = 'block';
-      const chartContainer = document.getElementById('chartContainer');
-      chartContainer.classList.remove('expanded-chart');
-      if (chartInstance) chartInstance.resize();
+      cerrarVistaExpandida();
     }
 
     // === 15) Botón "Ver Análisis" (Expandir gráfico) ===
     verAnalisisBtn.addEventListener('click', () => {
       const isMobile = window.matchMedia("only screen and (max-width: 768px)").matches;
       if (isMobile) {
-        // Expandir el modal a pantalla completa en horizontal
+        // Expandir el modal a pantalla completa en vertical (aprovechar el espacio disponible)
         modalOverlay.classList.add('expanded-view');
         const chartContainer = document.getElementById('chartContainer');
         chartContainer.classList.add('expanded-chart');
