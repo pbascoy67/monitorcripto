@@ -88,23 +88,24 @@
       border: 1px solid #00ffcc;
       background-color: transparent;
       color: inherit;
-    }
-    #coinFilter {
-      background-color: #0a0e17;
-      color: #ffffff;
-      border: 1px solid #00ffcc;
-      border-radius: 10px;
-      padding: 10px;
       min-width: 150px;
+      /* Asegurar que las opciones sean visibles */
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
     }
-    #rsiFilter {
-      background-color: #0a0e17;
+    /* Estilos para las opciones del select */
+    #modalTimeFrameFilter option {
+      background-color: #1a2332;
       color: #ffffff;
-      border: 1px solid #00ffcc;
-      border-radius: 10px;
-      padding: 10px;
-      min-width: 150px;
     }
+    body.light #modalTimeFrameFilter option {
+      background-color: #eaeaea;
+      color: #000000;
+    }
+
+    /* === Eliminado el timeFrameContainer de la página principal === */
 
     #intervalContainer {
       text-align: center;
@@ -526,6 +527,38 @@
 
     /* === Estilos para Vista Expandida en el Modal === */
     /* Ya definidos arriba */
+
+    /* === Nuevos Estilos para el Selector de Marco Temporal en el Modal === */
+    #modalTimeFrameContainer {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #modalTimeFrameContainer label {
+      margin-right: 5px;
+      font-weight: bold;
+    }
+    #modalTimeFrameFilter {
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #00ffcc;
+      background-color: transparent;
+      color: inherit;
+      min-width: 150px;
+      /* Asegurar que las opciones sean visibles */
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+    }
+    /* Estilos para las opciones del select */
+    #modalTimeFrameFilter option {
+      background-color: #1a2332;
+      color: #ffffff;
+    }
+    body.light #modalTimeFrameFilter option {
+      background-color: #eaeaea;
+      color: #000000;
+    }
   </style>
 </head>
 <body class="dark">
@@ -580,6 +613,7 @@
           <option value="neutral">Neutral</option>
       </select>
     </div>
+    <!-- Eliminado el timeFrameContainer de la página principal -->
   </div>
 
   <div id="error">No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.</div>
@@ -592,6 +626,20 @@
       <h2 id="modalTitle"></h2>
       <!-- Botón Actualizar que ahora solo actualiza la cripto del modal -->
       <button id="updateChartBtn">Actualizar</button>
+      <!-- Selector de Marco Temporal en el Modal -->
+      <div id="modalTimeFrameContainer">
+        <label for="modalTimeFrameFilter">Marco Temporal</label>
+        <select id="modalTimeFrameFilter">
+            <option value="5m">5 Minutos</option>
+            <option value="15m">15 Minutos</option>
+            <option value="1h">1 Hora</option>
+            <option value="1d">Por Día</option>
+            <option value="1w">Por Semana</option>
+            <option value="1M">Por Mes</option>
+            <option value="6M">Últimos 6 Meses</option>
+            <option value="1Y">Último Año</option>
+        </select>
+      </div>
       <p id="lastUpdateModal"></p>
       <div class="modal-info" id="modalInfo"></div>
       <div id="chartContainer">
@@ -646,6 +694,8 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Chart.js Zoom Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 
   <script>
     let chartInstance = null;
@@ -691,6 +741,7 @@
     const updateChartBtn = document.getElementById('updateChartBtn');
     const updateIntervalInputElem = document.getElementById('updateIntervalInput');
     const setIntervalBtnElem = document.getElementById('setIntervalBtn');
+    const modalTimeFrameFilter = document.getElementById('modalTimeFrameFilter'); // Nuevo
 
     // Barra de progreso
     const progressOverlay = document.getElementById('progressOverlay');
@@ -866,7 +917,9 @@
     // === 7) Carga de minigráfico (Binance) ===
     async function loadMiniChart(binanceSymbol, index) {
       try {
-        const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1m&limit=30`;
+        // Utilizar un marco temporal fijo para mini gráficos, por ejemplo '5m'
+        const miniTimeFrame = '5m';
+        const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${miniTimeFrame}&limit=30`;
         const res = await fetch(endpoint, {cache:'no-store'});
         if (!res.ok) return false;
         const klineData = await res.json();
@@ -875,7 +928,7 @@
         const closePrices = klineData.map(c => parseFloat(c[4]));
         const labels = klineData.map(c => {
           const date = new Date(c[0]);
-          return `${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+          return `${date.getDate()}/${(date.getMonth()+1)} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
         });
 
         const miniCtx = document.getElementById(`miniChart-${index}`);
@@ -1053,7 +1106,7 @@
       const binanceSymbol = (coin.symbol.toUpperCase() + 'USDT');
       let rsiValue = null;
       try {
-        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1m&limit=30`, { cache: 'no-store' });
+        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=5m&limit=30`, { cache: 'no-store' }); // Usando '5m' para mini gráficos
         if (res.ok) {
           const klineData = await res.json();
           const closePrices = klineData.map(c => parseFloat(c[4]));
@@ -1130,13 +1183,22 @@
       currentModalCoinName = coinName;
       currentModalPrice = currentPrice;
       currentModalSymbol = binanceSymbol;
+      // Inicializar el marco temporal del modal a '5m'
+      modalTimeFrameFilter.value = '5m';
       await loadModalData(coinId, coinName, currentPrice, binanceSymbol);
     }
 
     // === 13) Carga del modal (gráfico principal) ===
     async function loadModalData(coinId, coinName, currentPrice, binanceSymbol) {
       try {
-        const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1m&limit=100`;
+        const modalTimeFrame = modalTimeFrameFilter.value; // Obtener el marco temporal seleccionado en el modal
+        // Verificar si el intervalo es soportado por Binance
+        const supportedIntervals = ['1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '3d', '1w', '1M'];
+        if (!supportedIntervals.includes(modalTimeFrame)) {
+          throw new Error(`Intervalo de tiempo "${modalTimeFrame}" no soportado por Binance.`);
+        }
+
+        const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${modalTimeFrame}&limit=100`;
         const response = await fetch(endpoint, {cache:'no-store'});
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -1149,7 +1211,8 @@
         const volumes = klineData.map(c => parseFloat(c[5]));
         const labels = klineData.map(c => {
           const date = new Date(c[0]);
-          return `${date.getDate()}/${(date.getMonth()+1)} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+          const year = String(date.getFullYear()).slice(-2); // two-digit year
+          return `${date.getDate()}/${(date.getMonth()+1)}/${year} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
         });
 
         // RSI
@@ -1287,7 +1350,12 @@
                   },
                 },
                 x: {
-                  ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' }
+                  ticks: { 
+                    color: body.className === 'dark' ? '#ffffff' : '#000000',
+                    callback: function(value, index, values) {
+                      return this.getLabelForValue(value);
+                    }
+                  }
                 }
               },
               plugins: {
@@ -1299,8 +1367,23 @@
                 tooltip: {
                   mode: 'index',
                   intersect: false,
+                },
+                zoom: { // Configuración del plugin de zoom
+                  pan: {
+                    enabled: true,
+                    mode: 'xy',
+                  },
+                  zoom: {
+                    wheel: {
+                      enabled: true,
+                    },
+                    pinch: {
+                      enabled: true
+                    },
+                    mode: 'xy',
+                  }
                 }
-              }
+              },
             }
           });
           chartInstance.update();
@@ -1356,7 +1439,6 @@
 
     // === 15) Botón "Ver Análisis" (Expandir gráfico) ===
     verAnalisisBtn.addEventListener('click', () => {
-      // console.log("Botón 'Ver Análisis' clickeado"); // Debugging
       const isMobile = window.matchMedia("only screen and (max-width: 768px)").matches;
       if (isMobile) {
         // Expandir el modal a pantalla completa en vertical (aprovechar el espacio disponible)
@@ -1446,13 +1528,12 @@
       }
     });
 
-    // === 20) Filtros de Criptomoneda y RSI ===
-    coinFilter.addEventListener('change', () => {
-      applyFilters();
-    });
-
-    rsiFilter.addEventListener('change', () => {
-      applyFilters();
+    // === 20) Selector de Marco Temporal en el Modal ===
+    modalTimeFrameFilter.addEventListener('change', async () => {
+      // Si el modal está abierto, actualizar su gráfico
+      if (modalOverlay.style.display === 'flex' && currentModalCoinId) {
+        await loadModalData(currentModalCoinId, currentModalCoinName, currentModalPrice, currentModalSymbol);
+      }
     });
 
     // === 21) Función de Filtros ===
