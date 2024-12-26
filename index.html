@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Monitor Criptomonedas - RSI + PnL + Voz + Favoritas Primero</title>
   <style>
-    /* Estilos generales */
+    /* === Estilos Generales === */
     body.dark {
       background-color: #0a0e17;
       color: #ffffff;
@@ -76,6 +76,7 @@
     body.light #coinFilterContainer,
     body.light #rsiFilterContainer {
       background-color: #eaeaea;
+      color: #000000;
     }
     label {
       margin-bottom: 5px;
@@ -96,7 +97,6 @@
       padding: 10px;
       min-width: 150px;
     }
-
     #rsiFilter {
       background-color: #0a0e17;
       color: #ffffff;
@@ -153,7 +153,7 @@
       transform: translateY(-5px);
     }
     .crypto-card:hover::after {
-      content: "Doble clic para ver gráfico";
+      content: "Clic para ver gráfico";
       position: absolute;
       bottom: 10px;
       left: 50%;
@@ -277,12 +277,13 @@
       min-height: 300px;
       margin-bottom: 20px;
       position: relative;
-      transition: width 0.3s, height 0.3s; /* Para animación suave */
+      transition: width 0.3s, height 0.3s; 
     }
-    /* Nueva clase para el modo expandido en dispositivos móviles */
+    /* Clase expandida para móviles */
     #chartContainer.expanded-chart {
       width: 100%;
-      height: 500px; /* Ajusta según sea necesario */
+      height: 500px; 
+      /* Puedes ajustar la altura según necesites */
     }
     #cryptoChart {
       width: 100%;
@@ -460,7 +461,7 @@
       z-index: 2100;
     }
 
-    /* Estilos para la barra de progreso */
+    /* Barra de Progreso */
     #progressOverlay {
       position: fixed;
       top: 0;
@@ -498,10 +499,9 @@
       #progressBarContainer {
         width: 90%;
       }
-      /* Estilos para el modo expandido en dispositivos móviles */
       #chartContainer.expanded-chart {
         width: 100%;
-        height: 500px; /* Ajusta según sea necesario */
+        height: 500px;
       }
     }
   </style>
@@ -567,6 +567,7 @@
     <div id="modalContent">
       <button id="modalClose">Regresar</button>
       <h2 id="modalTitle"></h2>
+      <!-- Botón Actualizar que ahora solo actualiza la cripto del modal -->
       <button id="updateChartBtn">Actualizar</button>
       <p id="lastUpdateModal"></p>
       <div class="modal-info" id="modalInfo"></div>
@@ -593,12 +594,12 @@
 
       <div class="modal-explanation">
         <h4>Explicación de los Indicadores:</h4>
-        <p><span style="color:#00ffcc;font-weight:bold;">Línea principal (cyan):</span> Representa el <strong>precio histórico</strong> de la criptomoneda durante el período analizado.</p>
-        <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Indica la <strong>tendencia actual</strong> del precio, ayudando a identificar si el precio está en alza, baja o en una fase lateral.</p>
-        <p><span style="color:#FFD700;font-weight:bold;">SMA (7) (amarillo):</span> Es la <strong>Media Móvil Simple de 7 periodos</strong>, que suaviza las fluctuaciones de precio a corto plazo para identificar tendencias recientes.</p>
-        <p><span style="color:#FF8C00;font-weight:bold;">SMA (30) (naranja):</span> Es la <strong>Media Móvil Simple de 30 periodos</strong>, que proporciona una visión de las tendencias a mediano plazo.</p>
-        <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> Muestra la <strong>cantidad de operaciones</strong> realizadas durante cada periodo, lo que puede indicar la fuerza detrás de los movimientos de precio.</p>
-        <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> Representa la <strong>predicción de inteligencia artificial</strong>, proyectando posibles movimientos futuros del precio basados en patrones históricos.</p>
+        <p><span style="color:#00ffcc;font-weight:bold;">Línea principal (cyan):</span> Representa el <strong>precio histórico</strong> de la criptomoneda.</p>
+        <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Indica la <strong>tendencia actual</strong> del precio.</p>
+        <p><span style="color:#FFD700;font-weight:bold;">SMA (7) (amarillo):</span> <strong>Media Móvil Simple de 7 periodos</strong>.</p>
+        <p><span style="color:#FF8C00;font-weight:bold;">SMA (30) (naranja):</span> <strong>Media Móvil Simple de 30 periodos</strong>.</p>
+        <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> <strong>cantidad de operaciones</strong> en cada periodo.</p>
+        <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> <strong>predicción IA</strong> basada en patrones históricos.</p>
         <h4>Consejo:</h4>
         <p id="adviceText">(Se llenará con consejos aleatorios)</p>
       </div>
@@ -633,10 +634,9 @@
     let silenciarAlertas = false;
     let updateTimer = null;
     let favoritesActive = false; // Flag para controlar el filtro de favoritos
+    let updateInterval = parseInt(localStorage.getItem('updateInterval')) || 30; // Intervalo por defecto
 
-    // Intervalo por defecto 30 seg
-    let updateInterval = parseInt(localStorage.getItem('updateInterval')) || 30;
-
+    // Referencias a elementos del DOM
     const body = document.body;
     const themeToggle = document.getElementById('themeToggle');
     const silenciarAlertasBtn = document.getElementById('silenciarAlertasBtn');
@@ -671,15 +671,14 @@
     const progressText = document.getElementById('progressText');
     const progressMessage = document.getElementById('progressMessage');
 
-    // Tema
+    // === 1) Manejo de tema (dark/light) ===
     const savedTheme = localStorage.getItem('theme') || 'dark';
     body.className = savedTheme;
-
     themeToggle.addEventListener('click', () => {
       body.className = (body.className === 'dark') ? 'light' : 'dark';
       localStorage.setItem('theme', body.className);
-      // Actualizar colores de los gráficos si están abiertos
       if (chartInstance) {
+        // Ajustar colores del gráfico
         chartInstance.options.scales.y.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
         chartInstance.options.scales.y1.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
         chartInstance.options.scales.x.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
@@ -690,13 +689,13 @@
       }
     });
 
-    // Botón silenciar
+    // === 2) Botón silenciar alertas (voz) ===
     silenciarAlertasBtn.addEventListener('click', () => {
       silenciarAlertas = !silenciarAlertas;
       silenciarAlertasBtn.textContent = silenciarAlertas ? "Activar Alertas" : "Silenciar Alertas";
     });
 
-    // Intervalo configurable
+    // === 3) Intervalo de actualización (global) ===
     updateIntervalInputElem.value = updateInterval;
     setIntervalBtnElem.addEventListener('click', () => {
       const newVal = parseInt(updateIntervalInputElem.value);
@@ -709,7 +708,7 @@
       }
     });
 
-    // RSI
+    // === 4) RSI y recomendación ===
     function calculateRSI(closePrices, period = 14) {
       if (closePrices.length < period) return null;
       let gains = 0;
@@ -755,7 +754,7 @@
       }
     }
 
-    // Voz
+    // === 5) Voz (alertas) ===
     function speakMessage(text) {
       if (silenciarAlertas) return;
       if ('speechSynthesis' in window) {
@@ -767,14 +766,13 @@
       }
     }
 
-    // Creación y actualización de cards
+    // === 6) Creación de tarjetas (cards) para cada cripto en la pantalla principal ===
     function createCryptoCard(crypto, index, rsiRecommendation) {
       const card = document.createElement('div');
       card.className = 'crypto-card';
       card.setAttribute('data-coin-id', crypto.id);
-      card.setAttribute('data-coin-name', crypto.name);
       card.setAttribute('data-current-price', crypto.current_price);
-      card.setAttribute('data-rsi-state', rsiRecommendation.state); // Asegurarse que es en minúsculas
+      card.setAttribute('data-rsi-state', rsiRecommendation.state);
 
       const isFav = favorites.includes(crypto.id);
       const star = isFav ? '★' : '☆';
@@ -791,13 +789,12 @@
       `;
 
       // Favorito
-      const favIcon = card.querySelector('.favorite-icon');
-      favIcon.addEventListener('click', (e) => {
+      card.querySelector('.favorite-icon').addEventListener('click', (e) => {
         e.stopPropagation();
         toggleFavorite(crypto.id, card);
       });
 
-      // Doble click / double tap
+      // Abrir modal (clic o touch)
       let lastTap = 0;
       card.addEventListener('dblclick', () => {
         openModal(crypto.id, crypto.name, crypto.current_price, crypto.symbol.toUpperCase() + 'USDT');
@@ -826,13 +823,10 @@
       localStorage.setItem('favorites', JSON.stringify(favorites));
       reorderCards();
       if (favoritesActive) {
-        applyFilters(); // Reaplicar filtros si está activo
+        applyFilters();
       }
     }
 
-    /**
-     * Reordena para que las favoritas vayan siempre primero.
-     */
     function reorderCards() {
       const cards = Array.from(document.querySelectorAll('.crypto-card'));
       const favCards = [];
@@ -848,12 +842,11 @@
       });
 
       cryptoGrid.innerHTML = '';
-      // Primero favoritas
       favCards.forEach(c => cryptoGrid.appendChild(c));
-      // Luego las demás
       otherCards.forEach(c => cryptoGrid.appendChild(c));
     }
 
+    // === 7) Carga de minigráfico (Binance) ===
     async function loadMiniChart(binanceSymbol, index) {
       try {
         const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1m&limit=30`;
@@ -902,11 +895,11 @@
       }
     }
 
-    // PnL
+    // === 8) PnL (Ganancia / Pérdida) en el modal ===
     function updateProfitLoss(coinId, currentPrice) {
-      const buy = parseFloat(buyPrices[coinId] || 0);
-      if (!isNaN(buy) && buy > 0) {
-        const pnl = ((currentPrice - buy) / buy) * 100;
+      const buyVal = parseFloat(buyPrices[coinId] || 0);
+      if (!isNaN(buyVal) && buyVal > 0) {
+        const pnl = ((currentPrice - buyVal) / buyVal) * 100;
         let arrow = '';
         if (pnl > 0) {
           arrow = '<span class="green-arrow">▲</span>';
@@ -919,22 +912,20 @@
       }
     }
 
+    // === 9) Funciones para cargar TODAS las criptos o SOLO las favoritas ===
     async function fetchCryptoData(forceUpdate = false) {
       try {
-        // Mostrar barra de progreso y desactivar interacciones
         progressOverlay.style.display = 'flex';
         cryptoGrid.innerHTML = '';
         coinFilter.innerHTML = '<option value="all">Todas</option>';
-        rsiFilter.value = 'all'; // Reset RSI filter
+        rsiFilter.value = 'all'; 
         btnFavoritos.disabled = true;
         btnVerTodos.disabled = true;
         coinFilter.disabled = true;
         rsiFilter.disabled = true;
 
-        const response = await fetch(
-          'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false',
-          { cache: 'no-store' }
-        );
+        const endpoint = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false`;
+        const response = await fetch(endpoint, { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
@@ -946,10 +937,6 @@
         const totalCryptos = data.length;
         let loadedCryptos = 0;
 
-        // Limpiar cryptoGrid y reiniciar filtros
-        cryptoGrid.innerHTML = '';
-        coinFilter.innerHTML = '<option value="all">Todas</option>';
-
         for (let coin of data) {
           await createCardWithRSI(coin, loadedCryptos, totalCryptos);
           loadedCryptos++;
@@ -959,38 +946,18 @@
           progressMessage.textContent = `Cargando ${loadedCryptos} de ${totalCryptos} criptomonedas...`;
         }
 
-        // Reordenamos (favoritas primero)
         reorderCards();
-
         lastUpdateElement.textContent = `Última actualización: ${new Date().toLocaleString()}`;
+        applyFilters();
 
-        // Recalcular PnL
-        for (const coin of data) {
-          if (buyPrices[coin.id]) {
-            const card = document.querySelector(`.crypto-card[data-coin-id="${coin.id}"]`);
-            if (card) {
-              card.setAttribute('data-current-price', coin.current_price);
-              if (coin.id === currentModalCoinId) {
-                updateProfitLoss(coin.id, coin.current_price);
-              }
-            }
-          }
-        }
-
-        applyFilters(); // Aplicar filtros después de cargar los datos
-
-        // Ocultar barra de progreso y habilitar interacciones
         progressOverlay.style.display = 'none';
         btnFavoritos.disabled = false;
         btnVerTodos.disabled = false;
         coinFilter.disabled = false;
         rsiFilter.disabled = false;
-
       } catch (error) {
         console.error('Error al obtener datos:', error);
         errorElement.style.display = 'block';
-        errorElement.textContent = 'No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.';
-        // Ocultar barra de progreso y habilitar interacciones
         progressOverlay.style.display = 'none';
         btnFavoritos.disabled = false;
         btnVerTodos.disabled = false;
@@ -999,8 +966,74 @@
       }
     }
 
-    async function createCardWithRSI(crypto, loadedCryptos, totalCryptos) {
-      const binanceSymbol = (crypto.symbol.toUpperCase() + 'USDT');
+    // Carga SOLO favoritas
+    async function fetchFavoritesData() {
+      try {
+        progressOverlay.style.display = 'flex';
+        cryptoGrid.innerHTML = '';
+        coinFilter.innerHTML = '<option value="all">Todas</option>';
+        rsiFilter.value = 'all'; 
+        btnFavoritos.disabled = true;
+        btnVerTodos.disabled = true;
+        coinFilter.disabled = true;
+        rsiFilter.disabled = true;
+
+        if (favorites.length === 0) {
+          // No hay favoritas, salimos
+          progressOverlay.style.display = 'none';
+          btnFavoritos.disabled = false;
+          btnVerTodos.disabled = false;
+          coinFilter.disabled = false;
+          rsiFilter.disabled = false;
+          return;
+        }
+
+        const favoritesIds = favorites.join('%2C'); 
+        // Por ejemplo: "bitcoin%2Cethereum" en la query
+        const endpoint = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${favoritesIds}&order=market_cap_desc&per_page=50&page=1&sparkline=false`;
+        const response = await fetch(endpoint, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error("No se obtuvieron datos de las favoritas.");
+        }
+        cryptoData = data;
+
+        const totalCryptos = data.length;
+        let loadedCryptos = 0;
+
+        for (let coin of data) {
+          await createCardWithRSI(coin, loadedCryptos, totalCryptos);
+          loadedCryptos++;
+          const progressPercentage = Math.round((loadedCryptos / totalCryptos) * 100);
+          progressBar.style.width = `${progressPercentage}%`;
+          progressText.textContent = `${progressPercentage}%`;
+          progressMessage.textContent = `Cargando favoritas (${loadedCryptos}/${totalCryptos})...`;
+        }
+
+        reorderCards();
+        lastUpdateElement.textContent = `Última actualización: ${new Date().toLocaleString()}`;
+        applyFilters();
+
+        progressOverlay.style.display = 'none';
+        btnFavoritos.disabled = false;
+        btnVerTodos.disabled = false;
+        coinFilter.disabled = false;
+        rsiFilter.disabled = false;
+      } catch (error) {
+        console.error('Error al cargar favoritas:', error);
+        progressOverlay.style.display = 'none';
+        btnFavoritos.disabled = false;
+        btnVerTodos.disabled = false;
+        coinFilter.disabled = false;
+        rsiFilter.disabled = false;
+      }
+    }
+
+    // === 10) Crear card con RSI (para uso en fetchCryptoData y fetchFavoritesData) ===
+    async function createCardWithRSI(coin, loadedCryptos, totalCryptos) {
+      const binanceSymbol = (coin.symbol.toUpperCase() + 'USDT');
       let rsiValue = null;
       try {
         const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1m&limit=30`, { cache: 'no-store' });
@@ -1012,41 +1045,34 @@
           }
         }
       } catch (err) {
-        // Manejo silencioso de errores de fetch de Binance
+        // error silencioso
       }
       const rsiRec = getRecommendationFromRSI(rsiValue);
 
-      // Alertas de voz
-      if (!silenciarAlertas && favorites.includes(crypto.id) && rsiValue !== null) {
+      if (!silenciarAlertas && favorites.includes(coin.id) && rsiValue !== null) {
         const percentAlert = parseFloat(priceAlerts['globalPercentAlert'] || 5);
-
-        // RSI vender
         if (rsiValue >= 70) {
-          const buyVal = parseFloat(buyPrices[crypto.id] || 0);
+          const buyVal = parseFloat(buyPrices[coin.id] || 0);
           if (buyVal > 0) {
-            const pnl = ((crypto.current_price - buyVal) / buyVal) * 100;
+            const pnl = ((coin.current_price - buyVal) / buyVal) * 100;
             if (pnl >= percentAlert) {
-              speakMessage(`Se sugiere vender ${crypto.name}. Ganancia de ${pnl.toFixed(2)} porciento, RSI: ${rsiValue.toFixed(2)}`);
+              speakMessage(`Se sugiere vender ${coin.name}. Ganancia de ${pnl.toFixed(2)} porciento, RSI: ${rsiValue.toFixed(2)}`);
             }
           }
-        }
-        // RSI comprar
-        else if (rsiValue < 30) {
-          const buyVal = parseFloat(buyPrices[crypto.id] || 0);
+        } else if (rsiValue < 30) {
+          const buyVal = parseFloat(buyPrices[coin.id] || 0);
           if (buyVal === 0) {
-            speakMessage(`Se sugiere comprar ${crypto.name}. RSI: ${rsiValue.toFixed(2)}. Sin precio de compra configurado.`);
+            speakMessage(`Se sugiere comprar ${coin.name}. RSI: ${rsiValue.toFixed(2)}. Sin precio de compra configurado.`);
           }
         }
       }
 
-      // Crear card
-      const card = createCryptoCard(crypto, loadedCryptos, rsiRec);
+      const card = createCryptoCard(coin, loadedCryptos, rsiRec);
       cryptoGrid.appendChild(card);
 
-      // Añadir option al select
       const opt = document.createElement('option');
-      opt.value = crypto.id; // Usar ID para facilitar el filtrado
-      opt.textContent = crypto.name;
+      opt.value = coin.id;
+      opt.textContent = coin.name;
       coinFilter.appendChild(opt);
 
       const loaded = await loadMiniChart(binanceSymbol, loadedCryptos);
@@ -1055,6 +1081,33 @@
       }
     }
 
+    // === 11) Carga y Actualización de UNA sola cripto (para el modal) ===
+    // Esto se usará cuando en el modal se presione "Actualizar", para NO recargar las 50.
+    async function fetchSingleCoinData(coinId) {
+      try {
+        // Llamada a la API para 1 sola criptomoneda
+        const endpoint = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinId}&order=market_cap_desc&per_page=1&page=1&sparkline=false`;
+        const response = await fetch(endpoint, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error(`No se obtuvieron datos para ${coinId}.`);
+        }
+        const coin = data[0];
+        currentModalCoinId = coin.id;
+        currentModalCoinName = coin.name;
+        currentModalPrice = coin.current_price;
+        currentModalSymbol = coin.symbol.toUpperCase() + 'USDT';
+
+        // Volvemos a cargar el modal con loadModalData
+        await loadModalData(currentModalCoinId, currentModalCoinName, currentModalPrice, currentModalSymbol);
+      } catch (error) {
+        console.error('Error al obtener datos de una sola criptomoneda:', error);
+      }
+    }
+
+    // === 12) Apertura del modal ===
     async function openModal(coinId, coinName, currentPrice, binanceSymbol) {
       currentModalCoinId = coinId;
       currentModalCoinName = coinName;
@@ -1063,6 +1116,7 @@
       await loadModalData(coinId, coinName, currentPrice, binanceSymbol);
     }
 
+    // === 13) Carga del modal (gráfico principal) ===
     async function loadModalData(coinId, coinName, currentPrice, binanceSymbol) {
       try {
         const endpoint = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=1m&limit=100`;
@@ -1081,48 +1135,37 @@
           return `${date.getDate()}/${(date.getMonth()+1)} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
         });
 
-        const lastPrice = closePrices[closePrices.length - 1];
-        const trendValues = closePrices.map(() => lastPrice);
-
-        const shortSMA = calculateSMA(closePrices, 7);
-        const longSMA = calculateSMA(closePrices, 30);
-
-        // CoinGecko
-        const coingeckoDetails = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`, {cache:'no-store'});
-        const detailsData = await coingeckoDetails.json();
-        const marketCap = detailsData.market_data?.market_cap?.usd || 'N/A';
-        const volume24h = detailsData.market_data?.total_volume?.usd || 'N/A';
-
-        const aiPredictions = generateAIPrediction(closePrices);
-        const aiLabels = [];
-        for (let i = 1; i <= aiPredictions.length; i++) {
-          aiLabels.push(`Futuro+${i}`);
-        }
-
+        // RSI
         const rsiValue = calculateRSI(closePrices, 14);
         const rsiRec = getRecommendationFromRSI(rsiValue);
-        const modalRecColor = (rsiRec.flag === 'green-flag') ? '#4CAF50'
-                                : (rsiRec.flag === 'red-flag') ? '#F44336'
-                                : '#FF9800';
 
         modalTitle.textContent = `${coinName} - Tendencia: ${rsiRec.text}`;
         dataSource.textContent = endpoint;
 
         modalInfo.innerHTML = `
           <p>Precio Actual: $${currentPrice.toFixed(2)}</p>
-          <p>Market Cap: $${parseFloat(marketCap).toLocaleString()}</p>
-          <p>Volumen 24h: $${parseFloat(volume24h).toLocaleString()}</p>
           <p>RSI (14): ${rsiValue ? rsiValue.toFixed(2) : 'N/A'}</p>
         `;
 
         modalOverlay.style.display = 'flex';
 
+        // Destruimos un chart anterior
         if (chartInstance) {
           chartInstance.destroy();
         }
 
         // IA line
-        const aiLine = Array(closePrices.length).fill(null).concat(aiPredictions);
+        const aiPredictions = generateAIPrediction(closePrices);
+        const aiLabels = [];
+        for (let i = 1; i <= aiPredictions.length; i++) {
+          aiLabels.push(`Futuro+${i}`);
+        }
+
+        // Sumas
+        const lastPrice = closePrices[closePrices.length - 1];
+        const trendValues = closePrices.map(() => lastPrice);
+        const shortSMA = calculateSMA(closePrices, 7);
+        const longSMA = calculateSMA(closePrices, 30);
 
         setTimeout(() => {
           chartInstance = new Chart(document.getElementById('cryptoChart').getContext('2d'), {
@@ -1143,7 +1186,8 @@
                   type: 'line',
                   label: `Línea de tendencia (${rsiRec.text})`,
                   data: trendValues.concat(Array(aiPredictions.length).fill(null)),
-                  borderColor: modalRecColor,
+                  borderColor: (rsiRec.flag === 'green-flag') ? '#4CAF50' :
+                              (rsiRec.flag === 'red-flag')   ? '#F44336' : '#FF9800',
                   borderDash: [5, 5],
                   pointRadius: 0,
                   fill: false,
@@ -1181,7 +1225,7 @@
                 {
                   type: 'line',
                   label: 'Línea IA (Predicción)',
-                  data: aiLine,
+                  data: aiPredictions,
                   borderColor: '#EE82EE',
                   borderDash: [2, 2],
                   pointRadius: 0,
@@ -1244,7 +1288,7 @@
           chartInstance.update();
         }, 100);
 
-        fillAdviceAndComments(detailsData);
+        fillAdviceAndComments();
         lastUpdateModal.textContent = `Última actualización: ${new Date().toLocaleString()}`;
 
         if (buyPrices[coinId]) {
@@ -1254,8 +1298,8 @@
         }
         updateProfitLoss(coinId, currentPrice);
 
-        // Añadir funcionalidad de expansión en móviles
-        handleChartExpansion();
+        // Añadir funcionalidad de expansión en móviles con un solo clic
+        handleChartSingleTap();
 
       } catch (error) {
         console.error('Error al mostrar modal con gráfico:', error);
@@ -1268,7 +1312,7 @@
       }
     }
 
-    function fillAdviceAndComments(detailsData) {
+    function fillAdviceAndComments() {
       const randomAdvice = [
         "Observa también el volumen para mayor precisión.",
         "Ten en cuenta la tendencia global del mercado.",
@@ -1279,6 +1323,7 @@
       adviceText.textContent = randomAdvice[Math.floor(Math.random() * randomAdvice.length)];
     }
 
+    // === 14) Cierre del modal ===
     modalClose.addEventListener('click', () => {
       modalOverlay.style.display = 'none';
       // Si el gráfico está expandido, revertir su tamaño
@@ -1301,13 +1346,14 @@
       }
     });
 
+    // === 15) Botón "Ver Análisis" (Funcionalidad Opcional) ===
     verAnalisisBtn.addEventListener('click', () => {
-      // Como la sección de análisis ha sido eliminada, deshabilitamos el botón
-      // Alternativamente, podrías redirigir a otra sección o eliminar el botón
-      // Por ahora, lo mantendremos como está
-      // Podrías añadir una función que muestre más detalles si lo deseas
+      // Puedes implementar una función adicional para mostrar análisis más detallados
+      // Por ahora, deshabilitaremos el botón
+      alert("Funcionalidad de análisis aún no implementada.");
     });
 
+    // === 16) Botones de Alertas ===
     setAlertBtn.addEventListener('click', () => {
       const percentVal = parseFloat(priceAlertInput.value);
       if (!isNaN(percentVal) && percentVal > 0) {
@@ -1338,23 +1384,26 @@
       }
     });
 
-    btnFavoritos.addEventListener('click', () => {
+    // === 17) Botones de Favoritos y Ver Todos ===
+    btnFavoritos.addEventListener('click', async () => {
       favoritesActive = true;
-      applyFilters();
+      await fetchFavoritesData();
     });
 
-    btnVerTodos.addEventListener('click', () => {
+    btnVerTodos.addEventListener('click', async () => {
       favoritesActive = false;
-      resetFilters();
+      await fetchCryptoData(true);
     });
 
+    // === 18) Botón "Actualizar" en el Modal ===
     updateChartBtn.addEventListener('click', async () => {
-      await fetchCryptoData(true);
-      if (currentModalCoinId && currentModalCoinName && currentModalPrice && currentModalSymbol) {
-        await loadModalData(currentModalCoinId, currentModalCoinName, currentModalPrice, currentModalSymbol);
+      // Llamamos a fetchSingleCoinData para actualizar solo esta cripto
+      if (currentModalCoinId) {
+        await fetchSingleCoinData(currentModalCoinId);
       }
     });
 
+    // === 19) Filtros de Criptomoneda y RSI ===
     coinFilter.addEventListener('change', () => {
       applyFilters();
     });
@@ -1363,45 +1412,7 @@
       applyFilters();
     });
 
-    // Primer fetch
-    fetchCryptoData(false);
-
-    // Timer
-    function startUpdateTimer() {
-      if (updateTimer) {
-        clearInterval(updateTimer);
-      }
-      updateTimer = setInterval(async () => {
-        await fetchCryptoData(true);
-      }, updateInterval * 1000);
-    }
-    startUpdateTimer();
-
-    // Funciones extra
-    function calculateSMA(data, length) {
-      const sma = [];
-      for (let i = 0; i < data.length; i++) {
-        if (i < length - 1) {
-          sma.push(null);
-        } else {
-          const slice = data.slice(i - length + 1, i + 1);
-          const sum = slice.reduce((a, b) => a + b, 0);
-          sma.push(sum / length);
-        }
-      }
-      return sma;
-    }
-
-    function generateAIPrediction(closePrices) {
-      const predictions = [];
-      const lastPrice = closePrices[closePrices.length - 1];
-      for (let i = 1; i <= 10; i++) {
-        const factor = 1 + (Math.random() - 0.5) * 0.02;
-        predictions.push(lastPrice * factor);
-      }
-      return predictions;
-    }
-
+    // === 20) Función de Filtros ===
     function applyFilters() {
       const selectedCoin = coinFilter.value;
       const selectedRSI = rsiFilter.value;
@@ -1450,39 +1461,77 @@
       reorderCards();
     }
 
-    // Nueva función para manejar la expansión del gráfico en móviles
-    function handleChartExpansion() {
-      // Detectar si es un dispositivo móvil
+    // === 21) Función para manejar la expansión del gráfico en móviles con un solo clic ===
+    function handleChartSingleTap() {
       const isMobile = window.matchMedia("only screen and (max-width: 768px)").matches;
-
       if (!isMobile) return; // Solo aplicar en móviles
 
       const chartCanvas = document.getElementById('cryptoChart');
       const chartContainer = document.getElementById('chartContainer');
 
-      let lastTap = 0;
-
-      chartCanvas.addEventListener('touchend', function(event) {
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-        if (tapLength < 300 && tapLength > 0) {
-          // Doble-tap detectado
-          toggleChartExpansion();
-          event.preventDefault();
-        }
-        lastTap = currentTime;
-      });
-
-      function toggleChartExpansion() {
+      chartCanvas.addEventListener('click', function(event) {
+        // Alternar clase expandida
         chartContainer.classList.toggle('expanded-chart');
         if (chartInstance) {
           chartInstance.resize();
         }
-      }
+      });
     }
 
-    // Ejecutar la función después de cargar el modal
-    // Ya está incluido en loadModalData()
+    // === 22) Función de Inicio ===
+    async function initialize() {
+      // Primer fetch según estado inicial (Ver Todos o Favoritos)
+      if (favoritesActive) {
+        await fetchFavoritesData();
+      } else {
+        await fetchCryptoData(false);
+      }
+
+      // Iniciar el timer de actualización
+      startUpdateTimer();
+    }
+
+    // === 23) Timer de Actualización ===
+    function startUpdateTimer() {
+      if (updateTimer) {
+        clearInterval(updateTimer);
+      }
+      updateTimer = setInterval(async () => {
+        if (favoritesActive) {
+          await fetchFavoritesData();
+        } else {
+          await fetchCryptoData(true);
+        }
+      }, updateInterval * 1000);
+    }
+
+    // === 24) Funciones Extra ===
+    function calculateSMA(data, length) {
+      const sma = [];
+      for (let i = 0; i < data.length; i++) {
+        if (i < length - 1) {
+          sma.push(null);
+        } else {
+          const slice = data.slice(i - length + 1, i + 1);
+          const sum = slice.reduce((a, b) => a + b, 0);
+          sma.push(sum / length);
+        }
+      }
+      return sma;
+    }
+
+    function generateAIPrediction(closePrices) {
+      const predictions = [];
+      const lastPrice = closePrices[closePrices.length - 1];
+      for (let i = 1; i <= 10; i++) {
+        const factor = 1 + (Math.random() - 0.5) * 0.02;
+        predictions.push(lastPrice * factor);
+      }
+      return predictions;
+    }
+
+    // === 25) Carga Inicial ===
+    initialize();
 
   </script>
 </body>
