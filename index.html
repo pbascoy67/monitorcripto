@@ -242,6 +242,7 @@
       align-items: center;
       z-index: 3000;
       padding: 0;
+      overflow: hidden;
     }
     #modalContent {
       background: #1a2332;
@@ -280,10 +281,14 @@
       transition: width 0.3s, height 0.3s; 
     }
     /* Clase expandida para móviles */
-    #chartContainer.expanded-chart {
-      width: 100%;
-      height: 500px; 
-      /* Puedes ajustar la altura según necesites */
+    #modalOverlay.expanded-view #modalContent {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      flex-direction: column;
+    }
+    #modalOverlay.expanded-view #chartContainer {
+      height: 80vh;
     }
     #cryptoChart {
       width: 100%;
@@ -447,6 +452,17 @@
       display: block;
       font-size: 0.9em;
     }
+    #volverBtn {
+      background: #00ffcc;
+      color: #0a0e17;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px auto 0 auto;
+      display: none; /* Inicialmente oculto */
+      font-size: 0.9em;
+    }
     #silenciarAlertasBtn {
       background: #FF9800;
       color: #0a0e17;
@@ -459,31 +475,6 @@
       bottom: 20px;
       right: 20px;
       z-index: 2100;
-    }
-
-    /* === Estilos para Vista Expandida en el Modal === */
-    #modalOverlay.expanded-view #modalContent {
-      width: 100vw;
-      height: 100vh;
-      border-radius: 0;
-    }
-    #modalOverlay.expanded-view #chartContainer {
-      height: 80vh;
-    }
-    #modalOverlay.expanded-view #verAnalisisBtn {
-      display: none; /* Ocultar botón "Ver Análisis" en vista expandida */
-    }
-    #modalOverlay.expanded-view #volverBtn {
-      display: block;
-      margin: 10px auto 0 auto;
-      padding: 5px 10px;
-      border-radius: 5px;
-      border: none;
-      background: #00ffcc;
-      color: #0a0e17;
-      cursor: pointer;
-      font-size: 0.9em;
-      display: none; /* Inicialmente oculto */
     }
 
     /* === Barra de Progreso === */
@@ -529,6 +520,9 @@
         height: 500px;
       }
     }
+
+    /* === Estilos para Vista Expandida en el Modal === */
+    /* Ya definidos arriba */
   </style>
 </head>
 <body class="dark">
@@ -588,6 +582,7 @@
   <div id="error">No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.</div>
   <div id="cryptoGrid"></div>
 
+  <!-- Modal -->
   <div id="modalOverlay">
     <div id="modalContent">
       <button id="modalClose">Regresar</button>
@@ -602,7 +597,7 @@
       <!-- Botón para expandir el gráfico en móvil -->
       <button id="verAnalisisBtn">Ver Análisis</button>
       <!-- Botón para volver desde la vista expandida -->
-      <button id="volverBtn" style="display: none;">Volver</button>
+      <button id="volverBtn">Volver</button>
 
       <div id="priceAlertContainer">
         <label id="percentAlertLabel">% de ganancia para alerta:
@@ -1341,7 +1336,17 @@
 
     // === 14) Cierre del modal ===
     modalClose.addEventListener('click', () => {
-      modalOverlay.classList.remove('expanded-view'); // Asegurarse de remover cualquier clase de vista expandida
+      cerrarModal();
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        cerrarModal();
+      }
+    });
+
+    function cerrarModal() {
+      modalOverlay.classList.remove('expanded-view'); // Remover clase de vista expandida si existe
       modalOverlay.style.display = 'none';
       // Reiniciar el modal al estado inicial
       volverBtn.style.display = 'none';
@@ -1349,20 +1354,7 @@
       const chartContainer = document.getElementById('chartContainer');
       chartContainer.classList.remove('expanded-chart');
       if (chartInstance) chartInstance.resize();
-    });
-
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) {
-        modalOverlay.classList.remove('expanded-view'); // Asegurarse de remover cualquier clase de vista expandida
-        modalOverlay.style.display = 'none';
-        // Reiniciar el modal al estado inicial
-        volverBtn.style.display = 'none';
-        verAnalisisBtn.style.display = 'block';
-        const chartContainer = document.getElementById('chartContainer');
-        chartContainer.classList.remove('expanded-chart');
-        if (chartInstance) chartInstance.resize();
-      }
-    });
+    }
 
     // === 15) Botón "Ver Análisis" (Expandir gráfico) ===
     verAnalisisBtn.addEventListener('click', () => {
@@ -1378,13 +1370,17 @@
         verAnalisisBtn.style.display = 'none';
         volverBtn.style.display = 'block';
       } else {
-        // Para escritorio, puedes implementar otra funcionalidad si lo deseas
+        // Para escritorio, podrías implementar otra funcionalidad si lo deseas
         alert("Esta funcionalidad está optimizada para dispositivos móviles.");
       }
     });
 
     // === 16) Botón "Volver" (Revertir expansión del gráfico) ===
     volverBtn.addEventListener('click', () => {
+      cerrarVistaExpandida();
+    });
+
+    function cerrarVistaExpandida() {
       modalOverlay.classList.remove('expanded-view');
       const chartContainer = document.getElementById('chartContainer');
       chartContainer.classList.remove('expanded-chart');
@@ -1393,7 +1389,7 @@
       // Mostrar botón "Ver Análisis" y ocultar "Volver"
       verAnalisisBtn.style.display = 'block';
       volverBtn.style.display = 'none';
-    });
+    }
 
     // === 17) Botones de Alertas ===
     setAlertBtn.addEventListener('click', () => {
