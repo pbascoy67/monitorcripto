@@ -461,7 +461,32 @@
       z-index: 2100;
     }
 
-    /* Barra de Progreso */
+    /* === Estilos para Vista Expandida en el Modal === */
+    #modalOverlay.expanded-view #modalContent {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+    }
+    #modalOverlay.expanded-view #chartContainer {
+      height: 80vh;
+    }
+    #modalOverlay.expanded-view #verAnalisisBtn {
+      display: none; /* Ocultar botón "Ver Análisis" en vista expandida */
+    }
+    #modalOverlay.expanded-view #volverBtn {
+      display: block;
+      margin: 10px auto 0 auto;
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: none;
+      background: #00ffcc;
+      color: #0a0e17;
+      cursor: pointer;
+      font-size: 0.9em;
+      display: none; /* Inicialmente oculto */
+    }
+
+    /* === Barra de Progreso === */
     #progressOverlay {
       position: fixed;
       top: 0;
@@ -574,7 +599,10 @@
       <div id="chartContainer">
         <canvas id="cryptoChart"></canvas>
       </div>
+      <!-- Botón para expandir el gráfico en móvil -->
       <button id="verAnalisisBtn">Ver Análisis</button>
+      <!-- Botón para volver desde la vista expandida -->
+      <button id="volverBtn" style="display: none;">Volver</button>
 
       <div id="priceAlertContainer">
         <label id="percentAlertLabel">% de ganancia para alerta:
@@ -652,6 +680,7 @@
     const modalInfo = document.getElementById('modalInfo');
     const adviceText = document.getElementById('adviceText');
     const verAnalisisBtn = document.getElementById('verAnalisisBtn');
+    const volverBtn = document.getElementById('volverBtn'); // Botón "Volver"
     const lastUpdateModal = document.getElementById('lastUpdateModal');
     const priceAlertInput = document.getElementById('priceAlertInput');
     const setAlertBtn = document.getElementById('setAlertBtn');
@@ -795,18 +824,8 @@
       });
 
       // Abrir modal (clic o touch)
-      let lastTap = 0;
-      card.addEventListener('dblclick', () => {
+      card.addEventListener('click', () => {
         openModal(crypto.id, crypto.name, crypto.current_price, crypto.symbol.toUpperCase() + 'USDT');
-      });
-      card.addEventListener('touchend', (event) => {
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-        if (tapLength < 300 && tapLength > 0) {
-          openModal(crypto.id, crypto.name, crypto.current_price, crypto.symbol.toUpperCase() + 'USDT');
-          event.preventDefault();
-        }
-        lastTap = currentTime;
       });
 
       return card;
@@ -1161,11 +1180,12 @@
           aiLabels.push(`Futuro+${i}`);
         }
 
-        // Sumas
-        const lastPrice = closePrices[closePrices.length - 1];
-        const trendValues = closePrices.map(() => lastPrice);
+        // SMA
         const shortSMA = calculateSMA(closePrices, 7);
         const longSMA = calculateSMA(closePrices, 30);
+
+        // Preparar los datos para el gráfico
+        const aiLine = Array(closePrices.length).fill(null).concat(aiPredictions);
 
         setTimeout(() => {
           chartInstance = new Chart(document.getElementById('cryptoChart').getContext('2d'), {
@@ -1185,7 +1205,7 @@
                 {
                   type: 'line',
                   label: `Línea de tendencia (${rsiRec.text})`,
-                  data: trendValues.concat(Array(aiPredictions.length).fill(null)),
+                  data: closePrices.map(() => closePrices[closePrices.length -1]).concat(Array(aiPredictions.length).fill(null)),
                   borderColor: (rsiRec.flag === 'green-flag') ? '#4CAF50' :
                               (rsiRec.flag === 'red-flag')   ? '#F44336' : '#FF9800',
                   borderDash: [5, 5],
@@ -1225,7 +1245,7 @@
                 {
                   type: 'line',
                   label: 'Línea IA (Predicción)',
-                  data: aiPredictions,
+                  data: aiLine,
                   borderColor: '#EE82EE',
                   borderDash: [2, 2],
                   pointRadius: 0,
@@ -1297,10 +1317,6 @@
           buyPriceInput.value = "";
         }
         updateProfitLoss(coinId, currentPrice);
-
-        // Añadir funcionalidad de expansión en móviles con un solo clic
-        handleChartSingleTap();
-
       } catch (error) {
         console.error('Error al mostrar modal con gráfico:', error);
         modalTitle.textContent = `${coinName} - Sin datos de gráfico`;
@@ -1325,35 +1341,61 @@
 
     // === 14) Cierre del modal ===
     modalClose.addEventListener('click', () => {
+      modalOverlay.classList.remove('expanded-view'); // Asegurarse de remover cualquier clase de vista expandida
       modalOverlay.style.display = 'none';
-      // Si el gráfico está expandido, revertir su tamaño
+      // Reiniciar el modal al estado inicial
+      volverBtn.style.display = 'none';
+      verAnalisisBtn.style.display = 'block';
       const chartContainer = document.getElementById('chartContainer');
-      if (chartContainer.classList.contains('expanded-chart')) {
+      chartContainer.classList.remove('expanded-chart');
+      if (chartInstance) chartInstance.resize();
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        modalOverlay.classList.remove('expanded-view'); // Asegurarse de remover cualquier clase de vista expandida
+        modalOverlay.style.display = 'none';
+        // Reiniciar el modal al estado inicial
+        volverBtn.style.display = 'none';
+        verAnalisisBtn.style.display = 'block';
+        const chartContainer = document.getElementById('chartContainer');
         chartContainer.classList.remove('expanded-chart');
         if (chartInstance) chartInstance.resize();
       }
     });
 
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) {
-        modalOverlay.style.display = 'none';
-        // Si el gráfico está expandido, revertir su tamaño
+    // === 15) Botón "Ver Análisis" (Expandir gráfico) ===
+    verAnalisisBtn.addEventListener('click', () => {
+      const isMobile = window.matchMedia("only screen and (max-width: 768px)").matches;
+      if (isMobile) {
+        // Expandir el modal a pantalla completa en horizontal
+        modalOverlay.classList.add('expanded-view');
         const chartContainer = document.getElementById('chartContainer');
-        if (chartContainer.classList.contains('expanded-chart')) {
-          chartContainer.classList.remove('expanded-chart');
-          if (chartInstance) chartInstance.resize();
-        }
+        chartContainer.classList.add('expanded-chart');
+        if (chartInstance) chartInstance.resize();
+
+        // Mostrar botón "Volver" y ocultar "Ver Análisis"
+        verAnalisisBtn.style.display = 'none';
+        volverBtn.style.display = 'block';
+      } else {
+        // Para escritorio, puedes implementar otra funcionalidad si lo deseas
+        alert("Esta funcionalidad está optimizada para dispositivos móviles.");
       }
     });
 
-    // === 15) Botón "Ver Análisis" (Funcionalidad Opcional) ===
-    verAnalisisBtn.addEventListener('click', () => {
-      // Puedes implementar una función adicional para mostrar análisis más detallados
-      // Por ahora, deshabilitaremos el botón
-      alert("Funcionalidad de análisis aún no implementada.");
+    // === 16) Botón "Volver" (Revertir expansión del gráfico) ===
+    volverBtn.addEventListener('click', () => {
+      modalOverlay.classList.remove('expanded-view');
+      const chartContainer = document.getElementById('chartContainer');
+      chartContainer.classList.remove('expanded-chart');
+      if (chartInstance) chartInstance.resize();
+
+      // Mostrar botón "Ver Análisis" y ocultar "Volver"
+      verAnalisisBtn.style.display = 'block';
+      volverBtn.style.display = 'none';
     });
 
-    // === 16) Botones de Alertas ===
+    // === 17) Botones de Alertas ===
     setAlertBtn.addEventListener('click', () => {
       const percentVal = parseFloat(priceAlertInput.value);
       if (!isNaN(percentVal) && percentVal > 0) {
@@ -1384,7 +1426,7 @@
       }
     });
 
-    // === 17) Botones de Favoritos y Ver Todos ===
+    // === 18) Botones de Favoritos y Ver Todos ===
     btnFavoritos.addEventListener('click', async () => {
       favoritesActive = true;
       await fetchFavoritesData();
@@ -1395,7 +1437,7 @@
       await fetchCryptoData(true);
     });
 
-    // === 18) Botón "Actualizar" en el Modal ===
+    // === 19) Botón "Actualizar" en el Modal ===
     updateChartBtn.addEventListener('click', async () => {
       // Llamamos a fetchSingleCoinData para actualizar solo esta cripto
       if (currentModalCoinId) {
@@ -1403,7 +1445,7 @@
       }
     });
 
-    // === 19) Filtros de Criptomoneda y RSI ===
+    // === 20) Filtros de Criptomoneda y RSI ===
     coinFilter.addEventListener('change', () => {
       applyFilters();
     });
@@ -1412,7 +1454,7 @@
       applyFilters();
     });
 
-    // === 20) Función de Filtros ===
+    // === 21) Función de Filtros ===
     function applyFilters() {
       const selectedCoin = coinFilter.value;
       const selectedRSI = rsiFilter.value;
@@ -1461,24 +1503,10 @@
       reorderCards();
     }
 
-    // === 21) Función para manejar la expansión del gráfico en móviles con un solo clic ===
-    function handleChartSingleTap() {
-      const isMobile = window.matchMedia("only screen and (max-width: 768px)").matches;
-      if (!isMobile) return; // Solo aplicar en móviles
+    // === 22) Función para manejar la expansión del gráfico en móviles con un solo clic ===
+    // Ya está implementada mediante los botones "Ver Análisis" y "Volver"
 
-      const chartCanvas = document.getElementById('cryptoChart');
-      const chartContainer = document.getElementById('chartContainer');
-
-      chartCanvas.addEventListener('click', function(event) {
-        // Alternar clase expandida
-        chartContainer.classList.toggle('expanded-chart');
-        if (chartInstance) {
-          chartInstance.resize();
-        }
-      });
-    }
-
-    // === 22) Función de Inicio ===
+    // === 23) Función de Inicio ===
     async function initialize() {
       // Primer fetch según estado inicial (Ver Todos o Favoritos)
       if (favoritesActive) {
@@ -1491,7 +1519,7 @@
       startUpdateTimer();
     }
 
-    // === 23) Timer de Actualización ===
+    // === 24) Timer de Actualización ===
     function startUpdateTimer() {
       if (updateTimer) {
         clearInterval(updateTimer);
@@ -1505,7 +1533,7 @@
       }, updateInterval * 1000);
     }
 
-    // === 24) Funciones Extra ===
+    // === 25) Funciones Extra ===
     function calculateSMA(data, length) {
       const sma = [];
       for (let i = 0; i < data.length; i++) {
@@ -1530,7 +1558,7 @@
       return predictions;
     }
 
-    // === 25) Carga Inicial ===
+    // === 26) Carga Inicial ===
     initialize();
 
   </script>
