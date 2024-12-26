@@ -253,6 +253,7 @@
       flex-direction: column;
       overflow-y: auto;
       padding: 20px;
+      transition: width 0.3s, height 0.3s;
     }
     body.light #modalContent {
       background: #f0f0f0;
@@ -276,6 +277,12 @@
       min-height: 300px;
       margin-bottom: 20px;
       position: relative;
+      transition: width 0.3s, height 0.3s; /* Para animación suave */
+    }
+    /* Nueva clase para el modo expandido en dispositivos móviles */
+    #chartContainer.expanded-chart {
+      width: 100%;
+      height: 500px; /* Ajusta según sea necesario */
     }
     #cryptoChart {
       width: 100%;
@@ -452,6 +459,7 @@
       right: 20px;
       z-index: 2100;
     }
+
     /* Estilos para la barra de progreso */
     #progressOverlay {
       position: fixed;
@@ -489,6 +497,11 @@
       }
       #progressBarContainer {
         width: 90%;
+      }
+      /* Estilos para el modo expandido en dispositivos móviles */
+      #chartContainer.expanded-chart {
+        width: 100%;
+        height: 500px; /* Ajusta según sea necesario */
       }
     }
   </style>
@@ -1241,6 +1254,9 @@
         }
         updateProfitLoss(coinId, currentPrice);
 
+        // Añadir funcionalidad de expansión en móviles
+        handleChartExpansion();
+
       } catch (error) {
         console.error('Error al mostrar modal con gráfico:', error);
         modalTitle.textContent = `${coinName} - Sin datos de gráfico`;
@@ -1265,11 +1281,23 @@
 
     modalClose.addEventListener('click', () => {
       modalOverlay.style.display = 'none';
+      // Si el gráfico está expandido, revertir su tamaño
+      const chartContainer = document.getElementById('chartContainer');
+      if (chartContainer.classList.contains('expanded-chart')) {
+        chartContainer.classList.remove('expanded-chart');
+        if (chartInstance) chartInstance.resize();
+      }
     });
 
     modalOverlay.addEventListener('click', (e) => {
       if (e.target === modalOverlay) {
         modalOverlay.style.display = 'none';
+        // Si el gráfico está expandido, revertir su tamaño
+        const chartContainer = document.getElementById('chartContainer');
+        if (chartContainer.classList.contains('expanded-chart')) {
+          chartContainer.classList.remove('expanded-chart');
+          if (chartInstance) chartInstance.resize();
+        }
       }
     });
 
@@ -1421,6 +1449,41 @@
       });
       reorderCards();
     }
+
+    // Nueva función para manejar la expansión del gráfico en móviles
+    function handleChartExpansion() {
+      // Detectar si es un dispositivo móvil
+      const isMobile = window.matchMedia("only screen and (max-width: 768px)").matches;
+
+      if (!isMobile) return; // Solo aplicar en móviles
+
+      const chartCanvas = document.getElementById('cryptoChart');
+      const chartContainer = document.getElementById('chartContainer');
+
+      let lastTap = 0;
+
+      chartCanvas.addEventListener('touchend', function(event) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 300 && tapLength > 0) {
+          // Doble-tap detectado
+          toggleChartExpansion();
+          event.preventDefault();
+        }
+        lastTap = currentTime;
+      });
+
+      function toggleChartExpansion() {
+        chartContainer.classList.toggle('expanded-chart');
+        if (chartInstance) {
+          chartInstance.resize();
+        }
+      }
+    }
+
+    // Ejecutar la función después de cargar el modal
+    // Ya está incluido en loadModalData()
+
   </script>
 </body>
 </html>
