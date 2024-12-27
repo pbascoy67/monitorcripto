@@ -60,7 +60,7 @@
     /* === Contenedores de Filtros y Botones === */
     .top-bar {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between; /* Cambiado para acomodar nuevos botones */
       align-items: center;
       margin-bottom: 20px;
       gap: 10px;
@@ -87,10 +87,14 @@
       padding: 5px;
       border-radius: 5px;
       border: 1px solid #00ffcc;
-      background-color: transparent;
-      color: inherit;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
       min-width: 150px;
       cursor: pointer;
+    }
+    #filtersContainer option {
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
     }
     /* === Estilos de Botones === */
     .btn {
@@ -108,6 +112,7 @@
     }
     .btn-primary {
       background-color: #00ffcc;
+      color: #000000; /* Cambiado a negro para mejor legibilidad */
     }
     .btn-primary:hover {
       background-color: #00e6b8;
@@ -145,6 +150,7 @@
     }
     .btn-default {
       background-color: #9E9E9E;
+      color: #ffffff; /* Letras blancas */
     }
     .btn-default:hover {
       background-color: #757575;
@@ -256,7 +262,8 @@
     
     /* === Modal Detallado === */
     #modalOverlay,
-    #compareModalOverlay {
+    #compareModalOverlay,
+    #portfolioModalOverlay { /* Nuevo modal */
       position: fixed;
       top: 0;
       left: 0;
@@ -271,7 +278,8 @@
       overflow: hidden;
     }
     #modalContent,
-    #compareModalContent {
+    #compareModalContent,
+    #portfolioModalContent { /* Nuevo modal */
       background: #1a2332;
       border-radius: 15px;
       width: 95vw;
@@ -284,7 +292,8 @@
       transition: width 0.3s, height 0.3s;
     }
     body.light #modalContent,
-    body.light #compareModalContent {
+    body.light #compareModalContent,
+    body.light #portfolioModalContent { /* Nuevo modal */
       background-color: #ffffff;
       color: #000000;
     }
@@ -297,7 +306,8 @@
       z-index: 5000;
     }
     #chartContainer,
-    #comparisonChartContainer {
+    #comparisonChartContainer,
+    #portfolioChartContainer { /* Nuevo modal */
       width: 100%;
       min-height: 300px;
       margin-bottom: 20px;
@@ -306,7 +316,8 @@
     }
     /* Clase expandida para móviles */
     #modalOverlay.expanded-view #modalContent,
-    #compareModalOverlay.expanded-view #compareModalContent {
+    #compareModalOverlay.expanded-view #compareModalContent,
+    #portfolioModalOverlay.expanded-view #portfolioModalContent { /* Nuevo modal */
       width: 100vw;
       height: 100vh;
       border-radius: 0;
@@ -315,7 +326,8 @@
     }
     
     #modalOverlay.expanded-view #chartContainer,
-    #compareModalOverlay.expanded-view #comparisonChartContainer {
+    #compareModalOverlay.expanded-view #comparisonChartContainer,
+    #portfolioModalOverlay.expanded-view #portfolioChartContainer { /* Nuevo modal */
       width: 100%;
       height: calc(100vh - 50px); /* Ajustar según los elementos del modal */
       flex-grow: 1;
@@ -323,20 +335,23 @@
     
     /* Asegurar que el canvas del gráfico ocupe todo el contenedor */
     #cryptoChart,
-    #comparisonChart {
+    #comparisonChart,
+    #portfolioChart { /* Nuevo modal */
       width: 100% !important;
       height: 100% !important;
     }
     
     /* Ocultar otros elementos del modal cuando está en vista expandida */
     #modalOverlay.expanded-view #modalContent > *:not(#chartContainer):not(#volverBtn),
-    #compareModalOverlay.expanded-view #compareModalContent > *:not(#comparisonChartContainer):not(#volverCompareBtn) {
+    #compareModalOverlay.expanded-view #compareModalContent > *:not(#comparisonChartContainer):not(#volverCompareBtn),
+    #portfolioModalOverlay.expanded-view #portfolioModalContent > *:not(#portfolioChartContainer):not(#volverPortfolioBtn) { /* Nuevo modal */
       display: none;
     }
     
     /* Estilos del botón "Regresar" */
     #volverBtn,
-    #volverCompareBtn {
+    #volverCompareBtn,
+    #volverPortfolioBtn { /* Nuevo modal */
       /* Heredan estilos de .btn */
       /* Ya tienen clases específicas asignadas en HTML */
       display: none; /* Inicialmente oculto */
@@ -348,29 +363,38 @@
     
     /* === Modal de Comparación === */
     #compareModalContent select {
-      background-color: #000000;
-      color: #ffffff;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
     }
     body.light #compareModalContent select {
-      background-color: #ffffff;
-      color: #000000;
+      background-color: #ffffff; /* Fondo blanco en tema claro */
+      color: #000000; /* Letras negras en tema claro */
     }
     
-    /* === Tabla Comparativa === */
-    #comparisonTable {
+    /* === Tabla Comparativa y Portafolio === */
+    #comparisonTable,
+    #portfolioTable { /* Nuevo modal */
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
-    #comparisonTable th, #comparisonTable td {
+    #comparisonTable th, #comparisonTable td,
+    #portfolioTable th, #portfolioTable td { /* Nuevo modal */
       border: 1px solid #ddd;
       padding: 8px;
       text-align: center;
       position: relative; /* Para el tooltip */
       cursor: default;
     }
-    #comparisonTable th {
+    #comparisonTable th,
+    #portfolioTable th { /* Nuevo modal */
       background-color: #f2f2f2;
+      font-weight: bold;
+      color: #000000; /* Cambiado a negro */
+    }
+    #comparisonTable tr:hover,
+    #portfolioTable tr:hover { /* Nuevo modal */
+      background-color: #f5f5f5;
     }
     /* Tooltip Styles */
     .tooltip {
@@ -390,7 +414,9 @@
       font-size: 0.8em;
     }
     #comparisonTable th:hover .tooltip,
-    #comparisonTable td:hover .tooltip {
+    #comparisonTable td:hover .tooltip,
+    #portfolioTable th:hover .tooltip,
+    #portfolioTable td:hover .tooltip { /* Nuevo modal */
       opacity: 1;
       visibility: visible;
     }
@@ -408,7 +434,7 @@
       display: flex;
       gap: 5px;
     }
-    #btnFavoritos, #btnVerTodos {
+    #btnFavoritos, #btnVerTodos, #btnPortfolio { /* Nuevo modal */
       /* Heredan estilos de .btn */
       /* Ya tienen clases específicas asignadas en HTML */
     }
@@ -474,7 +500,8 @@
     }
     @media (max-width: 768px) {
       #modalContent,
-      #compareModalContent {
+      #compareModalContent,
+      #portfolioModalContent { /* Nuevo modal */
         width: 98vw;
         height: 98vh;
       }
@@ -501,19 +528,23 @@
       padding: 5px;
       border-radius: 5px;
       border: 1px solid #00ffcc;
-      background-color: transparent;
-      color: inherit;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
       min-width: 150px;
       cursor: pointer;
+    }
+    #modalTimeFrameFilter option {
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
     }
     
     /* === Responsive Grids and Charts === */
     /* Asegurar que el gráfico y la tabla sean responsivos */
     @media (max-width: 768px) {
-      #comparisonChartContainer, #chartContainer {
+      #comparisonChartContainer, #chartContainer, #portfolioChartContainer { /* Nuevo modal */
         height: 300px;
       }
-      #cryptoChart, #comparisonChart {
+      #cryptoChart, #comparisonChart, #portfolioChart { /* Nuevo modal */
         height: 100% !important;
       }
     }
@@ -534,6 +565,71 @@
     .orange-recommendation {
       color: #FF9800;
     }
+    
+    /* === Modal de Portafolio === */
+    #portfolioModalContent {
+      /* Reutilizar estilos existentes */
+    }
+    #portfolioModalContent h1 {
+      color: #00ffcc;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #portfolioTable th {
+      color: #000000; /* Letras en negro para legibilidad */
+    }
+    #portfolioTable td {
+      color: inherit;
+    }
+    #addPortfolioForm {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #addPortfolioForm select,
+    #addPortfolioForm input {
+      width: calc(20% - 10px);
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #00ffcc;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+      cursor: pointer;
+    }
+    #addPortfolioForm option {
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+    }
+    #addPortfolioForm button {
+      width: calc(100% - 20px);
+      margin-top: 10px;
+    }
+    #portfolioSummary .summary-item {
+      font-weight: bold;
+    }
+    #portfolioSummary .summary-value {
+      color: #4CAF50;
+    }
+    /* Ajuste para permitir hasta 10 decimales en el campo cantidad */
+    #portfolioCryptoAmount {
+      step: 0.0000000001;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+    }
+    #portfolioCryptoBuyPrice {
+      step: 0.0000000001;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+    }
+    #updateTimePortfolio {
+      text-align: center;
+      margin-top: 10px;
+      color: #00ffcc;
+    }
+    
   </style>
 </head>
 <body class="dark">
@@ -549,11 +645,14 @@
     <div id="progressText">0%</div>
   </div>
 
-  <!-- Barra Superior con Botones "Favoritos" y "Ver Todos" -->
+  <!-- Barra Superior con Botones "Favoritos", "Ver Todos" y "Mi Portafolio Cripto" -->
   <div class="top-bar">
     <div id="favoritesBar">
       <button id="btnFavoritos" class="btn btn-success">Favoritos</button>
       <button id="btnVerTodos" class="btn btn-secondary">Ver Todos</button>
+    </div>
+    <div>
+      <button id="btnPortfolio" class="btn btn-primary">Mi Portafolio Cripto</button> <!-- Nuevo botón -->
     </div>
   </div>
 
@@ -590,6 +689,11 @@
           <option value="neutral">Neutral</option>
       </select>
     </div>
+    <!-- Nuevo Contenedor para el Intervalo de Actualización -->
+    <div id="updateIntervalContainer">
+      <label for="updateInterval" title="Selecciona el intervalo de actualización en segundos">Intervalo Actualización (segundos)</label>
+      <input type="number" id="updateInterval" min="10" step="10" value="30">
+    </div>
   </div>
 
   <!-- Botón "Comparar Criptomonedas" Centrado Debajo de los Filtros -->
@@ -621,7 +725,7 @@
             <option value="1Y">Último Año</option>
         </select>
       </div>
-      <p id="lastUpdateModal"></p>
+      <p id="lastUpdateModal">Última actualización: (sin datos)</p>
       <div class="modal-info" id="modalInfo"></div>
       <div id="chartContainer">
         <canvas id="cryptoChart"></canvas>
@@ -639,7 +743,7 @@
       </div>
 
       <div id="buyPriceContainer">
-        <label title="Ingresa tu precio de compra">Precio de Compra: $<input type="number" id="buyPriceInput" placeholder="0.00"></label>
+        <label title="Ingresa tu precio de compra">Precio de Compra: $<input type="number" id="buyPriceInput" placeholder="0.00" step="0.0000000001"></label> <!-- Ajuste del step -->
         <button id="setBuyPriceBtn" class="btn btn-primary">Colocar precio de compra</button>
         <button id="clearBuyPriceBtn" class="btn btn-danger">Borrar precio de compra</button>
       </div>
@@ -777,6 +881,55 @@
     </div>
   </div>
 
+  <!-- Modal de Portafolio -->
+  <div id="portfolioModalOverlay">
+    <div id="portfolioModalContent">
+      <button class="btn btn-danger modalCloseBtn">Cerrar</button>
+      <h1>Mi Portafolio de Criptomonedas</h1>
+      <table id="portfolioTable">
+        <thead>
+          <tr>
+            <th>Criptomoneda</th>
+            <th>Cantidad</th>
+            <th>Precio de Compra</th>
+            <th>Valor Invertido (USD)</th>
+            <th>Fecha de Inversión</th>
+            <th>Precio Actual</th>
+            <th>Valor Actual</th>
+            <th>Ganancia/Pérdida</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Los datos se cargarán dinámicamente aquí -->
+        </tbody>
+      </table>
+
+      <div id="portfolioSummary">
+        <div class="summary-item">Total Invertido: <span id="totalInvestedPortfolio" class="summary-value"></span></div>
+        <div class="summary-item">Valor Total del Portafolio: <span id="totalPortfolioValuePortfolio" class="summary-value"></span></div>
+        <div class="summary-item">Ganancia/Pérdida Total: <span id="totalProfitLossPortfolio" class="summary-value"></span></div>
+        <div class="summary-item">Última Actualización: <span id="lastPortfolioUpdate" class="summary-value">(sin datos)</span></div> <!-- Nuevo campo para última actualización -->
+      </div>
+
+      <form id="addPortfolioForm">
+        <select id="portfolioCryptoName" required>
+          <option value="">Selecciona Criptomoneda</option>
+        </select>
+        <input type="text" id="portfolioCryptoSymbol" placeholder="Símbolo" readonly required>
+        <input type="number" id="portfolioCryptoAmount" placeholder="Cantidad" step="0.0000000001" required> <!-- Ajuste del step -->
+        <input type="number" id="portfolioCryptoBuyPrice" placeholder="Precio de compra" step="0.0000000001" required> <!-- Ajuste del step -->
+        <input type="date" id="portfolioCryptoDate" required>
+        <button type="submit" class="btn btn-success">Añadir Criptomoneda</button>
+      </form>
+
+      <!-- Botón para actualizar precios del portafolio -->
+      <button id="updatePortfolioPricesBtn" class="btn btn-info" style="margin-top: 20px;">Actualizar Precios</button>
+      <!-- Mostrar tiempo de actualización -->
+      <p id="updateTimePortfolio" style="text-align: center; margin-top: 10px; color: #00ffcc;">Tiempo de actualización: 0 ms</p>
+    </div>
+  </div>
+
   <!-- Botón de Tema -->
   <button id="themeToggle" class="btn btn-info">Tema</button>
 
@@ -787,10 +940,18 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <!-- Chart.js Zoom Plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+  <!-- jQuery para el modal de portafolio -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- DataTables para el modal de portafolio -->
+  <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+  <!-- Font Awesome para íconos en el modal de portafolio -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
   <script>
     let chartInstance = null;
     let comparisonChartInstance = null; // Para el gráfico de comparación
+    let portfolioChartInstance = null; // Para el gráfico de portafolio
     let cryptoData = [];
     let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
     let priceAlerts = JSON.parse(localStorage.getItem('priceAlerts')) || {};
@@ -830,6 +991,7 @@
     const profitLossText = document.getElementById('profitLossText');
     const btnFavoritos = document.getElementById('btnFavoritos');
     const btnVerTodos = document.getElementById('btnVerTodos');
+    const btnPortfolio = document.getElementById('btnPortfolio'); // Nuevo botón
     const updateChartBtn = document.getElementById('updateChartBtn');
 
     // Sección de Comparación
@@ -870,6 +1032,25 @@
     const volverCompareBtn = document.getElementById('volverCompareBtn');
     const comparisonRecommendation = document.getElementById('comparisonRecommendation');
 
+    // Modal de Portafolio
+    const portfolioModalOverlay = document.getElementById('portfolioModalOverlay');
+    const portfolioModalContent = document.getElementById('portfolioModalContent');
+    const portfolioClose = portfolioModalContent.querySelector('.modalCloseBtn');
+    const portfolioTable = document.getElementById('portfolioTable');
+    const portfolioSummary = document.getElementById('portfolioSummary');
+    const totalInvestedPortfolio = document.getElementById('totalInvestedPortfolio');
+    const totalPortfolioValuePortfolio = document.getElementById('totalPortfolioValuePortfolio');
+    const totalProfitLossPortfolio = document.getElementById('totalProfitLossPortfolio');
+    const lastPortfolioUpdate = document.getElementById('lastPortfolioUpdate'); // Nuevo elemento
+    const addPortfolioForm = document.getElementById('addPortfolioForm');
+    const portfolioCryptoName = document.getElementById('portfolioCryptoName');
+    const portfolioCryptoSymbol = document.getElementById('portfolioCryptoSymbol');
+    const portfolioCryptoAmount = document.getElementById('portfolioCryptoAmount');
+    const portfolioCryptoBuyPrice = document.getElementById('portfolioCryptoBuyPrice');
+    const portfolioCryptoDate = document.getElementById('portfolioCryptoDate');
+    const updatePortfolioPricesBtn = document.getElementById('updatePortfolioPricesBtn');
+    const updateTimePortfolio = document.getElementById('updateTimePortfolio'); // Nuevo elemento para tiempo de actualización
+
     // Barra de progreso
     const progressOverlay = document.getElementById('progressOverlay');
     const progressBar = document.getElementById('progressBar');
@@ -900,6 +1081,13 @@
         comparisonChartInstance.options.plugins.legend.labels.color = body.className === 'dark' ? '#ffffff' : '#000000';
         comparisonChartInstance.update();
       }
+      if (portfolioChartInstance) {
+        portfolioChartInstance.options.scales.y.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        portfolioChartInstance.options.scales.x.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        portfolioChartInstance.options.scales.y.title.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        portfolioChartInstance.options.plugins.legend.labels.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        portfolioChartInstance.update();
+      }
     });
 
     // === 2) Botón silenciar alertas (voz) ===
@@ -907,9 +1095,6 @@
       silenciarAlertas = !silenciarAlertas;
       silenciarAlertasBtn.textContent = silenciarAlertas ? "Activar Alertas" : "Silenciar Alertas";
     });
-
-    // === 3) Intervalo de actualización (global) ===
-    // Eliminado: No se utilizan estos elementos
 
     // === 4) RSI y recomendación ===
     function calculateRSI(closePrices, period = 14) {
@@ -1125,6 +1310,7 @@
         rsiFilter.value = 'all'; 
         btnFavoritos.disabled = true;
         btnVerTodos.disabled = true;
+        btnPortfolio.disabled = true;
         coinFilter.disabled = true;
         rsiFilter.disabled = true;
         compareCryptoBtn.classList.remove('enabled');
@@ -1147,6 +1333,9 @@
         // Llenar los select de comparación
         populateComparisonSelectors(data);
 
+        // Llenar los select del modal de portafolio
+        populatePortfolioCryptoSelector(data);
+
         // Procesar criptomonedas en batches para evitar sobrecarga de solicitudes
         const batchSize = 5; // Número de solicitudes simultáneas
         for (let i = 0; i < data.length; i += batchSize) {
@@ -1168,6 +1357,7 @@
         // Habilitar el botón de comparación
         compareCryptoBtn.classList.add('enabled');
         compareCryptoBtn.disabled = false;
+        btnPortfolio.disabled = false;
 
         progressOverlay.style.display = 'none';
         btnFavoritos.disabled = false;
@@ -1180,6 +1370,7 @@
         progressOverlay.style.display = 'none';
         btnFavoritos.disabled = false;
         btnVerTodos.disabled = false;
+        btnPortfolio.disabled = false;
         coinFilter.disabled = false;
         rsiFilter.disabled = false;
       }
@@ -1194,6 +1385,7 @@
         rsiFilter.value = 'all'; 
         btnFavoritos.disabled = true;
         btnVerTodos.disabled = true;
+        btnPortfolio.disabled = true;
         coinFilter.disabled = true;
         rsiFilter.disabled = true;
         compareCryptoBtn.classList.remove('enabled');
@@ -1204,6 +1396,7 @@
           progressOverlay.style.display = 'none';
           btnFavoritos.disabled = false;
           btnVerTodos.disabled = false;
+          btnPortfolio.disabled = false;
           coinFilter.disabled = false;
           rsiFilter.disabled = false;
           return;
@@ -1228,6 +1421,9 @@
         // Llenar los select de comparación solo con favoritas
         populateComparisonSelectors(data, true);
 
+        // Llenar los select del modal de portafolio
+        populatePortfolioCryptoSelector(data);
+
         // Procesar criptomonedas en batches para evitar sobrecarga de solicitudes
         const batchSize = 5; // Número de solicitudes simultáneas
         for (let i = 0; i < data.length; i += batchSize) {
@@ -1249,6 +1445,7 @@
         // Habilitar el botón de comparación
         compareCryptoBtn.classList.add('enabled');
         compareCryptoBtn.disabled = false;
+        btnPortfolio.disabled = false;
 
         progressOverlay.style.display = 'none';
         btnFavoritos.disabled = false;
@@ -1261,12 +1458,13 @@
         progressOverlay.style.display = 'none';
         btnFavoritos.disabled = false;
         btnVerTodos.disabled = false;
+        btnPortfolio.disabled = false;
         coinFilter.disabled = false;
         rsiFilter.disabled = false;
       }
     }
 
-    // === 10) Crear card con RSI (para uso en fetchCryptoData y fetchFavoritesData) ===
+    // === 10) Función para Crear Card con RSI ===
     async function createCardWithRSI(coin, index, totalCryptos) {
       const binanceSymbol = (coin.symbol.toUpperCase() + 'USDT');
       let rsiValue = null;
@@ -1329,6 +1527,14 @@
         opt2.value = coin.id;
         opt2.textContent = coin.name;
         compareCrypto2Select.appendChild(opt2);
+      }
+
+      // Añadir opciones al selector de criptomonedas en el modal de portafolio
+      if (!portfolioCryptoName.querySelector(`option[value="${coin.id}"]`)) {
+        const optPortfolio = document.createElement('option');
+        optPortfolio.value = coin.id;
+        optPortfolio.textContent = coin.name;
+        portfolioCryptoName.appendChild(optPortfolio);
       }
 
       const loaded = await loadMiniChart(binanceSymbol, index);
@@ -1584,7 +1790,7 @@
         adviceText.textContent = "No hay suficientes datos para dar un consejo.";
         dataSource.textContent = "";
         modalOverlay.style.display = 'flex';
-        lastUpdateModal.textContent = "";
+        lastUpdateModal.textContent = "Última actualización: (sin datos)";
       }
     }
 
@@ -1655,18 +1861,6 @@
       volverBtn.style.display = 'none';
     }
 
-    // === Nueva: Listener para cambios de orientación ===
-    window.addEventListener('orientationchange', () => {
-      if (modalOverlay.classList.contains('expanded-view') && chartInstance) {
-        chartInstance.resize();
-        chartInstance.update();
-      }
-      if (compareModalOverlay.classList.contains('expanded-view') && comparisonChartInstance) {
-        comparisonChartInstance.resize();
-        comparisonChartInstance.update();
-      }
-    });
-
     // === 17) Botones de Alertas ===
     setAlertBtn.addEventListener('click', () => {
       const percentVal = parseFloat(priceAlertInput.value);
@@ -1705,7 +1899,7 @@
       }
     });
 
-    // === 18) Botones de Favoritos y Ver Todos ===
+    // === 18) Botones de Favoritos, Ver Todos y Mi Portafolio ===
     btnFavoritos.addEventListener('click', async () => {
       favoritesActive = true;
       await fetchFavoritesData();
@@ -1714,6 +1908,10 @@
     btnVerTodos.addEventListener('click', async () => {
       favoritesActive = false;
       await fetchCryptoData(true);
+    });
+
+    btnPortfolio.addEventListener('click', () => {
+      openPortfolioModal();
     });
 
     // === 19) Botón "Actualizar" en el Modal ===
@@ -1781,14 +1979,12 @@
       reorderCards();
     }
 
-    // === 22) Función para manejar la expansión del gráfico en móviles con un solo clic ===
-    // Ya está implementada mediante los botones "Ver Análisis" y "Regresar"
-
-    // === 23) Función de Inicio ===
+    // === 23) Función para Inicio ===
     async function initialize() {
       // Añadir Event Listeners para los filtros
       coinFilter.addEventListener('change', applyFilters);
       rsiFilter.addEventListener('change', applyFilters);
+      document.getElementById('updateInterval').addEventListener('change', handleUpdateIntervalChange);
 
       // Añadir Event Listener para el botón de Comparación
       compareCryptoBtn.addEventListener('click', () => {
@@ -1807,7 +2003,7 @@
         }
       });
 
-      // Añadir Event Listener para el botón de "Regresar" en el modal de comparación
+      // Añadir Event Listener para el botón "Regresar" en el modal de comparación
       volverCompareBtn.addEventListener('click', () => {
         cerrarVistaExpandidaCompare();
       });
@@ -1815,6 +2011,27 @@
       // Event Listeners para habilitar el botón "Comparar" dentro del modal
       compareCrypto1Select.addEventListener('change', checkCompareButtonState);
       compareCrypto2Select.addEventListener('change', checkCompareButtonState);
+
+      // Añadir Event Listener para el botón "Regresar" en el modal de portafolio
+      portfolioModalContent.querySelector('.modalCloseBtn').addEventListener('click', () => {
+        cerrarPortfolioModal();
+      });
+
+      // Añadir Event Listener para el modal de portafolio al hacer clic fuera del contenido
+      portfolioModalOverlay.addEventListener('click', (e) => {
+        if (e.target === portfolioModalOverlay) {
+          cerrarPortfolioModal();
+        }
+      });
+
+      // Añadir Event Listener para el formulario de agregar criptomonedas al portafolio
+      addPortfolioForm.addEventListener('submit', handleAddPortfolioCrypto);
+
+      // Añadir Event Listener para el selector de criptomonedas en el portafolio para auto-llenar el símbolo
+      portfolioCryptoName.addEventListener('change', autoFillPortfolioSymbol);
+
+      // Añadir Event Listener para el botón de actualizar precios del portafolio
+      updatePortfolioPricesBtn.addEventListener('click', updatePortfolioPrices);
 
       // Primer fetch según estado inicial (Ver Todos o Favoritos)
       if (favoritesActive) {
@@ -1839,6 +2056,20 @@
           await fetchCryptoData(true);
         }
       }, updateInterval * 1000);
+    }
+
+    // Manejar cambios en el intervalo de actualización
+    function handleUpdateIntervalChange(e) {
+      const newInterval = parseInt(e.target.value);
+      if (!isNaN(newInterval) && newInterval >= 10) {
+        updateInterval = newInterval;
+        localStorage.setItem('updateInterval', updateInterval);
+        startUpdateTimer();
+        speakMessage(`Intervalo de actualización establecido en ${updateInterval} segundos.`);
+      } else {
+        alert("Por favor, ingresa un valor válido (mínimo 10 segundos).");
+        e.target.value = updateInterval; // Revertir al valor anterior si es inválido
+      }
     }
 
     // === 25) Funciones Extra ===
@@ -1866,7 +2097,7 @@
       return predictions;
     }
 
-    // === 26) Función para Llenar los Selects de Comparación ===
+    // === 26) Función para Llenar los Selects de Comparación y Portafolio ===
     function populateComparisonSelectors(data, isFavorites = false) {
       const select1 = compareCrypto1Select;
       const select2 = compareCrypto2Select;
@@ -1884,6 +2115,18 @@
         option2.value = coin.id;
         option2.textContent = coin.name;
         select2.appendChild(option2);
+      });
+    }
+
+    // Función para llenar el selector de criptomonedas en el modal de portafolio
+    function populatePortfolioCryptoSelector(data) {
+      const select = portfolioCryptoName;
+      select.innerHTML = '<option value="">Selecciona Criptomoneda</option>';
+      data.forEach(coin => {
+        const option = document.createElement('option');
+        option.value = coin.id;
+        option.textContent = coin.name;
+        select.appendChild(option);
       });
     }
 
@@ -2152,10 +2395,241 @@
     // === 32) Función de Filtros ===
     // Ya implementada en applyFilters()
 
-    // === 33) Carga Inicial ===
+    // === 34) Funciones para el Modal de Portafolio ===
+
+    // Abrir el modal de portafolio
+    function openPortfolioModal() {
+      portfolioModalOverlay.style.display = 'flex';
+      loadPortfolioData();
+    }
+
+    // Cerrar el modal de portafolio
+    function cerrarPortfolioModal() {
+      portfolioModalOverlay.style.display = 'none';
+    }
+
+    // Gestionar el portafolio
+    let portfolio = JSON.parse(localStorage.getItem('portfolio')) || [];
+
+    function loadPortfolioData() {
+      updatePortfolioTable();
+    }
+
+    function updatePortfolioTable() {
+      const tableBody = portfolioTable.querySelector('tbody');
+      tableBody.innerHTML = '';
+      let totalInvested = 0;
+      let totalPortfolioValue = 0;
+      let totalProfitLoss = 0;
+
+      portfolio.forEach((coin, index) => {
+        const mainCrypto = cryptoData.find(c => c.id === coin.id);
+        const currentPrice = mainCrypto ? mainCrypto.current_price : 0;
+        const currentValue = coin.amount * currentPrice;
+        const profitLoss = currentValue - coin.invested;
+        const profitLossPercentage = (profitLoss / coin.invested) * 100;
+
+        totalInvested += coin.invested;
+        totalPortfolioValue += currentValue;
+        totalProfitLoss += profitLoss;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${coin.name} (${coin.symbol.toUpperCase()})</td>
+          <td>${coin.amount}</td>
+          <td>$${coin.buyPrice.toFixed(2)}</td>
+          <td>$${coin.invested.toFixed(2)}</td>
+          <td>${coin.date}</td>
+          <td>$${currentPrice.toFixed(2)}</td>
+          <td>$${currentValue.toFixed(2)}</td>
+          <td class="${profitLoss >= 0 ? 'profit' : 'loss'}">
+            $${profitLoss.toFixed(2)} (${profitLossPercentage.toFixed(2)}%)
+          </td>
+          <td>
+            <i class="fas fa-edit edit-btn-portfolio" data-index="${index}"></i>
+            <i class="fas fa-trash-alt delete-btn-portfolio" data-index="${index}"></i>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      // Actualizar resumen del portafolio
+      totalInvestedPortfolio.textContent = `$${totalInvested.toFixed(2)}`;
+      totalPortfolioValuePortfolio.textContent = `$${totalPortfolioValue.toFixed(2)}`;
+      totalProfitLossPortfolio.textContent = `$${totalProfitLoss.toFixed(2)} (${totalProfitLoss !== 0 ? (totalProfitLoss > 0 ? '+' : '') + (totalProfitLoss / totalInvested * 100).toFixed(2) + '%' : '0%'})`;
+      totalProfitLossPortfolio.className = totalProfitLoss >= 0 ? 'summary-value' : 'summary-value loss';
+      lastPortfolioUpdate.textContent = `Última actualización: ${new Date().toLocaleString()}`; // Actualizar la fecha y hora de la última actualización
+
+      attachPortfolioEventListeners();
+
+      // Guardar cambios en el almacenamiento local
+      localStorage.setItem('portfolio', JSON.stringify(portfolio));
+    }
+
+    function attachPortfolioEventListeners() {
+      $('.edit-btn-portfolio').off('click').on('click', function() {
+        const index = $(this).data('index');
+        const coin = portfolio[index];
+
+        // Auto-llenar el formulario con los datos de la criptomoneda seleccionada
+        portfolioCryptoName.value = coin.id;
+        portfolioCryptoSymbol.value = coin.symbol.toUpperCase();
+        portfolioCryptoAmount.value = coin.amount;
+        portfolioCryptoBuyPrice.value = coin.buyPrice;
+        portfolioCryptoDate.value = coin.date;
+
+        // Remover la criptomoneda del portafolio para actualizarla
+        portfolio.splice(index, 1);
+        updatePortfolioTable();
+      });
+
+      $('.delete-btn-portfolio').off('click').on('click', function() {
+        const index = $(this).data('index');
+        portfolio.splice(index, 1);
+        updatePortfolioTable();
+      });
+    }
+
+    // Manejar la adición de criptomonedas al portafolio
+    async function handleAddPortfolioCrypto(e) {
+      e.preventDefault();
+      const selectedCoinId = portfolioCryptoName.value;
+      const cryptoSymbol = portfolioCryptoSymbol.value;
+      const amount = parseFloat(portfolioCryptoAmount.value);
+      const buyPrice = parseFloat(portfolioCryptoBuyPrice.value);
+      const date = portfolioCryptoDate.value;
+
+      if (!selectedCoinId || !cryptoSymbol || isNaN(amount) || isNaN(buyPrice) || !date) {
+        alert("Por favor, completa todos los campos correctamente.");
+        return;
+      }
+
+      // Obtener el nombre de la criptomoneda desde cryptoData
+      const crypto = cryptoData.find(c => c.id === selectedCoinId);
+      const cryptoName = crypto ? crypto.name : '';
+
+      // Calcular el valor invertido
+      const invested = amount * buyPrice;
+
+      // Añadir al portafolio
+      const newPortfolioCoin = {
+        id: selectedCoinId,
+        name: cryptoName,
+        symbol: cryptoSymbol,
+        amount: amount,
+        buyPrice: buyPrice,
+        invested: invested,
+        date: date
+      };
+
+      portfolio.push(newPortfolioCoin);
+      localStorage.setItem('portfolio', JSON.stringify(portfolio));
+      updatePortfolioTable();
+
+      // Limpiar el formulario
+      addPortfolioForm.reset();
+    }
+
+    // Auto-llenar el símbolo basado en la criptomoneda seleccionada
+    function autoFillPortfolioSymbol() {
+      const selectedCoinId = portfolioCryptoName.value;
+      const crypto = cryptoData.find(c => c.id === selectedCoinId);
+      if (crypto) {
+        portfolioCryptoSymbol.value = crypto.symbol.toUpperCase();
+      } else {
+        portfolioCryptoSymbol.value = '';
+      }
+    }
+
+    // Función para actualizar los precios actuales en el portafolio
+    function updatePortfolioPrices() {
+      const startTime = performance.now();
+      updatePortfolioTable();
+      const endTime = performance.now();
+      const timeTaken = endTime - startTime;
+      updateTimePortfolio.textContent = `Tiempo de actualización: ${timeTaken.toFixed(2)} ms`;
+      lastPortfolioUpdate.textContent = `Última actualización: ${new Date().toLocaleString()}`;
+      speakMessage("Precios del portafolio actualizados.");
+    }
+
+    // === 26) Función para Llenar los Selects de Comparación y Portafolio ===
+    // Ya implementada arriba
+
+    // === 27) Función para Comparar Criptomonedas ===
+    // Ya implementada arriba
+
+    // === 28) Función para Cerrar el Modal de Comparación ===
+    // Ya implementada arriba
+
+    // === 29) Función para Abrir el Modal de Comparación ===
+    // Ya implementada arriba
+
+    // === 30) Botón "Ver Análisis" en el Modal de Comparación ===
+    // Ya implementada arriba
+
+    // === 31) Botón "Volver" en el Modal de Comparación ===
+    // Ya implementada arriba
+
+    // === 32) Función de Filtros ===
+    // Ya implementada arriba
+
+    // === 34) Funciones para el Modal de Portafolio ===
+    // Ya implementada arriba
+
+    // === Otras Funciones ===
+    // ... (Mantener todas las otras funciones existentes)
+
+    // === Funciones adicionales para nuevos indicadores ===
+
+    // Función simulada para calcular On-Balance Volume (OBV)
+    function calculateOBV(coinData) {
+      // CoinGecko no proporciona OBV directamente. Normalmente, se calcula a partir de los precios y volúmenes históricos.
+      // Aquí simulamos un valor.
+      return Math.floor(Math.random() * 1000000).toLocaleString();
+    }
+
+    // Función simulada para obtener Sentimiento del Mercado
+    function getMarketSentiment() {
+      const sentiments = ['Positivo', 'Neutral', 'Negativo'];
+      return sentiments[Math.floor(Math.random() * sentiments.length)];
+    }
+
+    // Función simulada para obtener Número de Transacciones Diarias
+    function getDailyTransactions() {
+      // CoinGecko no proporciona este dato directamente. Simulamos un valor.
+      return Math.floor(Math.random() * 10000).toLocaleString();
+    }
+
+    // === Función para Simular RSI Basado en Variación de Precio ===
+    function simulateRSI(priceChangePercentage) {
+      if (priceChangePercentage === null || isNaN(priceChangePercentage)) return null;
+      // Simplemente mapea el cambio de precio a un RSI simulado
+      if (priceChangePercentage > 5) return 80; // Alto RSI
+      if (priceChangePercentage < -5) return 20; // Bajo RSI
+      return 50; // RSI neutral
+    }
+
+    // === Implementar lógica para habilitar el botón "Comparar" cuando se seleccionan dos criptomonedas ===
+    function checkCompareButtonState() {
+      if (compareCrypto1Select.value && compareCrypto2Select.value && compareCrypto1Select.value !== compareCrypto2Select.value) {
+        compareBtn.classList.add('enabled');
+        compareBtn.disabled = false;
+      } else {
+        compareBtn.classList.remove('enabled');
+        compareBtn.disabled = true;
+      }
+    }
+
+    // === 34) Funciones para Reutilizar en el Modal de Portafolio ===
+    // Ya implementada arriba
+
+    // === 34) Funciones para Reutilizar en el Modal de Portafolio ===
+    // Ya implementada arriba
+
+    // === Iniciar ===
     initialize();
 
-    // === 34) Función para Comparar RSI y Decidir Acción ===
+    // === Función para Comparar RSI y Decidir Acción ===
     function determineAction(rsiValue) {
       if (rsiValue === null) {
         return 'Esperar';
@@ -2203,17 +2677,6 @@
       if (priceChangePercentage > 5) return 80; // Alto RSI
       if (priceChangePercentage < -5) return 20; // Bajo RSI
       return 50; // RSI neutral
-    }
-
-    // === Implementar lógica para habilitar el botón "Comparar" cuando se seleccionan dos criptomonedas ===
-    function checkCompareButtonState() {
-      if (compareCrypto1Select.value && compareCrypto2Select.value && compareCrypto1Select.value !== compareCrypto2Select.value) {
-        compareBtn.classList.add('enabled');
-        compareBtn.disabled = false;
-      } else {
-        compareBtn.classList.remove('enabled');
-        compareBtn.disabled = true;
-      }
     }
 
   </script>
