@@ -89,7 +89,6 @@
       background-color: transparent;
       color: inherit;
       min-width: 150px;
-      /* appearance: none; */ /* Comentado para mantener el estilo por defecto */
       cursor: pointer;
     }
     /* Estilos para las opciones del select */
@@ -296,11 +295,21 @@
       height: 100vh;
       border-radius: 0;
       flex-direction: column;
+      padding: 10px; /* Reducir padding para maximizar el espacio */
     }
+
     #modalOverlay.expanded-view #chartContainer {
-      height: 80vh;
+      width: 100%;
+      height: calc(100vh - 100px); /* Ajustar según los elementos del modal */
       flex-grow: 1;
     }
+
+    /* Asegurar que el canvas del gráfico ocupe todo el contenedor */
+    #cryptoChart {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
     /* Mover .expanded-chart fuera de la media query */
     #chartContainer.expanded-chart {
       width: 100%;
@@ -553,7 +562,6 @@
       background-color: transparent;
       color: inherit;
       min-width: 150px;
-      /* appearance: none; */ /* Comentado para mantener el estilo por defecto */
       cursor: pointer;
     }
     /* Estilos para las opciones del select */
@@ -1450,11 +1458,13 @@
     verAnalisisBtn.addEventListener('click', () => {
       const isMobile = window.matchMedia("only screen and (max-width: 768px)").matches;
       if (isMobile) {
-        // Expandir el modal a pantalla completa en vertical (aprovechar el espacio disponible)
+        // Expandir el modal a pantalla completa
         modalOverlay.classList.add('expanded-view');
         const chartContainer = document.getElementById('chartContainer');
         chartContainer.classList.add('expanded-chart');
+
         if (chartInstance) {
+          // Reajustar el tamaño del gráfico
           chartInstance.resize();
           chartInstance.update();
         }
@@ -1486,6 +1496,14 @@
       verAnalisisBtn.style.display = 'block';
       volverBtn.style.display = 'none';
     }
+
+    // === Nueva: Listener para cambios de orientación ===
+    window.addEventListener('orientationchange', () => {
+      if (modalOverlay.classList.contains('expanded-view') && chartInstance) {
+        chartInstance.resize();
+        chartInstance.update();
+      }
+    });
 
     // === 17) Botones de Alertas ===
     setAlertBtn.addEventListener('click', () => {
