@@ -64,6 +64,7 @@
       align-items: center;
       margin-bottom: 20px;
       gap: 10px;
+      flex-wrap: wrap; /* Permitir que los elementos se ajusten en pantallas pequeñas */
     }
     #favoritesBar {
       display: flex;
@@ -79,6 +80,7 @@
       background-color: #1a2332;
       border-radius: 10px;
       width: fit-content;
+      flex-wrap: wrap; /* Permitir que los elementos se ajusten en pantallas pequeñas */
     }
     body.light #filtersContainer {
       background-color: #eaeaea;
@@ -92,9 +94,17 @@
       min-width: 150px;
       cursor: pointer;
     }
+    body.light #filtersContainer select {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
+    }
     #filtersContainer option {
       background-color: #000000; /* Fondo negro */
       color: #ffffff; /* Letras blancas */
+    }
+    body.light #filtersContainer option {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
     }
     /* === Estilos de Botones === */
     .btn {
@@ -150,7 +160,7 @@
     }
     .btn-default {
       background-color: #9E9E9E;
-      color: #ffffff; /* Letras blancas */
+      color: #ffffff;
     }
     .btn-default:hover {
       background-color: #757575;
@@ -363,12 +373,12 @@
     
     /* === Modal de Comparación === */
     #compareModalContent select {
-      background-color: #000000; /* Fondo negro */
-      color: #ffffff; /* Letras blancas */
+      background-color: #000000;
+      color: #ffffff;
     }
     body.light #compareModalContent select {
-      background-color: #ffffff; /* Fondo blanco en tema claro */
-      color: #000000; /* Letras negras en tema claro */
+      background-color: #ffffff;
+      color: #000000;
     }
     
     /* === Tabla Comparativa y Portafolio === */
@@ -377,6 +387,7 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
+      overflow-x: auto;
     }
     #comparisonTable th, #comparisonTable td,
     #portfolioTable th, #portfolioTable td { /* Nuevo modal */
@@ -385,6 +396,15 @@
       text-align: center;
       position: relative; /* Para el tooltip */
       cursor: default;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+    }
+    body.light #comparisonTable th,
+    body.light #comparisonTable td,
+    body.light #portfolioTable th,
+    body.light #portfolioTable td { /* Nuevo modal */
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
     }
     #comparisonTable th,
     #portfolioTable th { /* Nuevo modal */
@@ -509,6 +529,26 @@
         width: 90%;
       }
       /* Ya movimos .expanded-chart fuera de la media query */
+      /* Ajustes adicionales para mejorar la visualización en móviles */
+      #filtersContainer {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      #addPortfolioForm {
+        flex-direction: column;
+      }
+      #addPortfolioForm .form-group {
+        margin-bottom: 10px;
+      }
+      #portfolioModalContent form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      #addPortfolioForm select,
+      #addPortfolioForm input {
+        flex: 1 1 45%; /* Dos columnas */
+      }
     }
     
     /* === Nuevos Estilos para Vista Expandida en el Modal === */
@@ -533,9 +573,17 @@
       min-width: 150px;
       cursor: pointer;
     }
+    body.light #modalTimeFrameFilter {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
+    }
     #modalTimeFrameFilter option {
       background-color: #000000; /* Fondo negro */
       color: #ffffff; /* Letras blancas */
+    }
+    body.light #modalTimeFrameFilter option {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
     }
     
     /* === Responsive Grids and Charts === */
@@ -579,19 +627,16 @@
       color: #000000; /* Letras en negro para legibilidad */
     }
     #portfolioTable td {
-      color: inherit;
+      color: #ffffff; /* Letras blancas */
+      background-color: #000000; /* Fondo negro */
     }
-    #addPortfolioForm {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-      justify-content: space-between;
-      align-items: center;
+    body.light #portfolioTable td {
+      color: #000000; /* Letras negras en modo claro */
+      background-color: #ffffff; /* Fondo blanco en modo claro */
     }
     #addPortfolioForm select,
     #addPortfolioForm input {
-      width: calc(20% - 10px);
+      width: 100%;
       padding: 5px;
       border-radius: 5px;
       border: 1px solid #00ffcc;
@@ -599,13 +644,18 @@
       color: #ffffff; /* Letras blancas */
       cursor: pointer;
     }
+    body.light #addPortfolioForm select,
+    body.light #addPortfolioForm input {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
+    }
     #addPortfolioForm option {
       background-color: #000000; /* Fondo negro */
       color: #ffffff; /* Letras blancas */
     }
-    #addPortfolioForm button {
-      width: calc(100% - 20px);
-      margin-top: 10px;
+    body.light #addPortfolioForm option {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
     }
     #portfolioSummary .summary-item {
       font-weight: bold;
@@ -616,18 +666,235 @@
     /* Ajuste para permitir hasta 10 decimales en el campo cantidad */
     #portfolioCryptoAmount {
       step: 0.0000000001;
-      background-color: #000000; /* Fondo negro */
-      color: #ffffff; /* Letras blancas */
     }
     #portfolioCryptoBuyPrice {
       step: 0.0000000001;
+    }
+    
+    /* === Selector de Intervalo de Actualización === */
+    #updateIntervalContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #updateIntervalContainer label {
+      font-weight: bold;
+      cursor: help;
+    }
+    #updateInterval {
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #00ffcc;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+      min-width: 100px;
+      cursor: pointer;
+    }
+    body.light #updateInterval {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
+    }
+    #updateInterval option {
       background-color: #000000; /* Fondo negro */
       color: #ffffff; /* Letras blancas */
     }
-    #updateTimePortfolio {
-      text-align: center;
+    body.light #updateInterval option {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
+    }
+    
+    /* Ajustes para el formulario horizontal en el modal de portafolio */
+    #addPortfolioForm {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+    #addPortfolioForm .form-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 45%; /* Dos columnas */
+    }
+    #addPortfolioForm label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    #addPortfolioForm button {
+      flex: 1 1 100%;
       margin-top: 10px;
+    }
+    
+    /* === Responsive Ajustes para Modales en Móviles === */
+    @media (max-width: 768px) {
+      /* Asegurar que los modales ocupen toda la pantalla */
+      #modalOverlay.expanded-view #modalContent,
+      #compareModalOverlay.expanded-view #compareModalContent,
+      #portfolioModalOverlay.expanded-view #portfolioModalContent {
+        width: 100vw;
+        height: 100vh;
+      }
+      
+      /* Ajustes específicos para mejorar la usabilidad en móviles */
+      .crypto-card {
+        padding: 15px;
+      }
+      .crypto-logo {
+        width: 50px;
+        height: 50px;
+      }
+      .crypto-name {
+        font-size: 1em;
+      }
+      .crypto-price {
+        font-size: 1em;
+      }
+      .flag {
+        padding: 6px 12px;
+        font-size: 0.8em;
+      }
+      #filtersContainer select,
+      #modalTimeFrameFilter,
+      #updateInterval {
+        min-width: 100%;
+      }
+      #addPortfolioForm {
+        flex-direction: column;
+      }
+      #addPortfolioForm .form-group {
+        flex: 1 1 100%;
+      }
+    }
+    
+    /* === Estilos para Recomendaciones en Comparación === */
+    #comparisonRecommendation {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+    .green-recommendation {
+      color: #4CAF50;
+    }
+    .red-recommendation {
+      color: #F44336;
+    }
+    .orange-recommendation {
+      color: #FF9800;
+    }
+    
+    /* === Modal de Portafolio === */
+    #portfolioModalContent {
+      /* Reutilizar estilos existentes */
+    }
+    #portfolioModalContent h1 {
       color: #00ffcc;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #portfolioTable th {
+      color: #000000; /* Letras en negro para legibilidad */
+    }
+    #portfolioTable td {
+      color: #ffffff; /* Letras blancas */
+      background-color: #000000; /* Fondo negro */
+    }
+    body.light #portfolioTable td {
+      color: #000000; /* Letras negras en modo claro */
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+    }
+    #addPortfolioForm select,
+    #addPortfolioForm input {
+      width: 100%;
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #00ffcc;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+      cursor: pointer;
+    }
+    body.light #addPortfolioForm select,
+    body.light #addPortfolioForm input {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
+    }
+    #addPortfolioForm option {
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+    }
+    body.light #addPortfolioForm option {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
+    }
+    #portfolioSummary .summary-item {
+      font-weight: bold;
+    }
+    #portfolioSummary .summary-value {
+      color: #4CAF50;
+    }
+    /* Ajuste para permitir hasta 10 decimales en el campo cantidad */
+    #portfolioCryptoAmount {
+      step: 0.0000000001;
+    }
+    #portfolioCryptoBuyPrice {
+      step: 0.0000000001;
+    }
+    
+    /* === Selector de Intervalo de Actualización === */
+    #updateIntervalContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    #updateIntervalContainer label {
+      font-weight: bold;
+      cursor: help;
+    }
+    #updateInterval {
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #00ffcc;
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+      min-width: 100px;
+      cursor: pointer;
+    }
+    body.light #updateInterval {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
+    }
+    #updateInterval option {
+      background-color: #000000; /* Fondo negro */
+      color: #ffffff; /* Letras blancas */
+    }
+    body.light #updateInterval option {
+      background-color: #ffffff; /* Fondo blanco en modo claro */
+      color: #000000; /* Letras negras en modo claro */
+    }
+    
+    /* Ajustes para el formulario horizontal en el modal de portafolio */
+    #addPortfolioForm {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+    #addPortfolioForm .form-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 45%; /* Dos columnas */
+    }
+    #addPortfolioForm label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    #addPortfolioForm button {
+      flex: 1 1 100%;
+      margin-top: 10px;
     }
     
   </style>
@@ -645,14 +912,21 @@
     <div id="progressText">0%</div>
   </div>
 
-  <!-- Barra Superior con Botones "Favoritos", "Ver Todos" y "Mi Portafolio Cripto" -->
+  <!-- Barra Superior con Botones "Favoritos", "Ver Todos", "Mi Portafolio Cripto" y "Intervalo de Actualización" -->
   <div class="top-bar">
     <div id="favoritesBar">
       <button id="btnFavoritos" class="btn btn-success">Favoritos</button>
       <button id="btnVerTodos" class="btn btn-secondary">Ver Todos</button>
-    </div>
-    <div>
       <button id="btnPortfolio" class="btn btn-primary">Mi Portafolio Cripto</button> <!-- Nuevo botón -->
+    </div>
+    <div id="updateIntervalContainer">
+      <label for="updateInterval" title="Selecciona el intervalo en segundos para actualizar automáticamente">Intervalo de Actualización (segundos)</label>
+      <select id="updateInterval">
+        <option value="10">10</option>
+        <option value="30" selected>30</option>
+        <option value="60">60</option>
+        <option value="120">120</option>
+      </select>
     </div>
   </div>
 
@@ -688,11 +962,6 @@
           <option value="esperar">Esperar</option>
           <option value="neutral">Neutral</option>
       </select>
-    </div>
-    <!-- Nuevo Contenedor para el Intervalo de Actualización -->
-    <div id="updateIntervalContainer">
-      <label for="updateInterval" title="Selecciona el intervalo de actualización en segundos">Intervalo Actualización (segundos)</label>
-      <input type="number" id="updateInterval" min="10" step="10" value="30">
     </div>
   </div>
 
@@ -913,13 +1182,28 @@
       </div>
 
       <form id="addPortfolioForm">
-        <select id="portfolioCryptoName" required>
-          <option value="">Selecciona Criptomoneda</option>
-        </select>
-        <input type="text" id="portfolioCryptoSymbol" placeholder="Símbolo" readonly required>
-        <input type="number" id="portfolioCryptoAmount" placeholder="Cantidad" step="0.0000000001" required> <!-- Ajuste del step -->
-        <input type="number" id="portfolioCryptoBuyPrice" placeholder="Precio de compra" step="0.0000000001" required> <!-- Ajuste del step -->
-        <input type="date" id="portfolioCryptoDate" required>
+        <div class="form-group">
+          <label for="portfolioCryptoName">Criptomoneda</label>
+          <select id="portfolioCryptoName" required>
+            <option value="">Selecciona Criptomoneda</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="portfolioCryptoSymbol">Símbolo</label>
+          <input type="text" id="portfolioCryptoSymbol" placeholder="Símbolo" readonly required>
+        </div>
+        <div class="form-group">
+          <label for="portfolioCryptoAmount">Cantidad</label>
+          <input type="number" id="portfolioCryptoAmount" placeholder="Cantidad" step="0.0000000001" required> <!-- Ajuste del step -->
+        </div>
+        <div class="form-group">
+          <label for="portfolioCryptoBuyPrice">Precio de Compra</label>
+          <input type="number" id="portfolioCryptoBuyPrice" placeholder="Precio de compra" step="0.0000000001" required> <!-- Ajuste del step -->
+        </div>
+        <div class="form-group">
+          <label for="portfolioCryptoDate">Fecha de Inversión</label>
+          <input type="date" id="portfolioCryptoDate" required>
+        </div>
         <button type="submit" class="btn btn-success">Añadir Criptomoneda</button>
       </form>
 
@@ -1979,12 +2263,11 @@
       reorderCards();
     }
 
-    // === 23) Función para Inicio ===
+    // === 23) Función de Inicio ===
     async function initialize() {
       // Añadir Event Listeners para los filtros
       coinFilter.addEventListener('change', applyFilters);
       rsiFilter.addEventListener('change', applyFilters);
-      document.getElementById('updateInterval').addEventListener('change', handleUpdateIntervalChange);
 
       // Añadir Event Listener para el botón de Comparación
       compareCryptoBtn.addEventListener('click', () => {
@@ -2033,6 +2316,13 @@
       // Añadir Event Listener para el botón de actualizar precios del portafolio
       updatePortfolioPricesBtn.addEventListener('click', updatePortfolioPrices);
 
+      // Añadir Event Listener para el selector de intervalo de actualización
+      document.getElementById('updateInterval').addEventListener('change', (e) => {
+        updateInterval = parseInt(e.target.value);
+        localStorage.setItem('updateInterval', updateInterval);
+        startUpdateTimer();
+      });
+
       // Primer fetch según estado inicial (Ver Todos o Favoritos)
       if (favoritesActive) {
         await fetchFavoritesData();
@@ -2056,20 +2346,6 @@
           await fetchCryptoData(true);
         }
       }, updateInterval * 1000);
-    }
-
-    // Manejar cambios en el intervalo de actualización
-    function handleUpdateIntervalChange(e) {
-      const newInterval = parseInt(e.target.value);
-      if (!isNaN(newInterval) && newInterval >= 10) {
-        updateInterval = newInterval;
-        localStorage.setItem('updateInterval', updateInterval);
-        startUpdateTimer();
-        speakMessage(`Intervalo de actualización establecido en ${updateInterval} segundos.`);
-      } else {
-        alert("Por favor, ingresa un valor válido (mínimo 10 segundos).");
-        e.target.value = updateInterval; // Revertir al valor anterior si es inválido
-      }
     }
 
     // === 25) Funciones Extra ===
@@ -2552,9 +2828,6 @@
       speakMessage("Precios del portafolio actualizados.");
     }
 
-    // === 26) Función para Llenar los Selects de Comparación y Portafolio ===
-    // Ya implementada arriba
-
     // === 27) Función para Comparar Criptomonedas ===
     // Ya implementada arriba
 
@@ -2623,62 +2896,14 @@
     // === 34) Funciones para Reutilizar en el Modal de Portafolio ===
     // Ya implementada arriba
 
-    // === 34) Funciones para Reutilizar en el Modal de Portafolio ===
-    // Ya implementada arriba
-
     // === Iniciar ===
     initialize();
 
-    // === Función para Comparar RSI y Decidir Acción ===
-    function determineAction(rsiValue) {
-      if (rsiValue === null) {
-        return 'Esperar';
-      }
-      if (rsiValue > 70) {
-        return 'Vender';
-      } else if (rsiValue < 30) {
-        return 'Comprar';
-      } else {
-        return 'Esperar';
-      }
-    }
+    // === 34) Funciones para Reutilizar en el Modal de Portafolio ===
+    // Ya implementada arriba
 
-    function getRecommendationClass(action) {
-      if (action === 'Comprar') return 'green-recommendation';
-      if (action === 'Vender') return 'red-recommendation';
-      return 'orange-recommendation';
-    }
-
-    // === Funciones adicionales para nuevos indicadores ===
-
-    // Función simulada para calcular On-Balance Volume (OBV)
-    function calculateOBV(coinData) {
-      // CoinGecko no proporciona OBV directamente. Normalmente, se calcula a partir de los precios y volúmenes históricos.
-      // Aquí simulamos un valor.
-      return Math.floor(Math.random() * 1000000).toLocaleString();
-    }
-
-    // Función simulada para obtener Sentimiento del Mercado
-    function getMarketSentiment() {
-      const sentiments = ['Positivo', 'Neutral', 'Negativo'];
-      return sentiments[Math.floor(Math.random() * sentiments.length)];
-    }
-
-    // Función simulada para obtener Número de Transacciones Diarias
-    function getDailyTransactions() {
-      // CoinGecko no proporciona este dato directamente. Simulamos un valor.
-      return Math.floor(Math.random() * 10000).toLocaleString();
-    }
-
-    // === Función para Simular RSI Basado en Variación de Precio ===
-    function simulateRSI(priceChangePercentage) {
-      if (priceChangePercentage === null || isNaN(priceChangePercentage)) return null;
-      // Simplemente mapea el cambio de precio a un RSI simulado
-      if (priceChangePercentage > 5) return 80; // Alto RSI
-      if (priceChangePercentage < -5) return 20; // Bajo RSI
-      return 50; // RSI neutral
-    }
-
+    // === 34) Funciones para Reutilizar en el Modal de Portafolio ===
+    // Ya implementada arriba
   </script>
 </body>
 </html>
