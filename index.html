@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Monitor Criptomonedas - RSI + PnL + Voz + Favoritas Primero</title>
+  <title>Monitor Criptomonedas - RSI + PnL + Voz + Favoritas Primero + Comparación</title>
   <style>
     /* === Estilos Generales === */
     body.dark {
@@ -57,6 +57,32 @@
       color: #7a8599;
       margin-bottom: 20px;
     }
+    #intervalContainer {
+      text-align: center;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    #intervalContainer label {
+      margin-right: 5px;
+    }
+    #updateIntervalInput {
+      width: 60px;
+      padding: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    #setIntervalBtn {
+      padding: 5px 10px;
+      margin-left: 5px;
+      border-radius: 5px;
+      border: none;
+      background: #00ffcc;
+      color: #0a0e17;
+      cursor: pointer;
+    }
+    #setIntervalBtn:hover {
+      background: #00e6b8;
+    }
     #filtersContainer {
       display: flex;
       justify-content: center;
@@ -81,6 +107,7 @@
     label {
       margin-bottom: 5px;
       font-weight: bold;
+      cursor: help; /* Indica que hay información adicional */
     }
     select {
       padding: 5px;
@@ -92,12 +119,14 @@
       cursor: pointer;
     }
     /* Estilos para las opciones del select */
-    #modalTimeFrameFilter option {
-      background-color: #1a2332;
+    #modalTimeFrameFilter option,
+    #compareModalContent select option {
+      background-color: #000000;
       color: #ffffff;
     }
-    body.light #modalTimeFrameFilter option {
-      background-color: #eaeaea;
+    body.light #modalTimeFrameFilter option,
+    body.light #compareModalContent select option {
+      background-color: #ffffff;
       color: #000000;
     }
 
@@ -113,32 +142,29 @@
       color: inherit;
     }
 
-    /* === Eliminado el timeFrameContainer de la página principal === */
-
-    #intervalContainer {
-      text-align: center;
-      margin-top: 10px;
-      margin-bottom: 20px;
-    }
-    #intervalContainer label {
-      margin-right: 5px;
-    }
-    #updateIntervalInput {
-      width: 60px;
-      padding: 5px;
-      border-radius: 5px;
+    /* === Botón de Comparación en la Página Principal === */
+    #compareCryptoBtn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #FF9800;
+      color: #ffffff;
       border: none;
-    }
-    #setIntervalBtn {
-      padding: 5px 10px;
-      margin-left: 5px;
       border-radius: 5px;
-      border: none;
-      background: #00ffcc;
-      color: #0a0e17;
+      cursor: not-allowed; /* Indicador visual de deshabilitado */
+      font-size: 1em;
+      transition: background-color 0.3s, cursor 0.3s;
+      opacity: 0.6;
+    }
+    #compareCryptoBtn.enabled {
       cursor: pointer;
+      opacity: 1;
+    }
+    #compareCryptoBtn.enabled:hover {
+      background-color: #e68900;
     }
 
+    /* === Grilla de Criptomonedas === */
     #cryptoGrid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -232,14 +258,10 @@
       font-size: 1.2em;
       color: #ffc107;
     }
-    #error {
-      text-align: center;
-      color: #F44336;
-      font-size: 1.2em;
-      margin-top: 50px;
-      display: none;
-    }
-    #modalOverlay {
+
+    /* === Modal Detallado === */
+    #modalOverlay,
+    #compareModalOverlay {
       position: fixed;
       top: 0;
       left: 0;
@@ -253,7 +275,8 @@
       padding: 0;
       overflow: hidden;
     }
-    #modalContent {
+    #modalContent,
+    #compareModalContent {
       background: #1a2332;
       border-radius: 15px;
       width: 95vw;
@@ -265,11 +288,12 @@
       padding: 20px;
       transition: width 0.3s, height 0.3s;
     }
-    body.light #modalContent {
+    body.light #modalContent,
+    body.light #compareModalContent {
       background-color: #ffffff;
       color: #000000;
     }
-    #modalClose {
+    .modalCloseBtn {
       position: absolute;
       top: 10px;
       right: 10px;
@@ -282,7 +306,8 @@
       padding: 10px;
       border-radius: 5px;
     }
-    #chartContainer {
+    #chartContainer,
+    #comparisonChartContainer {
       width: 100%;
       min-height: 300px;
       margin-bottom: 20px;
@@ -290,7 +315,8 @@
       transition: width 0.3s, height 0.3s; 
     }
     /* Clase expandida para móviles */
-    #modalOverlay.expanded-view #modalContent {
+    #modalOverlay.expanded-view #modalContent,
+    #compareModalOverlay.expanded-view #compareModalContent {
       width: 100vw;
       height: 100vh;
       border-radius: 0;
@@ -298,25 +324,29 @@
       padding: 0;
     }
 
-    #modalOverlay.expanded-view #chartContainer {
+    #modalOverlay.expanded-view #chartContainer,
+    #compareModalOverlay.expanded-view #comparisonChartContainer {
       width: 100%;
       height: calc(100vh - 50px); /* Ajustar según los elementos del modal */
       flex-grow: 1;
     }
 
     /* Asegurar que el canvas del gráfico ocupe todo el contenedor */
-    #cryptoChart {
+    #cryptoChart,
+    #comparisonChart {
       width: 100% !important;
       height: 100% !important;
     }
 
     /* Ocultar otros elementos del modal cuando está en vista expandida */
-    #modalOverlay.expanded-view #modalContent > *:not(#chartContainer):not(#volverBtn) {
+    #modalOverlay.expanded-view #modalContent > *:not(#chartContainer):not(#volverBtn),
+    #compareModalOverlay.expanded-view #compareModalContent > *:not(#comparisonChartContainer):not(#volverCompareBtn) {
       display: none;
     }
 
-    /* Estilos del botón "Volver" */
-    #volverBtn {
+    /* Estilos del botón "Regresar" */
+    #volverBtn,
+    #volverCompareBtn {
       position: absolute;
       top: 10px;
       left: 10px;
@@ -331,105 +361,56 @@
       z-index: 5000;
     }
 
-    .modal-footer {
-      font-size: 0.9em;
-      color: #7a8599;
-      text-align: center;
-      word-break: break-all;
+    /* === Modal de Comparación === */
+    #compareModalContent {
+      background-color: #1a2332;
+      color: #ffffff;
+    }
+    body.light #compareModalContent {
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    /* === Tabla Comparativa === */
+    #comparisonTable {
+      width: 100%;
+      border-collapse: collapse;
       margin-top: 20px;
     }
-    body.light .modal-footer {
-      color: #333333;
-    }
-    .modal-info {
+    #comparisonTable th, #comparisonTable td {
+      border: 1px solid #ddd;
+      padding: 8px;
       text-align: center;
-      margin-bottom: 10px;
+      position: relative; /* Para el tooltip */
+      cursor: default;
     }
-    .modal-info p {
-      margin: 5px 0;
+    #comparisonTable th {
+      background-color: #f2f2f2;
     }
-    .modal-explanation {
-      font-size: 0.9em;
-      margin-top: 15px;
-      background-color: #0a0e17;
-      padding: 10px;
-      border-radius: 10px;
-    }
-    body.light .modal-explanation {
-      background-color: #ddd;
-      color: #000;
-    }
-    .modal-explanation h4 {
-      margin-top: 10px;
-      margin-bottom: 5px;
-    }
-    #priceAlertContainer {
-      margin: 10px 0;
-      text-align: center;
-    }
-    #percentAlertLabel {
-      display: inline-block;
-      margin-right: 5px;
-    }
-    #priceAlertInput {
-      width: 60px;
-      padding: 5px;
-      border-radius: 5px;
-      border: none;
-    }
-    #setAlertBtn {
+    /* Tooltip Styles */
+    .tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
       padding: 5px 10px;
-      margin-left: 5px;
-      border-radius: 5px;
-      border: none;
-      background: #00ffcc;
-      color: #0a0e17;
-      cursor: pointer;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s;
+      z-index: 100;
+      font-size: 0.8em;
     }
-    #buyPriceContainer {
-      margin: 10px 0;
-      text-align: center;
+    #comparisonTable th:hover .tooltip,
+    #comparisonTable td:hover .tooltip {
+      opacity: 1;
+      visibility: visible;
     }
-    #buyPriceInput {
-      width: 100px;
-      padding: 5px;
-      border-radius: 5px;
-      border: none;
-    }
-    #setBuyPriceBtn {
-      padding: 5px 10px;
-      margin-left: 5px;
-      border-radius: 5px;
-      border: none;
-      background: #00ffcc;
-      color: #0a0e17;
-      cursor: pointer;
-    }
-    #clearBuyPriceBtn {
-      padding: 5px 10px;
-      margin-left: 5px;
-      border-radius: 5px;
-      border: none;
-      background: #F44336;
-      color: white;
-      cursor: pointer;
-    }
-    #profitLossContainer {
-      margin: 10px 0;
-      text-align: center;
-    }
-    #profitLossText {
-      margin: 5px;
-      font-weight: bold;
-    }
-    .green-arrow {
-      color: #00ff00;
-      font-weight: bold;
-    }
-    .red-arrow {
-      color: #ff4444;
-      font-weight: bold;
-    }
+
+    /* === Botones y Otros === */
     #themeToggle {
       position: fixed;
       bottom: 20px;
@@ -489,7 +470,8 @@
       display: block;
       font-size: 0.9em;
     }
-    #volverBtn {
+    #volverBtn,
+    #volverCompareBtn {
       background: #F44336;
       color: white;
       border: none;
@@ -545,7 +527,8 @@
       transition: width 0.3s;
     }
     @media (max-width: 768px) {
-      #modalContent {
+      #modalContent,
+      #compareModalContent {
         width: 98vw;
         height: 98vh;
       }
@@ -566,6 +549,7 @@
     #modalTimeFrameContainer label {
       margin-right: 5px;
       font-weight: bold;
+      cursor: help; /* Indica que hay información adicional */
     }
     #modalTimeFrameFilter {
       padding: 5px;
@@ -576,14 +560,43 @@
       min-width: 150px;
       cursor: pointer;
     }
-    /* Estilos para las opciones del select */
-    #modalTimeFrameFilter option {
-      background-color: #1a2332;
+
+    /* === Estilos para el Modal de Comparación === */
+    #compareModalContent select {
+      background-color: #000000;
       color: #ffffff;
     }
-    body.light #modalTimeFrameFilter option {
-      background-color: #eaeaea;
+    body.light #compareModalContent select {
+      background-color: #ffffff;
       color: #000000;
+    }
+
+    /* === Responsive Grids and Charts === */
+    /* Asegurar que el gráfico y la tabla sean responsivos */
+    @media (max-width: 768px) {
+      #comparisonChartContainer, #chartContainer {
+        height: 300px;
+      }
+      #cryptoChart, #comparisonChart {
+        height: 100% !important;
+      }
+    }
+
+    /* === Estilos para Recomendaciones en Comparación === */
+    #comparisonRecommendation {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+    .green-recommendation {
+      color: #4CAF50;
+    }
+    .red-recommendation {
+      color: #F44336;
+    }
+    .orange-recommendation {
+      color: #FF9800;
     }
   </style>
 </head>
@@ -616,7 +629,8 @@
   <p id="lastUpdate">Última actualización: (sin datos)</p>
 
   <div id="intervalContainer">
-    <label>Actualización (segundos):
+    <label title="Configura el intervalo de actualización en segundos">
+      Actualización (segundos):
       <input type="number" id="updateIntervalInput" placeholder="30">
     </label>
     <button id="setIntervalBtn">Set Interval</button>
@@ -624,13 +638,13 @@
 
   <div id="filtersContainer">
     <div id="coinFilterContainer">
-      <label for="coinFilter">Criptomoneda</label>
+      <label for="coinFilter" title="Filtra por criptomoneda específica">Criptomoneda</label>
       <select id="coinFilter">
           <option value="all">Todas</option>
       </select>
     </div>
     <div id="rsiFilterContainer">
-      <label for="rsiFilter">Estado RSI</label>
+      <label for="rsiFilter" title="Filtra por estado del RSI">Estado RSI</label>
       <select id="rsiFilter">
           <option value="all">Todas</option>
           <option value="comprar">Comprar</option>
@@ -639,22 +653,24 @@
           <option value="neutral">Neutral</option>
       </select>
     </div>
-    <!-- Eliminado el timeFrameContainer de la página principal -->
   </div>
 
-  <div id="error">No se pudo acceder a los datos en tiempo real. Por favor, intente más tarde.</div>
+  <!-- Botón de Comparación en la Página Principal -->
+  <button id="compareCryptoBtn">Comparar Criptomonedas</button>
+
+  <!-- Grilla de Criptomonedas -->
   <div id="cryptoGrid"></div>
 
-  <!-- Modal -->
+  <!-- Modal Detallado -->
   <div id="modalOverlay">
     <div id="modalContent">
-      <button id="modalClose">Regresar</button>
+      <button class="modalCloseBtn">Cerrar</button>
       <h2 id="modalTitle"></h2>
       <!-- Botón Actualizar que ahora solo actualiza la cripto del modal -->
       <button id="updateChartBtn">Actualizar</button>
       <!-- Selector de Marco Temporal en el Modal -->
       <div id="modalTimeFrameContainer">
-        <label for="modalTimeFrameFilter">Marco Temporal</label>
+        <label for="modalTimeFrameFilter" title="Selecciona el marco temporal para el gráfico">Marco Temporal</label>
         <select id="modalTimeFrameFilter">
             <option value="5m">5 Minutos</option>
             <option value="15m">15 Minutos</option>
@@ -677,14 +693,14 @@
       <button id="volverBtn">Regresar</button>
 
       <div id="priceAlertContainer">
-        <label id="percentAlertLabel">% de ganancia para alerta:
+        <label id="percentAlertLabel" title="Establece el porcentaje de ganancia para recibir una alerta">% de ganancia para alerta:
           <input type="number" id="priceAlertInput" placeholder="5">
         </label>
         <button id="setAlertBtn">Set Alert</button>
       </div>
 
       <div id="buyPriceContainer">
-        <label>Precio de Compra: $<input type="number" id="buyPriceInput" placeholder="0.00"></label>
+        <label title="Ingresa tu precio de compra">Precio de Compra: $<input type="number" id="buyPriceInput" placeholder="0.00"></label>
         <button id="setBuyPriceBtn">Colocar precio de compra</button>
         <button id="clearBuyPriceBtn">Borrar precio de compra</button>
       </div>
@@ -709,6 +725,119 @@
     </div>
   </div>
 
+  <!-- Modal de Comparación -->
+  <div id="compareModalOverlay">
+    <div id="compareModalContent">
+      <button class="modalCloseBtn">Cerrar</button>
+      <h2>Comparación de Criptomonedas</h2>
+      <div id="compareSelectorsContainer">
+        <select id="compareCrypto1">
+          <option value="">Selecciona Cripto 1</option>
+        </select>
+        <select id="compareCrypto2">
+          <option value="">Selecciona Cripto 2</option>
+        </select>
+        <button id="compareBtn" disabled>Comparar</button> <!-- Inicialmente deshabilitado -->
+      </div>
+      <div id="comparisonChartContainer">
+        <canvas id="comparisonChart"></canvas>
+      </div>
+      <table id="comparisonTable">
+        <thead>
+          <tr>
+            <th>Métrica</th>
+            <th id="metric1">Cripto 1</th>
+            <th id="metric2">Cripto 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Precio Actual</td>
+            <td id="price1">-</td>
+            <td id="price2">-</td>
+          </tr>
+          <tr>
+            <td>Variación Precio (24h)
+              <span class="tooltip">Cambio porcentual del precio en las últimas 24 horas.</span>
+            </td>
+            <td id="priceChange1">-</td>
+            <td id="priceChange2">-</td>
+          </tr>
+          <tr>
+            <td>Capitalización de Mercado
+              <span class="tooltip">Valor total de todas las monedas en circulación.</span>
+            </td>
+            <td id="marketCap1">-</td>
+            <td id="marketCap2">-</td>
+          </tr>
+          <tr>
+            <td>Volumen (24h)
+              <span class="tooltip">Cantidad total de operaciones realizadas en las últimas 24 horas.</span>
+            </td>
+            <td id="volume1">-</td>
+            <td id="volume2">-</td>
+          </tr>
+          <tr>
+            <td>On-Balance Volume (OBV)
+              <span class="tooltip">Mide la presión de compra y venta acumulativa basada en el volumen.</span>
+            </td>
+            <td id="obv1">-</td>
+            <td id="obv2">-</td>
+          </tr>
+          <tr>
+            <td>Sentimiento del Mercado
+              <span class="tooltip">Evaluación del sentimiento general del mercado hacia la criptomoneda.</span>
+            </td>
+            <td id="sentiment1">-</td>
+            <td id="sentiment2">-</td>
+          </tr>
+          <tr>
+            <td>Supply Circulante
+              <span class="tooltip">Cantidad de monedas actualmente en circulación.</span>
+            </td>
+            <td id="circulatingSupply1">-</td>
+            <td id="circulatingSupply2">-</td>
+          </tr>
+          <tr>
+            <td>Supply Total
+              <span class="tooltip">Cantidad total de monedas que existirán.</span>
+            </td>
+            <td id="totalSupply1">-</td>
+            <td id="totalSupply2">-</td>
+          </tr>
+          <tr>
+            <td>Dominancia de Mercado
+              <span class="tooltip">Porcentaje de la capitalización de mercado de la criptomoneda respecto al total del mercado cripto.</span>
+            </td>
+            <td id="marketDominance1">-</td>
+            <td id="marketDominance2">-</td>
+          </tr>
+          <tr>
+            <td>Número de Transacciones Diarias
+              <span class="tooltip">Cantidad de transacciones realizadas en las últimas 24 horas.</span>
+            </td>
+            <td id="transactions1">-</td>
+            <td id="transactions2">-</td>
+          </tr>
+          <tr>
+            <td>RSI (14)
+              <span class="tooltip">Mide la fortaleza o debilidad del activo en los últimos 14 periodos.</span>
+            </td>
+            <td id="rsi1">-</td>
+            <td id="rsi2">-</td>
+          </tr>
+          <!-- Más métricas según necesidad -->
+        </tbody>
+      </table>
+      <!-- Botón para expandir el gráfico en móvil -->
+      <button id="verAnalisisCompareBtn">Ver Análisis</button>
+      <!-- Botón para volver desde la vista expandida -->
+      <button id="volverCompareBtn">Regresar</button>
+      <!-- Recomendación de Comparación -->
+      <div id="comparisonRecommendation"></div>
+    </div>
+  </div>
+
   <button id="themeToggle">Tema</button>
   <div id="favoritesBar">
     <button id="btnFavoritos">Favoritos</button>
@@ -724,6 +853,7 @@
 
   <script>
     let chartInstance = null;
+    let comparisonChartInstance = null; // Para el gráfico de comparación
     let cryptoData = [];
     let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
     let priceAlerts = JSON.parse(localStorage.getItem('priceAlerts')) || {};
@@ -747,7 +877,8 @@
     const coinFilter = document.getElementById('coinFilter');
     const rsiFilter = document.getElementById('rsiFilter');
     const modalOverlay = document.getElementById('modalOverlay');
-    const modalClose = document.getElementById('modalClose');
+    const modalContent = document.getElementById('modalContent');
+    const modalClose = modalContent.querySelector('.modalCloseBtn');
     const modalTitle = document.getElementById('modalTitle');
     const dataSource = document.getElementById('dataSource');
     const modalInfo = document.getElementById('modalInfo');
@@ -768,6 +899,45 @@
     const setIntervalBtnElem = document.getElementById('setIntervalBtn');
     const modalTimeFrameFilter = document.getElementById('modalTimeFrameFilter'); // Nuevo
 
+    // Sección de Comparación
+    const compareCryptoBtn = document.getElementById('compareCryptoBtn');
+    const compareModalOverlay = document.getElementById('compareModalOverlay');
+    const compareModalContent = document.getElementById('compareModalContent');
+    const compareModalClose = compareModalContent.querySelector('.modalCloseBtn');
+    const compareSelectorsContainer = document.getElementById('compareSelectorsContainer');
+    const compareCrypto1Select = document.getElementById('compareCrypto1');
+    const compareCrypto2Select = document.getElementById('compareCrypto2');
+    const compareBtn = document.getElementById('compareBtn'); // Botón de comparación dentro del modal
+    const comparisonChartCtx = document.getElementById('comparisonChart').getContext('2d');
+    const comparisonTable = document.getElementById('comparisonTable');
+    const metric1Header = document.getElementById('metric1');
+    const metric2Header = document.getElementById('metric2');
+    const price1Cell = document.getElementById('price1');
+    const price2Cell = document.getElementById('price2');
+    const priceChange1Cell = document.getElementById('priceChange1'); // Nueva referencia
+    const priceChange2Cell = document.getElementById('priceChange2'); // Nueva referencia
+    const marketCap1Cell = document.getElementById('marketCap1');
+    const marketCap2Cell = document.getElementById('marketCap2');
+    const volume1Cell = document.getElementById('volume1');
+    const volume2Cell = document.getElementById('volume2');
+    const obv1Cell = document.getElementById('obv1');
+    const obv2Cell = document.getElementById('obv2');
+    const sentiment1Cell = document.getElementById('sentiment1');
+    const sentiment2Cell = document.getElementById('sentiment2');
+    const circulatingSupply1Cell = document.getElementById('circulatingSupply1');
+    const circulatingSupply2Cell = document.getElementById('circulatingSupply2');
+    const totalSupply1Cell = document.getElementById('totalSupply1');
+    const totalSupply2Cell = document.getElementById('totalSupply2');
+    const marketDominance1Cell = document.getElementById('marketDominance1');
+    const marketDominance2Cell = document.getElementById('marketDominance2');
+    const transactions1Cell = document.getElementById('transactions1');
+    const transactions2Cell = document.getElementById('transactions2');
+    const rsi1CellCompare = document.getElementById('rsi1');
+    const rsi2CellCompare = document.getElementById('rsi2');
+    const verAnalisisCompareBtn = document.getElementById('verAnalisisCompareBtn');
+    const volverCompareBtn = document.getElementById('volverCompareBtn');
+    const comparisonRecommendation = document.getElementById('comparisonRecommendation');
+
     // Barra de progreso
     const progressOverlay = document.getElementById('progressOverlay');
     const progressBar = document.getElementById('progressBar');
@@ -780,6 +950,7 @@
     themeToggle.addEventListener('click', () => {
       body.className = (body.className === 'dark') ? 'light' : 'dark';
       localStorage.setItem('theme', body.className);
+      // Actualizar colores de los gráficos si están activos
       if (chartInstance) {
         // Ajustar colores del gráfico
         chartInstance.options.scales.y.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
@@ -789,6 +960,13 @@
         chartInstance.options.scales.y1.title.color = body.className === 'dark' ? '#ffffff' : '#000000';
         chartInstance.options.plugins.legend.labels.color = body.className === 'dark' ? '#ffffff' : '#000000';
         chartInstance.update();
+      }
+      if (comparisonChartInstance) {
+        comparisonChartInstance.options.scales.y.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        comparisonChartInstance.options.scales.x.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        comparisonChartInstance.options.scales.y.title.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        comparisonChartInstance.options.plugins.legend.labels.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        comparisonChartInstance.update();
       }
     });
 
@@ -885,7 +1063,7 @@
         <img src="${crypto.image}" alt="${crypto.name} logo" class="crypto-logo">
         <div class="crypto-name">${crypto.name}</div>
         <div class="crypto-price">$${crypto.current_price.toFixed(2)}</div>
-        <div class="flag ${rsiRecommendation.flag}">${rsiRecommendation.text}</div>
+        <div class="flag ${rsiRecommendation.flag}" title="RSI (Relative Strength Index): ${rsiRecommendation.text}">${rsiRecommendation.text}</div>
         <div class="mini-chart-container">
           <canvas id="miniChart-${index}" class="mini-chart"></canvas>
         </div>
@@ -1018,6 +1196,9 @@
         btnVerTodos.disabled = true;
         coinFilter.disabled = true;
         rsiFilter.disabled = true;
+        // Eliminar o comentar estas líneas para no deshabilitar el botón
+        // compareCryptoBtn.classList.remove('enabled');
+        // compareCryptoBtn.disabled = true;
 
         const endpoint = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false`;
         const response = await fetch(endpoint, { cache: 'no-store' });
@@ -1032,6 +1213,9 @@
         const totalCryptos = data.length;
         let loadedCryptos = 0;
 
+        // Llenar los select de comparación
+        populateComparisonSelectors(data);
+
         for (let coin of data) {
           await createCardWithRSI(coin, loadedCryptos, totalCryptos);
           loadedCryptos++;
@@ -1044,6 +1228,10 @@
         reorderCards();
         lastUpdateElement.textContent = `Última actualización: ${new Date().toLocaleString()}`;
         applyFilters();
+
+        // Habilitar el botón de comparación
+        compareCryptoBtn.classList.add('enabled');
+        compareCryptoBtn.disabled = false;
 
         progressOverlay.style.display = 'none';
         btnFavoritos.disabled = false;
@@ -1072,6 +1260,9 @@
         btnVerTodos.disabled = true;
         coinFilter.disabled = true;
         rsiFilter.disabled = true;
+        // Eliminar o comentar estas líneas para no deshabilitar el botón
+        // compareCryptoBtn.classList.remove('enabled');
+        // compareCryptoBtn.disabled = true;
 
         if (favorites.length === 0) {
           // No hay favoritas, salimos
@@ -1098,6 +1289,9 @@
         const totalCryptos = data.length;
         let loadedCryptos = 0;
 
+        // Llenar los select de comparación solo con favoritas
+        populateComparisonSelectors(data, true);
+
         for (let coin of data) {
           await createCardWithRSI(coin, loadedCryptos, totalCryptos);
           loadedCryptos++;
@@ -1110,6 +1304,10 @@
         reorderCards();
         lastUpdateElement.textContent = `Última actualización: ${new Date().toLocaleString()}`;
         applyFilters();
+
+        // Habilitar el botón de comparación
+        compareCryptoBtn.classList.add('enabled');
+        compareCryptoBtn.disabled = false;
 
         progressOverlay.style.display = 'none';
         btnFavoritos.disabled = false;
@@ -1172,6 +1370,20 @@
         opt.value = coin.id;
         opt.textContent = coin.name;
         coinFilter.appendChild(opt);
+      }
+
+      // Añadir opciones a los selects de comparación
+      if (!compareCrypto1Select.querySelector(`option[value="${coin.id}"]`)) {
+        const opt1 = document.createElement('option');
+        opt1.value = coin.id;
+        opt1.textContent = coin.name;
+        compareCrypto1Select.appendChild(opt1);
+      }
+      if (!compareCrypto2Select.querySelector(`option[value="${coin.id}"]`)) {
+        const opt2 = document.createElement('option');
+        opt2.value = coin.id;
+        opt2.textContent = coin.name;
+        compareCrypto2Select.appendChild(opt2);
       }
 
       const loaded = await loadMiniChart(binanceSymbol, loadedCryptos);
@@ -1294,18 +1506,7 @@
                 },
                 {
                   type: 'line',
-                  label: `Línea de tendencia (${rsiRec.text})`,
-                  data: closePrices.map(() => closePrices[closePrices.length -1]).concat(Array(aiPredictions.length).fill(null)),
-                  borderColor: (rsiRec.flag === 'green-flag') ? '#4CAF50' :
-                              (rsiRec.flag === 'red-flag')   ? '#F44336' : '#FF9800',
-                  borderDash: [5, 5],
-                  pointRadius: 0,
-                  fill: false,
-                  yAxisID: 'y',
-                },
-                {
-                  type: 'line',
-                  label: 'SMA (7)',
+                  label: `SMA (7)`,
                   data: shortSMA.concat(Array(aiPredictions.length).fill(null)),
                   borderColor: '#FFD700',
                   fill: false,
@@ -1315,7 +1516,7 @@
                 },
                 {
                   type: 'line',
-                  label: 'SMA (30)',
+                  label: `SMA (30)`,
                   data: longSMA.concat(Array(aiPredictions.length).fill(null)),
                   borderColor: '#FF8C00',
                   fill: false,
@@ -1511,6 +1712,10 @@
         chartInstance.resize();
         chartInstance.update();
       }
+      if (compareModalOverlay.classList.contains('expanded-view') && comparisonChartInstance) {
+        comparisonChartInstance.resize();
+        comparisonChartInstance.update();
+      }
     });
 
     // === 17) Botones de Alertas ===
@@ -1629,6 +1834,32 @@
       coinFilter.addEventListener('change', applyFilters);
       rsiFilter.addEventListener('change', applyFilters);
 
+      // Añadir Event Listener para el botón de Comparación
+      compareCryptoBtn.addEventListener('click', () => {
+        openCompareModal();
+      });
+
+      // Añadir Event Listener para el cierre del modal de comparación
+      compareModalClose.addEventListener('click', () => {
+        cerrarCompareModal();
+      });
+
+      // Añadir Event Listener para el modal de comparación al hacer clic fuera del contenido
+      compareModalOverlay.addEventListener('click', (e) => {
+        if (e.target === compareModalOverlay) {
+          cerrarCompareModal();
+        }
+      });
+
+      // Añadir Event Listener para el botón de "Regresar" en el modal de comparación
+      volverCompareBtn.addEventListener('click', () => {
+        cerrarVistaExpandidaCompare();
+      });
+
+      // Event Listeners para habilitar el botón "Comparar" dentro del modal
+      compareCrypto1Select.addEventListener('change', checkCompareButtonState);
+      compareCrypto2Select.addEventListener('change', checkCompareButtonState);
+
       // Primer fetch según estado inicial (Ver Todos o Favoritos)
       if (favoritesActive) {
         await fetchFavoritesData();
@@ -1679,8 +1910,342 @@
       return predictions;
     }
 
-    // === 26) Carga Inicial ===
+    // === 26) Función para Llenar los Selects de Comparación ===
+    function populateComparisonSelectors(data, isFavorites = false) {
+      const select1 = compareCrypto1Select;
+      const select2 = compareCrypto2Select;
+      // Limpiar opciones excepto la primera
+      select1.innerHTML = '<option value="">Selecciona Cripto 1</option>';
+      select2.innerHTML = '<option value="">Selecciona Cripto 2</option>';
+
+      data.forEach(coin => {
+        const option1 = document.createElement('option');
+        option1.value = coin.id;
+        option1.textContent = coin.name;
+        select1.appendChild(option1);
+
+        const option2 = document.createElement('option');
+        option2.value = coin.id;
+        option2.textContent = coin.name;
+        select2.appendChild(option2);
+      });
+    }
+
+    // === 27) Función para Comparar Criptomonedas ===
+    compareBtn.addEventListener('click', async () => {
+      const crypto1 = compareCrypto1Select.value;
+      const crypto2 = compareCrypto2Select.value;
+
+      if (!crypto1 || !crypto2) {
+        alert('Por favor, selecciona ambas criptomonedas para comparar.');
+        return;
+      }
+
+      if (crypto1 === crypto2) {
+        alert('Selecciona dos criptomonedas diferentes para comparar.');
+        return;
+      }
+
+      try {
+        // Mostrar barra de progreso
+        progressOverlay.style.display = 'flex';
+        progressMessage.textContent = 'Cargando datos para la comparación...';
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+
+        // Fetch data desde CoinGecko
+        const endpoint = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${crypto1},${crypto2}&order=market_cap_desc&per_page=2&page=1&sparkline=false`;
+        const response = await fetch(endpoint, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        if (!Array.isArray(data) || data.length < 2) {
+          throw new Error("No se obtuvieron suficientes datos de CoinGecko para la comparación.");
+        }
+
+        const [data1, data2] = data;
+
+        // Actualizar la tabla
+        metric1Header.textContent = data1.name;
+        metric2Header.textContent = data2.name;
+        price1Cell.textContent = `$${data1.current_price.toLocaleString()}`;
+        price2Cell.textContent = `$${data2.current_price.toLocaleString()}`;
+        // Variación del Precio (24h)
+        priceChange1Cell.textContent = data1.price_change_percentage_24h !== null ? `${data1.price_change_percentage_24h.toFixed(2)}%` : 'N/A';
+        priceChange2Cell.textContent = data2.price_change_percentage_24h !== null ? `${data2.price_change_percentage_24h.toFixed(2)}%` : 'N/A';
+        // Capitalización de Mercado
+        marketCap1Cell.textContent = data1.market_cap ? `$${data1.market_cap.toLocaleString()}` : 'N/A';
+        marketCap2Cell.textContent = data2.market_cap ? `$${data2.market_cap.toLocaleString()}` : 'N/A';
+        // Volumen (24h)
+        volume1Cell.textContent = data1.total_volume ? `$${data1.total_volume.toLocaleString()}` : 'N/A';
+        volume2Cell.textContent = data2.total_volume ? `$${data2.total_volume.toLocaleString()}` : 'N/A';
+        // RSI (14) - Simulación, ya que CoinGecko no proporciona RSI
+        rsi1CellCompare.textContent = calculateRSI([data1.current_price]) ? calculateRSI([data1.current_price]).toFixed(2) : 'N/A';
+        rsi2CellCompare.textContent = calculateRSI([data2.current_price]) ? calculateRSI([data2.current_price]).toFixed(2) : 'N/A';
+
+        // On-Balance Volume (OBV) - Simulación
+        obv1Cell.textContent = calculateOBV(data1) || 'N/A';
+        obv2Cell.textContent = calculateOBV(data2) || 'N/A';
+
+        // Sentimiento del Mercado - Simulación
+        sentiment1Cell.textContent = getMarketSentiment();
+        sentiment2Cell.textContent = getMarketSentiment();
+
+        // Supply Circulante y Total
+        circulatingSupply1Cell.textContent = data1.circulating_supply ? `${data1.circulating_supply.toLocaleString()} ${data1.symbol.toUpperCase()}` : 'N/A';
+        circulatingSupply2Cell.textContent = data2.circulating_supply ? `${data2.circulating_supply.toLocaleString()} ${data2.symbol.toUpperCase()}` : 'N/A';
+        totalSupply1Cell.textContent = data1.total_supply ? `${data1.total_supply.toLocaleString()} ${data1.symbol.toUpperCase()}` : 'N/A';
+        totalSupply2Cell.textContent = data2.total_supply ? `${data2.total_supply.toLocaleString()} ${data2.symbol.toUpperCase()}` : 'N/A';
+
+        // Dominancia de Mercado
+        marketDominance1Cell.textContent = data1.market_cap_rank ? `${data1.market_cap_rank}` : 'N/A';
+        marketDominance2Cell.textContent = data2.market_cap_rank ? `${data2.market_cap_rank}` : 'N/A';
+
+        // Número de Transacciones Diarias - Simulación
+        transactions1Cell.textContent = getDailyTransactions();
+        transactions2Cell.textContent = getDailyTransactions();
+
+        // Fetch historiales de precios para el gráfico
+        const days = 30; // Puedes hacer que el usuario elija el período
+        const history1 = await fetch(`https://api.coingecko.com/api/v3/coins/${crypto1}/market_chart?vs_currency=usd&days=${days}`);
+        const history2 = await fetch(`https://api.coingecko.com/api/v3/coins/${crypto2}/market_chart?vs_currency=usd&days=${days}`);
+        const historyData1 = await history1.json();
+        const historyData2 = await history2.json();
+
+        const labels1 = historyData1.prices.map(price => {
+          const date = new Date(price[0]);
+          return `${date.getMonth()+1}/${date.getDate()}`;
+        });
+        const labels2 = historyData2.prices.map(price => {
+          const date = new Date(price[0]);
+          return `${date.getMonth()+1}/${date.getDate()}`;
+        });
+
+        // Asegurar que ambas series tengan el mismo número de etiquetas
+        const minLength = Math.min(labels1.length, labels2.length);
+        const labels = labels1.slice(-minLength);
+        const prices1 = historyData1.prices.slice(-minLength).map(price => price[1]);
+        const prices2 = historyData2.prices.slice(-minLength).map(price => price[1]);
+
+        // Calcular RSI para ambas criptomonedas
+        const rsiValue1 = calculateRSI(prices1, 14);
+        const rsiValue2 = calculateRSI(prices2, 14);
+        rsi1CellCompare.textContent = rsiValue1 ? rsiValue1.toFixed(2) : 'N/A';
+        rsi2CellCompare.textContent = rsiValue2 ? rsiValue2.toFixed(2) : 'N/A';
+
+        // Crear o actualizar el gráfico de comparación
+        if (comparisonChartInstance) {
+          comparisonChartInstance.data.labels = labels;
+          comparisonChartInstance.data.datasets[0].data = prices1;
+          comparisonChartInstance.data.datasets[1].data = prices2;
+          comparisonChartInstance.update();
+        } else {
+          comparisonChartInstance = new Chart(comparisonChartCtx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: data1.name,
+                  data: prices1,
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                  fill: true,
+                  tension: 0.3,
+                },
+                {
+                  label: data2.name,
+                  data: prices2,
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                  fill: true,
+                  tension: 0.3,
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              interaction: {
+                mode: 'index',
+                intersect: false,
+              },
+              scales: {
+                x: { display: true },
+                y: { 
+                  display: true,
+                  ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
+                  title: {
+                    display: true,
+                    text: 'Precio (USD)',
+                    color: body.className === 'dark' ? '#ffffff' : '#000000'
+                  }
+                }
+              },
+              plugins: {
+                legend: {
+                  labels: {
+                    color: body.className === 'dark' ? '#ffffff' : '#000000'
+                  }
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                },
+                zoom: { // Configuración del plugin de zoom
+                  pan: {
+                    enabled: true,
+                    mode: 'xy',
+                  },
+                  zoom: {
+                    wheel: {
+                      enabled: true,
+                    },
+                    pinch: {
+                      enabled: true
+                    },
+                    mode: 'xy',
+                  }
+                }
+              },
+            }
+          });
+        }
+
+        // Determinar recomendaciones basadas en RSI
+        const recommendation1 = determineAction(rsiValue1);
+        const recommendation2 = determineAction(rsiValue2);
+
+        // Mostrar recomendaciones debajo del gráfico
+        comparisonRecommendation.innerHTML = `
+          <p>${data1.name}: <span class="${getRecommendationClass(recommendation1)}">${recommendation1}</span></p>
+          <p>${data2.name}: <span class="${getRecommendationClass(recommendation2)}">${recommendation2}</span></p>
+        `;
+
+        // Actualizar el progreso
+        progressBar.style.width = '100%';
+        progressText.textContent = '100%';
+        progressMessage.textContent = 'Comparación completada.';
+        setTimeout(() => {
+          progressOverlay.style.display = 'none';
+        }, 500);
+      } catch (error) {
+        console.error('Error al comparar criptomonedas:', error);
+        alert(`Error: ${error.message}`);
+        progressOverlay.style.display = 'none';
+      }
+    });
+
+    // === 28) Función para Cerrar el Modal de Comparación ===
+    function cerrarCompareModal() {
+      compareModalOverlay.classList.remove('expanded-view');
+      cerrarVistaExpandidaCompare();
+      compareModalOverlay.style.display = 'none';
+      // Limpiar recomendaciones
+      comparisonRecommendation.innerHTML = '';
+    }
+
+    // === 29) Función para Abrir el Modal de Comparación ===
+    function openCompareModal() {
+      compareModalOverlay.style.display = 'flex';
+    }
+
+    // === 30) Botón "Ver Análisis" en el Modal de Comparación ===
+    verAnalisisCompareBtn.addEventListener('click', () => {
+      const isMobile = window.matchMedia("only screen and (max-width: 768px)").matches;
+      if (isMobile) {
+        // Expandir el modal a pantalla completa
+        compareModalOverlay.classList.add('expanded-view');
+
+        if (comparisonChartInstance) {
+          // Reajustar el tamaño del gráfico
+          comparisonChartInstance.resize();
+          comparisonChartInstance.update();
+        }
+
+        // Mostrar botón "Regresar" y ocultar "Ver Análisis"
+        verAnalisisCompareBtn.style.display = 'none';
+        volverCompareBtn.style.display = 'block';
+      } else {
+        // Para escritorio, podrías implementar otra funcionalidad si lo deseas
+        alert("Esta funcionalidad está optimizada para dispositivos móviles.");
+      }
+    });
+
+    // === 31) Botón "Volver" en el Modal de Comparación ===
+    volverCompareBtn.addEventListener('click', () => {
+      cerrarVistaExpandidaCompare();
+    });
+
+    function cerrarVistaExpandidaCompare() {
+      compareModalOverlay.classList.remove('expanded-view');
+      if (comparisonChartInstance) {
+        comparisonChartInstance.resize();
+        comparisonChartInstance.update();
+      }
+
+      // Mostrar botón "Ver Análisis" y ocultar "Regresar"
+      verAnalisisCompareBtn.style.display = 'block';
+      volverCompareBtn.style.display = 'none';
+    }
+
+    // === 32) Función de Filtros ===
+    // Ya implementada en applyFilters()
+
+    // === 33) Carga Inicial ===
     initialize();
+
+    // === 34) Función para Comparar RSI y Decidir Acción ===
+    function determineAction(rsiValue) {
+      if (rsiValue === null) {
+        return 'Esperar';
+      }
+      if (rsiValue > 70) {
+        return 'Vender';
+      } else if (rsiValue < 30) {
+        return 'Comprar';
+      } else {
+        return 'Esperar';
+      }
+    }
+
+    function getRecommendationClass(action) {
+      if (action === 'Comprar') return 'green-recommendation';
+      if (action === 'Vender') return 'red-recommendation';
+      return 'orange-recommendation';
+    }
+
+    // === Funciones adicionales para nuevos indicadores ===
+
+    // Función simulada para calcular On-Balance Volume (OBV)
+    function calculateOBV(coinData) {
+      // CoinGecko no proporciona OBV directamente. Normalmente, se calcula a partir de los precios y volúmenes históricos.
+      // Aquí simulamos un valor.
+      return Math.floor(Math.random() * 1000000).toLocaleString();
+    }
+
+    // Función simulada para obtener Sentimiento del Mercado
+    function getMarketSentiment() {
+      const sentiments = ['Positivo', 'Neutral', 'Negativo'];
+      return sentiments[Math.floor(Math.random() * sentiments.length)];
+    }
+
+    // Función simulada para obtener Número de Transacciones Diarias
+    function getDailyTransactions() {
+      // CoinGecko no proporciona este dato directamente. Simulamos un valor.
+      return Math.floor(Math.random() * 10000).toLocaleString();
+    }
+
+    // === Implementar lógica para habilitar el botón "Comparar" cuando se seleccionan dos criptomonedas ===
+    function checkCompareButtonState() {
+      if (compareCrypto1Select.value && compareCrypto2Select.value && compareCrypto1Select.value !== compareCrypto2Select.value) {
+        compareBtn.classList.add('enabled');
+        compareBtn.disabled = false;
+      } else {
+        compareBtn.classList.remove('enabled');
+        compareBtn.disabled = true;
+      }
+    }
 
   </script>
 </body>
