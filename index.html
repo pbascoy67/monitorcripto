@@ -89,10 +89,7 @@
       background-color: transparent;
       color: inherit;
       min-width: 150px;
-      /* Asegurar que las opciones sean visibles */
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
+      /* appearance: none; */ /* Comentado para mantener el estilo por defecto */
       cursor: pointer;
     }
     /* Estilos para las opciones del select */
@@ -103,6 +100,18 @@
     body.light #modalTimeFrameFilter option {
       background-color: #eaeaea;
       color: #000000;
+    }
+
+    /* Añadidos para asegurar la visibilidad de las opciones en los filtros principales */
+    #coinFilterContainer select,
+    #rsiFilterContainer select {
+      background-color: inherit;
+      color: inherit;
+    }
+    #coinFilter option,
+    #rsiFilter option {
+      background-color: inherit;
+      color: inherit;
     }
 
     /* === Eliminado el timeFrameContainer de la página principal === */
@@ -544,10 +553,7 @@
       background-color: transparent;
       color: inherit;
       min-width: 150px;
-      /* Asegurar que las opciones sean visibles */
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
+      /* appearance: none; */ /* Comentado para mantener el estilo por defecto */
       cursor: pointer;
     }
     /* Estilos para las opciones del select */
@@ -630,14 +636,21 @@
       <div id="modalTimeFrameContainer">
         <label for="modalTimeFrameFilter">Marco Temporal</label>
         <select id="modalTimeFrameFilter">
+            <option value="1m">1 Minuto</option>
+            <option value="3m">3 Minutos</option>
             <option value="5m">5 Minutos</option>
             <option value="15m">15 Minutos</option>
+            <option value="30m">30 Minutos</option>
             <option value="1h">1 Hora</option>
-            <option value="1d">Por Día</option>
-            <option value="1w">Por Semana</option>
-            <option value="1M">Por Mes</option>
-            <option value="6M">Últimos 6 Meses</option>
-            <option value="1Y">Último Año</option>
+            <option value="2h">2 Horas</option>
+            <option value="4h">4 Horas</option>
+            <option value="6h">6 Horas</option>
+            <option value="8h">8 Horas</option>
+            <option value="12h">12 Horas</option>
+            <option value="1d">1 Día</option>
+            <option value="3d">3 Días</option>
+            <option value="1w">1 Semana</option>
+            <option value="1M">1 Mes</option>
         </select>
       </div>
       <p id="lastUpdateModal"></p>
@@ -672,8 +685,12 @@
         <p><span style="color:#4CAF50;font-weight:bold;">Línea de tendencia (verde/punteada):</span> Indica la <strong>tendencia actual</strong> del precio.</p>
         <p><span style="color:#FFD700;font-weight:bold;">SMA (7) (amarillo):</span> <strong>Media Móvil Simple de 7 periodos</strong>.</p>
         <p><span style="color:#FF8C00;font-weight:bold;">SMA (30) (naranja):</span> <strong>Media Móvil Simple de 30 periodos</strong>.</p>
-        <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> <strong>cantidad de operaciones</strong> en cada periodo.</p>
-        <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> <strong>predicción IA</strong> basada en patrones históricos.</p>
+        <p><span style="color:#FF69B4;font-weight:bold;">Banda Superior e Inferior (rosa):</span> <strong>Bandas de Bollinger</strong>, indican volatilidad y posibles puntos de reversión.</p>
+        <p><span style="color:#8A2BE2;font-weight:bold;">MACD Línea (violeta) y Señal (naranja):</span> <strong>Indicador MACD</strong>, muestra la relación entre dos EMAs y ayuda a identificar cambios de tendencia.</p>
+        <p><span style="color:#FF6347;font-weight:bold;">%K Estocástico (rojo) y %D (naranja):</span> <strong>Oscilador Estocástico</strong>, indica condiciones de sobrecompra/sobreventa y posibles señales de reversión.</p>
+        <p><span style="color:#32CD32;font-weight:bold;">Stochastic RSI %K (verde) y %D (rosa):</span> <strong>Stochastic RSI</strong>, combina RSI y Oscilador Estocástico para mayor sensibilidad.</p>
+        <p><span style="color:#00BFFF;font-weight:bold;">Volumen (azul):</span> <strong>Cantidad de operaciones</strong> en cada periodo.</p>
+        <p><span style="color:#EE82EE;font-weight:bold;">Línea IA (violeta):</span> <strong>Predicción IA</strong> basada en patrones históricos.</p>
         <h4>Consejo:</h4>
         <p id="adviceText">(Se llenará con consejos aleatorios)</p>
       </div>
@@ -762,6 +779,10 @@
         chartInstance.options.scales.x.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
         chartInstance.options.scales.y.title.color = body.className === 'dark' ? '#ffffff' : '#000000';
         chartInstance.options.scales.y1.title.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        chartInstance.options.scales.y2.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        chartInstance.options.scales.y2.title.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        chartInstance.options.scales.y3.ticks.color = body.className === 'dark' ? '#ffffff' : '#000000';
+        chartInstance.options.scales.y3.title.color = body.className === 'dark' ? '#ffffff' : '#000000';
         chartInstance.options.plugins.legend.labels.color = body.className === 'dark' ? '#ffffff' : '#000000';
         chartInstance.update();
       }
@@ -791,30 +812,35 @@
       if (closePrices.length < period) return null;
       let gains = 0;
       let losses = 0;
+      let rsiArray = [];
+      
       for (let i = 1; i < period; i++) {
         const diff = closePrices[i] - closePrices[i - 1];
         if (diff > 0) gains += diff;
         else losses -= diff;
       }
-      let avgGain = gains / (period - 1);
-      let avgLoss = losses / (period - 1);
-
-      let rsiArray = [null];
+      
+      let avgGain = gains / period;
+      let avgLoss = losses / period;
+      
+      const rsInitial = avgLoss === 0 ? 100 : avgGain / avgLoss;
+      rsiArray.push(100 - (100 / (1 + rsInitial)));
+      
       for (let i = period; i < closePrices.length; i++) {
         const diff = closePrices[i] - closePrices[i - 1];
         const gain = diff > 0 ? diff : 0;
         const loss = diff < 0 ? -diff : 0;
         avgGain = (avgGain * (period - 1) + gain) / period;
         avgLoss = (avgLoss * (period - 1) + loss) / period;
-
-        if (avgLoss === 0) {
-          rsiArray.push(100);
-        } else {
-          const rs = avgGain / avgLoss;
-          rsiArray.push(100 - (100 / (1 + rs)));
-        }
+        
+        const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+        const rsi = 100 - (100 / (1 + rs));
+        rsiArray.push(rsi);
       }
-      return rsiArray[rsiArray.length - 1];
+      
+      // Rellenar los primeros 'period' valores con null para alinear con los datos
+      const padding = Array(period).fill(null);
+      return padding.concat(rsiArray);
     }
 
     function getRecommendationFromRSI(rsiValue) {
@@ -988,6 +1014,13 @@
         progressOverlay.style.display = 'flex';
         cryptoGrid.innerHTML = '';
         coinFilter.innerHTML = '<option value="all">Todas</option>';
+        rsiFilter.innerHTML = `
+          <option value="all">Todas</option>
+          <option value="comprar">Comprar</option>
+          <option value="vender">Vender</option>
+          <option value="esperar">Esperar</option>
+          <option value="neutral">Neutral</option>
+        `;
         rsiFilter.value = 'all'; 
         btnFavoritos.disabled = true;
         btnVerTodos.disabled = true;
@@ -1042,6 +1075,13 @@
         progressOverlay.style.display = 'flex';
         cryptoGrid.innerHTML = '';
         coinFilter.innerHTML = '<option value="all">Todas</option>';
+        rsiFilter.innerHTML = `
+          <option value="all">Todas</option>
+          <option value="comprar">Comprar</option>
+          <option value="vender">Vender</option>
+          <option value="esperar">Esperar</option>
+          <option value="neutral">Neutral</option>
+        `;
         rsiFilter.value = 'all'; 
         btnFavoritos.disabled = true;
         btnVerTodos.disabled = true;
@@ -1104,35 +1144,36 @@
     // === 10) Crear card con RSI (para uso en fetchCryptoData y fetchFavoritesData) ===
     async function createCardWithRSI(coin, loadedCryptos, totalCryptos) {
       const binanceSymbol = (coin.symbol.toUpperCase() + 'USDT');
-      let rsiValue = null;
+      let rsiValueArray = null;
       try {
         const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=5m&limit=30`, { cache: 'no-store' }); // Usando '5m' para mini gráficos
         if (res.ok) {
           const klineData = await res.json();
           const closePrices = klineData.map(c => parseFloat(c[4]));
           if (closePrices.length > 0) {
-            rsiValue = calculateRSI(closePrices, 14);
+            rsiValueArray = calculateRSI(closePrices, 14);
           }
         }
       } catch (err) {
         // error silencioso
       }
-      const rsiRec = getRecommendationFromRSI(rsiValue);
+      const latestRSI = rsiValueArray ? rsiValueArray[rsiValueArray.length -1] : null;
+      const rsiRec = getRecommendationFromRSI(latestRSI);
 
-      if (!silenciarAlertas && favorites.includes(coin.id) && rsiValue !== null) {
+      if (!silenciarAlertas && favorites.includes(coin.id) && latestRSI !== null) {
         const percentAlert = parseFloat(priceAlerts['globalPercentAlert'] || 5);
-        if (rsiValue >= 70) {
+        if (latestRSI >= 70) {
           const buyVal = parseFloat(buyPrices[coin.id] || 0);
           if (buyVal > 0) {
             const pnl = ((coin.current_price - buyVal) / buyVal) * 100;
             if (pnl >= percentAlert) {
-              speakMessage(`Se sugiere vender ${coin.name}. Ganancia de ${pnl.toFixed(2)} porciento, RSI: ${rsiValue.toFixed(2)}`);
+              speakMessage(`Se sugiere vender ${coin.name}. Ganancia de ${pnl.toFixed(2)} porciento, RSI: ${latestRSI.toFixed(2)}`);
             }
           }
-        } else if (rsiValue < 30) {
+        } else if (latestRSI < 30) {
           const buyVal = parseFloat(buyPrices[coin.id] || 0);
           if (buyVal === 0) {
-            speakMessage(`Se sugiere comprar ${coin.name}. RSI: ${rsiValue.toFixed(2)}. Sin precio de compra configurado.`);
+            speakMessage(`Se sugiere comprar ${coin.name}. RSI: ${latestRSI.toFixed(2)}. Sin precio de compra configurado.`);
           }
         }
       }
@@ -1140,10 +1181,14 @@
       const card = createCryptoCard(coin, loadedCryptos, rsiRec);
       cryptoGrid.appendChild(card);
 
-      const opt = document.createElement('option');
-      opt.value = coin.id;
-      opt.textContent = coin.name;
-      coinFilter.appendChild(opt);
+      // Añadir opciones al filtro de criptomonedas
+      // Verificar si la opción ya existe para evitar duplicados
+      if (!Array.from(coinFilter.options).some(option => option.value === coin.id)) {
+        const opt = document.createElement('option');
+        opt.value = coin.id;
+        opt.textContent = coin.name;
+        coinFilter.appendChild(opt);
+      }
 
       const loaded = await loadMiniChart(binanceSymbol, loadedCryptos);
       if (!loaded) {
@@ -1215,21 +1260,37 @@
           return `${date.getDate()}/${(date.getMonth()+1)}/${year} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
         });
 
-        // RSI
-        const rsiValue = calculateRSI(closePrices, 14);
-        const rsiRec = getRecommendationFromRSI(rsiValue);
+        // RSI (devuelve array completo)
+        const rsiValues = calculateRSI(closePrices, 14);
+        const latestRSI = rsiValues[rsiValues.length -1];
+        const rsiRec = getRecommendationFromRSI(latestRSI);
+
+        // Bollinger Bands
+        const bollingerBands = calculateBollingerBands(closePrices, 20, 2);
+        const bollingerUpper = bollingerBands.map(b => b.upper);
+        const bollingerLower = bollingerBands.map(b => b.lower);
+        const bollingerMiddle = calculateSMA(closePrices, 20);
+
+        // MACD
+        const { macdLine, signalLine, histogram } = calculateMACD(closePrices, 12, 26, 9);
+
+        // Oscilador Estocástico
+        const { stochK, stochD } = calculateStochasticOscillator(closePrices, 14, 3);
+
+        // Stochastic RSI
+        const { stochRSI, stochRSID } = calculateStochasticRSI(rsiValues, 14, 3);
 
         modalTitle.textContent = `${coinName} - Tendencia: ${rsiRec.text}`;
         dataSource.textContent = endpoint;
 
         modalInfo.innerHTML = `
           <p>Precio Actual: $${currentPrice.toFixed(2)}</p>
-          <p>RSI (14): ${rsiValue ? rsiValue.toFixed(2) : 'N/A'}</p>
+          <p>RSI (14): ${latestRSI ? latestRSI.toFixed(2) : 'N/A'}</p>
         `;
 
         modalOverlay.style.display = 'flex';
 
-        // Destruimos un chart anterior
+        // Destruir cualquier instancia previa de Chart.js
         if (chartInstance) {
           chartInstance.destroy();
         }
@@ -1248,6 +1309,9 @@
         // Preparar los datos para el gráfico
         const aiLine = Array(closePrices.length).fill(null).concat(aiPredictions);
 
+        // Rellenar los indicadores con null para alinear con las predicciones
+        const fillData = (array) => array.concat(Array(aiPredictions.length).fill(null));
+
         setTimeout(() => {
           chartInstance = new Chart(document.getElementById('cryptoChart').getContext('2d'), {
             data: {
@@ -1256,7 +1320,7 @@
                 {
                   type: 'line',
                   label: `${coinName} (USD)`,
-                  data: closePrices.concat(Array(aiPredictions.length).fill(null)),
+                  data: fillData(closePrices),
                   borderColor: '#00ffcc',
                   backgroundColor: 'rgba(0,255,204,0.1)',
                   tension: 0.3,
@@ -1266,7 +1330,7 @@
                 {
                   type: 'line',
                   label: `Línea de tendencia (${rsiRec.text})`,
-                  data: closePrices.map(() => closePrices[closePrices.length -1]).concat(Array(aiPredictions.length).fill(null)),
+                  data: fillData(closePrices.map(() => closePrices[closePrices.length -1])),
                   borderColor: (rsiRec.flag === 'green-flag') ? '#4CAF50' :
                               (rsiRec.flag === 'red-flag')   ? '#F44336' : '#FF9800',
                   borderDash: [5, 5],
@@ -1277,7 +1341,7 @@
                 {
                   type: 'line',
                   label: 'SMA (7)',
-                  data: shortSMA.concat(Array(aiPredictions.length).fill(null)),
+                  data: fillData(shortSMA),
                   borderColor: '#FFD700',
                   fill: false,
                   pointRadius: 0,
@@ -1287,17 +1351,117 @@
                 {
                   type: 'line',
                   label: 'SMA (30)',
-                  data: longSMA.concat(Array(aiPredictions.length).fill(null)),
+                  data: fillData(longSMA),
                   borderColor: '#FF8C00',
                   fill: false,
                   pointRadius: 0,
                   tension: 0.2,
                   yAxisID: 'y',
                 },
+                // Bollinger Bands
+                {
+                  type: 'line',
+                  label: 'Banda Superior',
+                  data: fillData(bollingerUpper),
+                  borderColor: '#FF69B4',
+                  borderDash: [5, 5],
+                  fill: false,
+                  pointRadius: 0,
+                  yAxisID: 'y',
+                },
+                {
+                  type: 'line',
+                  label: 'Banda Inferior',
+                  data: fillData(bollingerLower),
+                  borderColor: '#FF69B4',
+                  borderDash: [5, 5],
+                  fill: false,
+                  pointRadius: 0,
+                  yAxisID: 'y',
+                },
+                {
+                  type: 'line',
+                  label: 'Media de Bollinger',
+                  data: fillData(bollingerMiddle),
+                  borderColor: '#FFD700',
+                  borderDash: [2, 2],
+                  fill: false,
+                  pointRadius: 0,
+                  yAxisID: 'y',
+                },
+                // MACD
+                {
+                  type: 'line',
+                  label: 'MACD Línea',
+                  data: fillData(macdLine),
+                  borderColor: '#8A2BE2',
+                  fill: false,
+                  pointRadius: 0,
+                  yAxisID: 'y',
+                },
+                {
+                  type: 'line',
+                  label: 'MACD Señal',
+                  data: fillData(signalLine),
+                  borderColor: '#FF4500',
+                  borderDash: [5, 5],
+                  fill: false,
+                  pointRadius: 0,
+                  yAxisID: 'y',
+                },
+                {
+                  type: 'bar',
+                  label: 'Histograma MACD',
+                  data: fillData(histogram),
+                  backgroundColor: 'rgba(138,43,226,0.5)',
+                  borderColor: '#8A2BE2',
+                  borderWidth: 1,
+                  yAxisID: 'y',
+                },
+                // Oscilador Estocástico
+                {
+                  type: 'line',
+                  label: '%K Estocástico',
+                  data: fillData(stochK),
+                  borderColor: '#FF6347',
+                  fill: false,
+                  pointRadius: 0,
+                  yAxisID: 'y2', // Eje Y secundario
+                },
+                {
+                  type: 'line',
+                  label: '%D Estocástico',
+                  data: fillData(stochD),
+                  borderColor: '#FFA500',
+                  borderDash: [5, 5],
+                  fill: false,
+                  pointRadius: 0,
+                  yAxisID: 'y2',
+                },
+                // Stochastic RSI
+                {
+                  type: 'line',
+                  label: 'Stochastic RSI %K',
+                  data: fillData(stochRSI),
+                  borderColor: '#32CD32',
+                  fill: false,
+                  pointRadius: 0,
+                  yAxisID: 'y3', // Eje Y terciario
+                },
+                {
+                  type: 'line',
+                  label: 'Stochastic RSI %D',
+                  data: fillData(stochRSID),
+                  borderColor: '#FF1493',
+                  borderDash: [5, 5],
+                  fill: false,
+                  pointRadius: 0,
+                  yAxisID: 'y3',
+                },
                 {
                   type: 'bar',
                   label: 'Volumen',
-                  data: volumes.concat(Array(aiPredictions.length).fill(null)),
+                  data: fillData(volumes),
                   backgroundColor: 'rgba(0,191,255,0.3)',
                   borderColor: '#00BFFF',
                   borderWidth: 1,
@@ -1343,6 +1507,34 @@
                   title: {
                     display: true,
                     text: 'Volumen',
+                    color: body.className === 'dark' ? '#ffffff' : '#000000'
+                  },
+                  grid: {
+                    drawOnChartArea: false,
+                  },
+                },
+                y2: { // Eje Y secundario para el Oscilador Estocástico
+                  type: 'linear',
+                  display: true,
+                  position: 'right',
+                  ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
+                  title: {
+                    display: true,
+                    text: 'Oscilador Estocástico',
+                    color: body.className === 'dark' ? '#ffffff' : '#000000'
+                  },
+                  grid: {
+                    drawOnChartArea: false,
+                  },
+                },
+                y3: { // Eje Y terciario para Stochastic RSI
+                  type: 'linear',
+                  display: true,
+                  position: 'left',
+                  ticks: { color: body.className === 'dark' ? '#ffffff' : '#000000' },
+                  title: {
+                    display: true,
+                    text: 'Stochastic RSI',
                     color: body.className === 'dark' ? '#ffffff' : '#000000'
                   },
                   grid: {
@@ -1590,6 +1782,10 @@
 
     // === 23) Función de Inicio ===
     async function initialize() {
+      // Añadir Event Listeners para los filtros
+      coinFilter.addEventListener('change', applyFilters);
+      rsiFilter.addEventListener('change', applyFilters);
+
       // Primer fetch según estado inicial (Ver Todos o Favoritos)
       if (favoritesActive) {
         await fetchFavoritesData();
@@ -1642,7 +1838,6 @@
 
     // === 26) Carga Inicial ===
     initialize();
-
   </script>
 </body>
 </html>
